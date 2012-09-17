@@ -31,7 +31,9 @@
 extern "C" {
 #endif
 
-extern char* fisica_clave(char* clave, const char *nombre, const char *paterno, const char *materno, const char *year, const char* month, const char *day, const int debug);
+extern char* fisica_clave_abreviada(char* clave, const char *nombre, const char *paterno, const char *materno, const char *year, const char* month, const char *day, const int debug);
+
+extern char* clave_rfc_persona_fisica(char* clave, const char *nombre, const char *paterno, const char *materno, const char *year, const char* month, const char *day, const int debug);
 
 
 #if defined(__cplusplus)
