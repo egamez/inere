@@ -205,13 +205,3 @@ digito_verificador(const char* rfc, const int debug)
   if ( debug ) printf("Suma [%d], remainder [%d], digit [%c]\n", suma, remainder, result);
   return result;
 }
-/*
-int
-main(int argc, char* argv[])
-{
-  char c = 0;
-  if ( argc < 2 ) return 1;
-  c = digito_verificador(argv[1]);
-  return 0;
-}
-*/
