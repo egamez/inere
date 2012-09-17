@@ -182,7 +182,7 @@ main(int argc, char* argv[])
 
     /* Now, obtain the RFC corto */
     memset(rfc, 0, 14);
-    fisica_clave(rfc, nombre, paterno, materno, ano, mes, dia, want_debug);
+    fisica_clave_abreviada(rfc, nombre, paterno, materno, ano, mes, dia, want_debug);
 
     /* Now you need to obtain the clave diferenciadora de homonimias */
     want_homonimia = 1;
