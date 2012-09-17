@@ -28,7 +28,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "inere/numerales.h"
 #include "inere/cantidades.h"
 
 int
@@ -40,7 +39,7 @@ main(int argc, char* argv[])
   if ( argc < 2 ) return 1;
 
   memset(nombre, 0, MAXNUMERAL);
-  cantidad(argv[1], nombre, debug);
+  cantidad(nombre, argv[1], debug);
   printf("%s\n", nombre);
 
   return 0;
