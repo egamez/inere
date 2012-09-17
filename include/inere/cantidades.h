@@ -27,11 +27,15 @@
 #ifndef INERE_CANTIDADES_INCLUDED_H
 #define INERE_CANTIDADES_INCLUDED_H
 
+#ifndef INERE_NUMERALES_INCLUDED_H
+#include "inere/numerales.h"
+#endif
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-extern char* cantidad(const char* numero, char *nombre, const int debug);
+extern char* cantidad(char* nombre, const char* numero, const int debug);
 
 #if defined(__cplusplus)
 }
