@@ -1,6 +1,6 @@
 #
 SUBDIRS = lib src
-EXTRA_DIST = autogen.sh README \
+EXTRA_DIST = autogen.sh README.md \
 	examples/Makefile \
 	examples/obten_digito.c \
 	examples/obten_homonimia.c \
