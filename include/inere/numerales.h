@@ -33,7 +33,7 @@ extern "C" {
 
 #define MAXNUMERAL 126
 
-extern char* numeral(const char* numero, char* nombre, const int debug);
+extern char* numeral(char* nombre, const char* numero, const int debug);
 
 #if defined(__cplusplus)
 }
