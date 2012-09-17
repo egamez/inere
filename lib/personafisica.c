@@ -470,8 +470,12 @@ fisica_regla9(char *clave, int debug)
  * En caso de la mujer, se debera usar el nombre de soltera.
  */
 
+
+/**
+ * Esta funcion
+ */
 char*
-fisica_clave(char* clave, const char *nombre, const char *paterno, const char *materno, const char *year, const char* month, const char *day, const int debug)
+fisica_clave_abreviada(char* clave, const char *nombre, const char *paterno, const char *materno, const char *year, const char* month, const char *day, const int debug)
 {
   char result[5];
   char fecha[7];
@@ -571,6 +575,55 @@ fisica_clave(char* clave, const char *nombre, const char *paterno, const char *m
   if ( debug ) printf("Fecha [%s].\n", fecha);
 
   snprintf(clave, 11, "%s%s", result, fecha);
+
+  return clave;
+}
+
+
+char*
+clave_rfc_persona_fisica(char* clave, const char *nombre, const char *paterno, const char *materno, const char *year, const char* month, const char *day, const int debug)
+{
+  char clave_diferenciadora[3];
+  char verificador[2];
+  char digito = 0;
+  char* apellidos = NULL;
+  size_t apellidos_len = 0;
+
+  memset(clave, 0, 14);
+
+  fisica_clave_abreviada(clave, nombre, paterno, materno, year, month, day, debu);
+
+  /* Ahora obten la clave diferenciadora de homonimias */
+  apellidos_len = strlen(paterno);
+  if ( materno != NULL ) {
+     apellidos_len += strlen(materno) + 2;
+     apellidos = (char*)calloc(apellidos_len, sizeof(char));
+     memset(apellidos, 0, apellidos_len);
+     strncpy(apellidos, paterno, strlen(paterno));
+     strncat(apellidos, " ", 1);
+     strncat(apellidos, materno, strlen(materno));
+
+  } else {
+    apellidos = (char*)calloc(apellidos_len + 1, sizeof(char));
+    memset(apellidos, 0, apellidos_len + 1);
+    strncpy(apellidos, paterno, apellidos_len);
+
+  }
+
+  /* Ahora obten la clave diferenciadora de homonimias */
+  memset(clave_diferenciadora, 0, 3);
+  homonimia(clave_diferenciadora, nombre, apellidos, debug);
+
+  /* Agrega la clave */
+  strncat(clave, clave_diferenciadora, 2);
+
+  /* Libera memoria */
+  free(apellidos);
+
+  /* Ahora obten el digito verificador */
+  digito = digito_verificador(clave, debug);
+  snprintf(verificador, 2, "%c", digito);
+  strncat(clave, verificador, 1);
 
   return clave;
 }
