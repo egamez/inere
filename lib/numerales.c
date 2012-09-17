@@ -238,7 +238,7 @@ construye_clase(const unsigned int unidad, const unsigned int decena, const unsi
  *
  */
 char*
-numeral(const char* numero, char* nombre, const int debug)
+numeral(char* nombre, const char* numero, const int debug)
 {
   int i = 0;
   char* copy = NULL;

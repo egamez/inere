@@ -93,7 +93,7 @@ cantidad(char* nombre, const char* numero, const int debug)
 
   /* Now build up the full quantity name */
   memset(buffer, 0, MAXNUMERAL);
-  numeral(integral, buffer, debug);
+  numeral(buffer, integral, debug);
 
   /* Capitalize the first letter */
   *buffer -= 32;
