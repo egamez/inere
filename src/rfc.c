@@ -39,7 +39,7 @@ usage()
 {
   printf(" -c/--homonimia\t\tObten la clave diferenciadora de homonimias. Se\n");
   printf("\t\t\trequerira tanto el nombre como los apellidos.\n");
-  printf(" -v/--digito=RFC\tObten el digito verificador para este RFC abreviado. \n");
+  printf(" -k/--digito=RFC\tObten el digito verificador para este RFC abreviado. \n");
   printf(" -r/--rfc\t\tObten la clave del Registro Federal de Contribuyentes.\n");
   printf(" -n/--nombre=NOMBRE\tFija el nombre o razon social que se utilizara\n");
   printf("\t\t\tpara el calculo del RFC.\n");
@@ -52,6 +52,7 @@ usage()
   printf(" -m/--mes=MES\t\tFija el numero de mes de nacimiento.\n");
   printf(" -a/--ano=ANO\t\tFija el ano de nacimiento.\n");
   printf(" -d/--debug\t\tSet the debug mode.\n");
+  printf(" -v/--verbose\t\tSet the verbose mode.\n");
   printf(" -h/--help\t\tImprime este mensaje.\n");
   printf("\n\nBugs to: Enrique Gamez <egamez@edisson.com.mx>\n");
 }
@@ -64,6 +65,7 @@ main(int argc, char* argv[])
   int want_debug = 0;
   int want_verificador = 0;
   int want_rfc = 0;
+  int want_verbose = 0;
   char* nombre = NULL;
   char* paterno = NULL;
   char* materno = NULL;
@@ -78,7 +80,7 @@ main(int argc, char* argv[])
   /* options descriptor */
   static struct option longopts[] = {
       {"homonimia",	no_argument,		NULL,	'c'},
-      {"digito",	required_argument,	NULL,	'v'},
+      {"digito",	required_argument,	NULL,	'k'},
       {"rfc",		no_argument,		NULL,	'r'},
       {"nombre",	required_argument,	NULL,	'n'},
       {"paterno",	required_argument,	NULL,	'p'},
@@ -87,18 +89,19 @@ main(int argc, char* argv[])
       {"mes",		required_argument,	NULL,	'm'},
       {"ano",		required_argument,	NULL,	'a'},
       {"debug",		no_argument,		NULL,	'd'},
-      {"help",		no_argument,		NULL,	'y'},
+      {"verbose",	no_argument,		NULL,	'v'},
+      {"help",		no_argument,		NULL,	'h'},
       {NULL,		0,			NULL,	0}
     };
 
-  while ((ch=getopt_long(argc,argv,"cv:n:p:t:i:m:a:dy",longopts,NULL)) != -1 ) {
+  while ((ch=getopt_long(argc,argv,"ck:rn:p:t:i:m:a:dvh",longopts,NULL)) != -1 ) {
     switch(ch) {
       case 'c':
 	/* Get the clave diferenciadora de homonimias */
 	want_homonimia = 1;
 	break;
 
-      case 'v':
+      case 'k':
 	/* Get the digito verificador */
 	want_verificador = 1;
 	rfc_corto = optarg;
@@ -144,12 +147,19 @@ main(int argc, char* argv[])
 	want_debug = 1;
 	break;
 
-      case 'y':
+      case 'v':
+	/* Verbosity */
+	want_verbose = 1;
+	break;
+
+      case 'h':
 	usage();
 	break;
 
       default:
+	printf("Hola tarola\n");
 	usage();
+	break;
 
     }
 
@@ -181,6 +191,11 @@ main(int argc, char* argv[])
     }
 
     /* Now, obtain the RFC corto */
+    if ( want_verbose ) {
+      printf("Clave de el RFC para:\nNombre: %s\nPrimer apellido: %s\n", nombre, paterno);
+      if ( materno != NULL ) printf("Segundo apellido: %s\n", materno);
+      printf("Fecha de nacimiento:\n\tDia: %s\n\tMes: %s\n\tAno: %s\n", dia, mes, ano);
+    }
     memset(rfc, 0, 14);
     fisica_clave_abreviada(rfc, nombre, paterno, materno, ano, mes, dia, want_debug);
 
@@ -215,7 +230,7 @@ main(int argc, char* argv[])
           strncpy(apellidos, paterno, strlen(paterno));
         }
 
-	if ( want_debug ) {
+	if ( (want_verbose && !want_rfc) || want_debug ) {
 	  printf("Nombre completo del contribuyente, para el cual se calculara la clave diferenciadora de homonimias: \"%s %s\".\n", nombre, apellidos);
 	}
         homonimia(clave_diferenciadora, nombre, apellidos, want_debug);
@@ -228,12 +243,19 @@ main(int argc, char* argv[])
     if ( want_rfc ) {
       strncat(rfc, clave_diferenciadora, 2);
     } else {
-      if ( materno == NULL && paterno == NULL )
-        printf("Clave diferenciadora de homonimias para el nombre '%s': %s\n", nombre, clave_diferenciadora);
-      else if ( materno == NULL )
-        printf("Clave diferenciadora de homonimias para el nombre '%s, %s': %s\n", paterno, nombre, clave_diferenciadora);
-      else
-        printf("Clave diferenciadora de homonimias para el nombre '%s %s, %s': %s\n", paterno, materno, nombre, clave_diferenciadora);
+
+      if ( want_verbose ) printf("Clave diferenciadora de homonimias");
+
+      if ( materno == NULL && paterno == NULL ) {
+        if ( want_debug ) printf(" para el nombre '%s': ", nombre);
+      } else if ( materno == NULL ) {
+        if ( want_debug ) printf(" para el nombre '%s, %s': ", paterno, nombre);
+      } else {
+        if ( want_debug ) printf(" para el nombre '%s %s, %s': ", paterno, materno, nombre);
+      }
+
+      if ( want_verbose ) printf(": ");
+      printf("%s\n", clave_diferenciadora);
     }
 
   }
@@ -245,11 +267,13 @@ main(int argc, char* argv[])
     snprintf(tmp, 2, "%c", digito);
     strncat(rfc, tmp, 1);
     /* And print the result */
+    if ( want_verbose ) printf("RFC: ");
     printf("%s\n", rfc);
   } else {
     if ( want_verificador && rfc_corto != NULL ) {
       digito = digito_verificador(rfc_corto, want_debug);
-      printf("Digito verificador para la version incompleta del RFC '%s': %c\n", rfc_corto, digito);
+      if ( want_verbose || want_debug ) printf("Digito verificador para la version incompleta del RFC '%s': ", rfc_corto);
+      printf("%c\n", digito);
     }
   }
 
