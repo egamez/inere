@@ -43,7 +43,7 @@
 #endif
 
 char*
-cantidad(const char* numero, char* nombre, const int debug)
+cantidad(char* nombre, const char* numero, const int debug)
 {
   char* cents = 0;
   char* integral = 0;
