@@ -131,11 +131,64 @@ Instalación
 	make
 
 
-Uso
----
+Ejemplos
+--------
 
-Los programas deberan...
+La manera de obtener la clave de el RFC es
 
+```c
+#include <string.h>
+#include <stdio.h>
+
+#include <inere/personafisica.h>
+
+int
+main(int argc, char* argv[])
+{
+  char rfc[14];
+  char* nombre = NULL;
+  char* primer_apellido = NULL;
+  char* segundo_apellido = NULL;
+  char* year = NULL;
+  char* month = NULL;
+  char* day = NULL;
+
+  if ( argc < 6 ) {
+    fprintf(stderr, "Sintax:\n%s <dia> <mes> <año> <nombre> <primer-apellido> [<segundo-apellido>]\n", argv[0]);
+    return 1;
+  }
+  day = argv[1];
+  month = argv[2];
+  year = argv[3];
+  nombre = argv[4];
+  primer_apellido = argv[5];
+  if ( argc == 7 ) segundo_apellido = argv[6];
+
+  memset(rfc, 0, 14);
+
+  clave_rfc_persona_fisica(rfc, nombre, primer_apellido, segundo_apellido, year, month, day, 0);
+
+  printf("La clave de el RFC es: %s\n", rfc);
+  return 0;
+}
+```
+
+y compilandolo con
+
+	gcc -I<installation-path>/include -o obten_rfc obten_rfc.c -L<installation-path>/lib -linere
+
+y ejecutandolo con la instrucción
+
+	./obten_rfc 18 12 1921 "Jose Antonio" Camargo Hernandez
+
+se obtiene la clave de el RFC (CAHA211218UL1).
+
+Hay varios ejemplos en el subdirectorio ejemplos.
+
+Licencia
+--------
+
+Ver COPYING.
 
 Fuentes de la información
 -------------------------
