@@ -65,6 +65,12 @@
 #ifndef INERE_PERSONAFISICA_INCLUDED_H
 #include "inere/personafisica.h"
 #endif
+#ifndef INERE_HOMONIMIA_INCLUDED_H
+#include "inere/homonimia.h"
+#endif
+#ifndef INERE_VERIFICADOR_INCLUDED_H
+#include "inere/verificador.h"
+#endif
 
 /**
  * Regla 1a.
@@ -591,7 +597,7 @@ clave_rfc_persona_fisica(char* clave, const char *nombre, const char *paterno, c
 
   memset(clave, 0, 14);
 
-  fisica_clave_abreviada(clave, nombre, paterno, materno, year, month, day, debu);
+  fisica_clave_abreviada(clave, nombre, paterno, materno, year, month, day, debug);
 
   /* Ahora obten la clave diferenciadora de homonimias */
   apellidos_len = strlen(paterno);
