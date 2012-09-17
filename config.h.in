@@ -45,6 +45,9 @@
 /* Define to 1 if you have the `strndup' function. */
 #undef HAVE_STRNDUP
 
+/* Define to 1 if you have the `strndupa' function. */
+#undef HAVE_STRNDUPA
+
 /* Define to 1 if you have the `strstr' function. */
 #undef HAVE_STRSTR
 
