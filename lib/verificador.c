@@ -205,3 +205,30 @@ digito_verificador(const char* rfc, const int debug)
   if ( debug ) printf("Suma [%d], remainder [%d], digit [%c]\n", suma, remainder, result);
   return result;
 }
+
+/**
+ * Funcion para verificar un RFC
+ *
+ * La funcion regresara
+ *      0 si la clave de el RFC es correcta.
+ *      > 0 si la clave de el RFC no es correcta.
+ *
+ * en particular, la funcion regresara el valor correcto del digito
+ * verificador para la clave proporcionada.
+ *
+ */
+char
+verifica_rfc(const char* rfc, const int debug)
+{
+  char result = 0;
+  char copy[13];
+  const size_t len = strlen(rfc);
+
+  memset(copy, 0, 13);
+  memcpy(copy, rfc, len-1);
+
+  result = digito_verificador(copy, debug);
+  if ( result == rfc[len-1] ) result = 0;
+
+  return result;
+}

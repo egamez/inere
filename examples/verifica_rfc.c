@@ -1,4 +1,6 @@
-/*
+/**
+ * obten_digito.c
+ *
  * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
  *                     L.A.E.
  * All rights reserved.
@@ -24,19 +26,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef INERE_VERIFICADOR_INCLUDED_H
-#define INERE_VERIFICADOR_INCLUDED_H
+#include <string.h>
+#include <stdio.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+#include <inere/verificador.h>
 
-extern char digito_verificador(const char* rfc, const int debug);
+int
+main(int argc, char* argv[])
+{
+  char result = 0;
+  size_t len;
 
-extern char verifica_rfc(const char* rfc, const int debug);
+  if ( argc < 2 ) {
+    fprintf(stderr, "Uso:\n\n\t%s <clave-de-el-RFC>\n",  argv[0]);
+    return 1;
+  }
 
-#if defined(__cplusplus)
+  result = verifica_rfc(argv[1], 0);
+  if ( result == 0 ) {
+    printf("Clave de el RFC verificada.\n");
+  } else {
+    len = strlen(argv[1]);
+    printf("Clave de el RFC incorrecta, el digito verificador para la clave suministrada es \"%c\", mientras que el digito suministrado es \"%c\".\n", result, argv[1][len-1]);
+  }
+
+  return 0;
 }
-#endif
-
-#endif /* INERE_VERIFICADOR_INCLUDED_H */
