@@ -3,61 +3,45 @@ CC		:= gcc
 DBG		:= -g -O2
 XTRACCFLAGS	:= -fPIC -pipe -funsigned-char -ansi -pedantic -pedantic-errors
 INCLUDES	:= -I../include
-LIBS		:= -L../lib/.libs -linere
+LIBS		:= -L../lib/.libs -linere -Wl,-rpath=../lib/.libs
 
 WARNINGS	:= -Wextra -Wall -W
 CCFLAGS		:= $(DBG) $(WARNINGS) $(XTRACCFLAGS) $(INCLUDES)
-
-RFC_EXE		:= obten_rfc
-RFC_SOURCE	:= obten_rfc.c
-RFC_OBJ		:= obten_rfc.o
-
-HOMO_EXE	:= obten_homonimia
-HOMO_SOURCE	:= obten_homonimia.c
-HOMO_OBJ	:= obten_homonimia.o
-
-DIG_EXE		:= obten_digito
-DIG_SOURCE	:= obten_digito.c
-DIG_OBJ		:= obten_digito.o
-
-VER_EXE		:= verifica_rfc
-VER_SRC		:= verifica_rfc.c
-VER_OBJ		:= verifica_rfc.o
 
 # Targets
 .SUFFIXES:	.c .o
 .PHONY:		clean
 
-all: $(RFC_EXE) $(HOMO_EXE) $(DIG_EXE) $(VER_EXE)
+all: obten_rfc obten_homonimia obten_digito verifica_rfc
 
-$(RFC_EXE): $(RFC_OBJ)
-	$(CC) $(DBG) -o $@ $(RFC_OBJ) $(LIBS)
+obten_rfc: obten_rfc.o
+	$(CC) $(DBG) -o $@ obten_rfc.o $(LIBS)
 
-$(HOMO_EXE): $(HOMO_OBJ)
-	$(CC) $(DBG) -o $@ $(HOMO_OBJ) $(LIBS)
+obten_homonimia: obten_homonimia.o
+	$(CC) $(DBG) -o $@ obten_homonimia.o $(LIBS)
 
-$(DIG_EXE): $(DIG_OBJ)
-	$(CC) $(DBG) -o $@ $(DIG_OBJ) $(LIBS)
+obten_digito: obten_digito.o
+	$(CC) $(DBG) -o $@ obten_digito.o $(LIBS)
 
-$(VER_EXE): $(VER_OBJ)
-	$(CC) $(DBG) -o $@ $(VER_OBJ) $(LIBS)
+verifica_rfc: verifica_rfc.o
+	$(CC) $(DBG) -o $@ verifica_rfc.o $(LIBS)
 
 clean:
-	rm -f $(RFC_EXE) $(HOMO_EXE) $(DIG_EXE) $(RFC_OBJ) $(HOMO_OBJ) $(DIG_OBJ) $(VER_EXE) $(VER_OBJ)
+	rm -f obten_rfc obten_rfc.o obten_homonimia obten_homonimia.o obten_digito obten_digito.o verifica_rfc verifica_rfc.o
 
 # Rules
-$(RFC_OBJ): $(RFC_SRC)
+obten_rfc.o: obten_rfc.c
 	@echo compiling $< ...
 	$(CC) $(CCFLAGS) -c $< -o $@
 
-$(HOMO_OBJ): $(HOMO_SRC)
+obten_homonimia.o: obten_homonimia.c
 	@echo compiling $< ...
 	$(CC) $(CCFLAGS) -c $< -o $@
 
-$(DIG_OBJ): $(DIG_SRC)
+obten_digito.o: obten_digito.c
 	@echo compiling $< ...
 	$(CC) $(CCFLAGS) -c $< -o $@
 
-$(VER_OBJ): $(VER_SRC)
+verifica_rfc.o: verifica_rfc.c
 	@echo compiling $< ...
 	$(CC) $(CCFLAGS) -c $< -o $@

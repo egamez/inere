@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+	  
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <title>Verifica RFC (persona Fisica) : Example</title>
+  <style type="text/css">
+body
+{
+	padding: 50px;
+}
+input
+{
+	border: 1px solid #999;
+	margin: 0 5px;
+}
+.digito_verificador
+{
+	padding: 0 5px;
+	display: inline-block;
+}
+.digito_verificador_0
+{
+	background-color: #fcb6b1;
+}
+.digito_verificador_1
+{
+	background-color: #fccab1;
+}
+  </style>
+</head>
+<body>
+
+  <h1>Digito Verificador: Demo</h1>
+
+  <form method="post" action="">
+    <p>
+      <label for="password">Introduzca la clave de su RFC (persona fisica):</label>
+        <input type="rfc" name="rfc" id="rfc" value="" size="13"/>
+    </p>
+  </form>
+
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js"></script>
+  <script type="text/javascript" src="jquery.digito_verificador_fisica.js"></script>
+  <script type="text/javascript">
+	$('form').attr('autocomplete', 'off');
+	$('#rfc').digito_verificador();
+  </script>
+</body>
+</html>

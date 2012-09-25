@@ -1,7 +1,7 @@
 /**
  * obten_digito.c
  *
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
+ * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>, and
  *                     L.A.E.
  * All rights reserved.
  *
@@ -44,7 +44,7 @@ main(int argc, char* argv[])
 
   result = verifica_rfc(argv[1], 0);
   if ( result == 0 ) {
-    printf("Clave de el RFC verificada.\n");
+    printf("Digito de verificacion (\"%c\") de la clave de el RFC correcta.\n", result);
   } else {
     len = strlen(argv[1]);
     printf("Clave de el RFC incorrecta, el digito verificador para la clave suministrada es \"%c\", mientras que el digito suministrado es \"%c\".\n", result, argv[1][len-1]);

@@ -1,7 +1,7 @@
 /**
  * obten_homonimia.c
  *
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
+ * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>, and
  *                     L.A.E.
  * All rights reserved.
  *
