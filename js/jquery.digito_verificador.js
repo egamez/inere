@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2012	Lae,
  *			Enrique Gámez <egamez@edisson.com.mx>
- * Persona moral.
  *
  * http://n0nick.net/jquery/password-strength/
  *
@@ -38,7 +37,14 @@ var digitoVerificador = new function()
 		var remainder = 0;
 		var index = 13;
 		var digit = '';
-		var rfc_small = rfc.substring(0, 12);
+		var pattern = /\w+(?!$)/; /* Remove the last character */
+		var rfc_small = '';
+
+		if ( rfc.length == 12 ) {
+			rfc_small = ' ' + pattern.exec(rfc);
+		} else {
+			rfc_small = '' + pattern.exec(rfc); /* Boggus */
+		}
 
 		jQuery.each(rfc_small, function() {
 			current = this;
@@ -59,20 +65,31 @@ var digitoVerificador = new function()
 		return digit;
 	};
 
+	this.rfcValido = function(rfc)
+	{
+		var validRFC = true;
+		var regexp = /^([a-z]{3,4})([0-9]{2})[01][0-9][0-3][0-9]([0-9a-z]{2})[0-9a]$/i;
+		validRFC = regexp.test( rfc );
+		return validRFC;
+	};
+
 	this.validaDigitoVerificador = function(rfc)
 	{
 		var digito = this.obtenDigitoVerificador(rfc);
-		return (digito == rfc.charAt(12)) ? 1 : 0;
+		var pattern = /\w(?=$)/;
+		var supplied = pattern.exec(rfc);
+		return (digito == supplied) ? 1 : 0;
 	};
 };
 
 $.fn.digito_verificador = function(options)
 {
 	var settings = $.extend({
-		'minLength' : 6,
+		'minLength' : 12,
+		'maxLength' : 13,
 		'texts' : {
-			0: 'Digito no concuerda',
-			1: 'Digito identico'
+			0: 'Dígito no concuerda',
+			1: 'Dígito idéntico'
 		},
 		'onCheck': null
 	}, options);
@@ -85,11 +102,13 @@ $.fn.digito_verificador = function(options)
 
 		$(this).bind('keyup.digito_verificador', function()
 		{
-			var val = $(this).val();
-			if ( val.length > 11 )
+			var val = $(this).val().toUpperCase();
+			var bienformado = digitoVerificador.rfcValido(val);
+			if ( (val.length == 12 && bienformado) ||
+			     (val.length == 13 && bienformado) )
 			{
-				var rfc = ' ' + val;
-				var level = digitoVerificador.validaDigitoVerificador(rfc);
+				var level = digitoVerificador.validaDigitoVerificador(val);
+				$(this).text("digito: " + level + ".");
 				var _class = 'digito_verificador_' + level;
 
 				if (!container.hasClass(_class) && level in settings.texts)
