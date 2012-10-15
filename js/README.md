@@ -18,6 +18,10 @@ Para su uso únicamente es necesario llamar a la función para un campo de tipo 
 
 La función elimina cualquier espacio o guion antes de realizar el calculo de el dígito, de modo que la introducción, del [R.F.C][2] en el campo, puede incluir estos carácteres para mejorar su lectura.
 
+=== Persona física / Persona moral
+
+La función opera con ambos tipos de claves sin ningun problema (hasta el momento.)
+
 Resultados
 ----------
 
@@ -61,7 +65,7 @@ Se provee también un ejemplo de uso para una página web simple (rfc.html).
 
 Autores
 -------
-LAE
+LAE,
 Enrique Gámez <egamezf@gmail.com>
 
 Licencia
