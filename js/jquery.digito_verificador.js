@@ -113,7 +113,7 @@ var methods = {
 
 	rfcValido: function( rfc ) {
 		var validRFC = true;
-		var regexp = /^([A-Z\u00D1]{3,4})([0-9]{2})((0[1-9])|(1[012]))((0[1-9])|([12][0-9])|(3[01]))([0-9A-Z]{2})[0-9Z]$/;
+		var regexp = /^([A-Z&\u00D1]{3,4})([0-9]{2})((0[1-9])|(1[012]))((0[1-9])|([12][0-9])|(3[01]))([0-9A-Z]{2})[0-9A]$/;
 		validRFC = regexp.test( rfc );
 		return validRFC;
 	},
