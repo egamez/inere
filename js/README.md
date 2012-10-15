@@ -14,7 +14,7 @@ Uso
 
 Para su uso únicamente es necesario llamar a la función para un campo de tipo texto:
 
-	$( '#rfc' ).digito_verificador();
+	$( '#rfc' ).rfc_digito_verificador();
 
 La función elimina cualquier espacio o guion antes de realizar el calculo de el dígito, de modo que la introducción, del [R.F.C][2] en el campo, puede incluir estos carácteres para mejorar su lectura.
 
@@ -41,21 +41,21 @@ Ejemplos
 
 Para desplegar las leyendas 'Captura correcta' y 'Posible error en la captura' sólo sera necesario declararlo en las opciones de la manera siguiente:
 
-	$('#rfc').digito_verificador({
+	$('#rfc').rfc_digito_verificador({
 		legendOnSuccess: "Captura correcta.",
 		legendOnFail: "Posible error en la captura."
 	});
 
 es posible agregar a la cadena de instruccuines de el selector algunos atributos CSS, por ejemplo:
 
-	$('#rfc').digito_verificador({
+	$('#rfc').rfc_digito_verificador({
 		legendOnSuccess: "Captura correcta.",
 		legendOnFail: "Posible error en la captura."
 	}).css('text-transform', 'uppercase');
 
 el ejemplo anterior agregara las leyendas junto al campo de introducción de la clave del [R.F.C][2] y cambiara de color el fondo del campo también, pero si se quiere desabilitar lo opción del cambio de color solo sera necesario agregar, a la opciones de arriba la opción 'withColors' con el valor 'false':
 
-	$('#rfc').digito_verificador({
+	$('#rfc').rfc_digito_verificador({
 		legendOnSuccess: "Captura correcta.",
 		legendOnFail: "Posible error en la captura.",
 		withColors: false
