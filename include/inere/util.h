@@ -1,7 +1,5 @@
-/**
- * obten_digito.c
- *
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>, and
+/*
+ * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
  *                     Lae
  * All rights reserved.
  *
@@ -25,36 +23,22 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * gcc -I<path>/include -o obten_digito obten_digito.c -L<path>/lib -linere
- *
- * ./obten_digito CAHA211218UL
- *
- * El resultado debe ser el digito "1"
  */
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef INERE_UTIL_INCLUDED_H
+#define INERE_UTIL_INCLUDED_H
 
-#include <inere/verificador.h>
-#include <inere/util.h>
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
-int
-main(int argc, char* argv[])
-{
-  char digito = 0;
-  char* clave = 0;
+extern unsigned int ustr_len(const unsigned char* s);
 
-  if ( argc < 2 ) {
-    fprintf(stderr, "Uso:\n\t%s <RFC-sin-digito-verificador>\n", argv[0]);
-    return 1;
-  }
+extern char* to_upper_case_and_convert(const unsigned char* in);
 
-  clave = to_upper_case_and_convert((unsigned char*)argv[1]);
-  digito = digito_verificador(clave, 0);
-  free(clave);
+extern unsigned char* recover_translations(const char* in, unsigned char* out);
 
-  printf("Digito verificador: %c\n", digito);
-
-  return 0;
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* INERE_UTIL_INCLUDED_H */

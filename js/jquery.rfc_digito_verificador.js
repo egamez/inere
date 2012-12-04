@@ -17,79 +17,67 @@
  */
 (function($) {
 
-var methods = {
+var inere = {
 
 	init: function(options) {
 		var settings = $.extend({
-			'legendOnFail': '',
-			'legendOnSuccess': '',
-			'withColors': true
+			container: null
 		}, options);
 
 		return this.each(function() {
 
+			var container = null;
+			if ( settings.container ) {
+				container = $( settings.container );
+			} else {
+				container = $( "<span/>" ).attr( "class" , "rfc-verificador" );
+				$( this ).after( container );
+			}
 
-			$(this).bind('keyup.rfc_digito_verificador', function() {
+			$(this).bind( "keyup.rfc_verificador", function() {
 
-				var val = methods.rfcNormalize($(this).val().toUpperCase());
-				var bienformado = methods.rfcValido(val);
-				var container = null;
-
-				if ( settings.legendOnFail.length || settings.legendOnSuccess.length ) {
-					container = $('<span/>').attr('class', 'rfc_digito_verificador');
-					$(this).after(container);
-				}
+				var val = inere.rfcNormalize($(this).val().toUpperCase());
+				var bienformado = inere.rfcWellFormed(val);
 
 				if ( bienformado ) {
-					var legend = '';
-					var bg_color = '';
-					if ( methods.rfcValidaDigitoVerificador(val) ) {
-						legend = settings.legendOnSuccess;
-						bg_color = '#00CC00';
+
+					if ( inere.rfcValidate(val) ) {
+						console.log("Valid");
+						container.text( "Valido" ).attr( "class", "rfc-verificador" );
 					} else {
-						legend = settings.legendOnFail;
-						bg_color = '#990000';
-					}
-					if ( legend.length ) container.text(legend).attr('class', 'rfc_digito_verificador');
-					if ( settings.withColors ) {
-						$(this).css('color', '#fff')
-							.css('background', bg_color);
+						container.text( "No valido" ).attr( "class", "rfc-verificador" );
 					}
 
 				} else {
-					// This block will erase legends when the
-					// the RFC clave isn't complete
-					if ( settings.legendOnFail.length || settings.legendOnSuccess.length ) container.text('').attr('class', 'rfc_digito_verificador');
-					$(this).css('color', '');
-					$(this).css('background', '');
+					container.text( "" ).attr( "class", "rfc_verificador" );
 				}
 			});
 
 			if ($(this).val() != '') { // thanks Jason Judge
-				$(this).trigger('keyup.rfc_digito_verificador');
+				$(this).trigger('keyup.rfc_verificador');
 			}
 		});
 
 	},
 
-	rfcObtenDigitoVerificador: function( rfc ) {
-		var anexo3 =	{0:0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9,
-				A:10, B:11, C:12, D:13,   E:14, F:15, G:16, H:17, I:18, J:19,
-				K:20, L:21, M:22, N:23, '&':24, O:25, P:26, Q:27, R:28, S:29,
-				T:30, U:31, V:32, W:33,   X:34, Y:35, Z:36, ' ':37, \u00D1:38};
+	rfcGetVerificatorDigit: function( rfc ) {
+		var anexo3 =	{'0': 0, '1': 1, '2': 2, '3': 3,  '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+				 'A':10, 'B':11, 'C':12, 'D':13,  'E':14, 'F':15, 'G':16, 'H':17, 'I':18, 'J':19,
+				 'K':20, 'L':21, 'M':22, 'N':23,  '&':24, 'O':25, 'P':26, 'Q':27, 'R':28, 'S':29,
+				 'T':30, 'U':31, 'V':32, 'W':33,  'X':34, 'Y':35, 'Z':36, ' ':37, \u00D1:38};
 		var current;
 		var suma = 0;
 		var acumulado = 0;
 		var remainder = 0;
 		var index = 13;
 		var digit = '';
-		var pattern = /\w+(?!$)/; /* Remove the last character */
-		var rfc_small = '';
+		var pattern = /\w+(?!$)/; // Pattern to remove the last character.
+		var rfc_small = null;
 
 		if ( rfc.length == 12 ) {
 			rfc_small = ' ' + pattern.exec(rfc);
 		} else {
-			rfc_small = '' + pattern.exec(rfc); /* Boggus */
+			rfc_small = '' + pattern.exec(rfc);
 		}
 
 		jQuery.each(rfc_small, function() {
@@ -103,7 +91,7 @@ var methods = {
 		});
 
 		remainder = acumulado % 11;
-		// Ahora asigna el digito verificador.
+		// Now assign the 'digito verificador'
 		if	( remainder == 0 )	digit = '0';
 		else if ( remainder == 1 )	digit = 'A';
 		else				digit = 11-remainder;
@@ -111,34 +99,38 @@ var methods = {
 		return digit;
 	},
 
-	rfcValido: function( rfc ) {
-		var validRFC = true;
-		var regexp = /^([A-Z&\u00D1]{3,4})([0-9]{2})((0[1-9])|(1[012]))((0[1-9])|([12][0-9])|(3[01]))([0-9A-Z]{2})[0-9A]$/;
-		validRFC = regexp.test( rfc );
-		return validRFC;
+	rfcWellFormed: function( rfc ) {
+		// The following regexp seems to capture the full 'Clave del RFC'
+		// but is used a more relaxed one to capture possible mistakes
+		// on the 'digito verificado de la clave del RFC', mistakes
+		// like using some other letter instead of the unique valid ('A')
+		//var regexp = /^([A-Z&\u00D1]{3,4})([0-9]{2})((0[1-9])|(1[012]))((0[1-9])|([12][0-9])|(3[01]))([0-9A-Z]{2})[0-9A]$/;
+		var regexp = /^([A-Z&\u00D1]{3,4})([0-9]{2})((0[1-9])|(1[012]))((0[1-9])|([12][0-9])|(3[01]))[0-9A-Z]{3}$/;
+		return regexp.test( rfc);
 	},
 
-	rfcValidaDigitoVerificador: function( rfc ) {
-		var digito = methods.rfcObtenDigitoVerificador(rfc);
+	rfcValidate: function( rfc ) {
+		var digit = inere.rfcGetVerificatorDigit(rfc);
 		var pattern = /\w(?=$)/;
 		var supplied = pattern.exec(rfc);
-		return (digito == supplied);
+		return (digit == supplied);
 	},
 
 	rfcNormalize: function( rfc ) {
+		// Remove any space or dash character.
 		return rfc.replace(/[ -]/g, '');
 	},
 
 };
 
-$.fn.rfc_digito_verificador = function( method ) {
+$.fn.rfc_verificador = function( method ) {
 
-	if ( methods[method] ) {
-		return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
+	if ( inere[method] ) {
+		return inere[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
 	} else if ( typeof method === 'object' || ! method ) {
-		return methods.init.apply( this, arguments );
+		return inere.init.apply( this, arguments );
 	} else {
-		$.error( 'Method ' +  method + ' does not exist on jQuery.rfc_digito_verificador.' );
+		$.error( 'Method ' +  method + ' does not exist on jQuery.rfc_verificador.' );
 	}
 
 };

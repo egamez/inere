@@ -1,7 +1,7 @@
 #
 CC		:= gcc
 DBG		:= -g -O2
-XTRACCFLAGS	:= -fPIC -pipe -funsigned-char -ansi -pedantic -pedantic-errors
+XTRACCFLAGS	:= -D_GNU_SOURCE -fPIC -pipe -funsigned-char -ansi -pedantic -pedantic-errors
 INCLUDES	:= -I../include
 LIBS		:= -L../lib/.libs -linere -Wl,-rpath=../lib/.libs
 

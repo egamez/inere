@@ -2,7 +2,7 @@
  * obten_homonimia.c
  *
  * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>, and
- *                     L.A.E.
+ *                     Lae
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,21 +34,30 @@
  */
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <inere/homonimia.h>
+#include <inere/util.h>
 
 int
 main(int argc, char* argv[])
 {
   char clave[3];
+  char* unombre = 0;
+  char* uapellidos = 0;
 
   if ( argc < 3 ) {
     fprintf(stderr, "Uso:\n\t%s <nombre> <apellidos>\n", argv[0]);
     return 1;
   }
 
+  unombre = to_upper_case_and_convert((unsigned char*)argv[1]);
+  uapellidos = to_upper_case_and_convert((unsigned char*)argv[2]);
   memset(clave, 0, 3);
-  homonimia(clave, argv[1], argv[2], 0);
+  homonimia(clave, unombre, uapellidos, 0);
+
+  free(uapellidos);
+  free(unombre);
 
   printf("Clave diferenciadora de homonimias: %s\n", clave);
 

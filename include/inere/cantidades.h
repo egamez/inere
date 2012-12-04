@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     L.A.E.
+ *                     Lae
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

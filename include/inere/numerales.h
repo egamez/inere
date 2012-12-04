@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     L.A.E.
+ *                     Lae
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 extern "C" {
 #endif
 
-#define MAXNUMERAL 126
+#define MAXNUMERAL 252
 
 extern char* numeral(char* nombre, const char* numero, const int debug);
 

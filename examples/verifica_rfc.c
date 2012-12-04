@@ -2,7 +2,7 @@
  * obten_digito.c
  *
  * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>, and
- *                     L.A.E.
+ *                     Lae
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,27 +28,34 @@
  */
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <inere/verificador.h>
+#include <inere/util.h>
 
 int
 main(int argc, char* argv[])
 {
   char result = 0;
-  size_t len;
+  size_t len = 0;
+  char* clave = 0;
 
   if ( argc < 2 ) {
     fprintf(stderr, "Uso:\n\n\t%s <clave-de-el-RFC>\n",  argv[0]);
     return 1;
   }
 
-  result = verifica_rfc(argv[1], 0);
+  clave = to_upper_case_and_convert((unsigned char*)argv[1]);
+  result = verifica_rfc(clave, 0);
+
+  len = strlen(clave);
   if ( result == 0 ) {
-    printf("Digito de verificacion (\"%c\") de la clave de el RFC correcta.\n", result);
+    printf("Digito de verificacion ('%c') coincide con la clave del R.F.C. suministrada.\n", clave[len-1]);
   } else {
-    len = strlen(argv[1]);
-    printf("Clave de el RFC incorrecta, el digito verificador para la clave suministrada es \"%c\", mientras que el digito suministrado es \"%c\".\n", result, argv[1][len-1]);
+    printf("Clave de el RFC incorrecta, el digito verificador para la clave suministrada es \"%c\", mientras que el digito suministrado es \"%c\".\n", result, clave[len-1]);
   }
+
+  free(clave);
 
   return 0;
 }

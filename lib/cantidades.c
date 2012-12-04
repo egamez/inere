@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *		       L.A.E.
+ *		       Lae
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,13 +24,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef __OpenBSD__
-# ifndef _GNU_SOURCE
-#  define _GNU_SOURCE
-# endif
-#endif
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -49,35 +42,48 @@ cantidad(char* nombre, const char* numero, const int debug)
   char* integral = 0;
   char buffer[MAXNUMERAL];
   int cents_len = 0;
+  int must_freed = 0;
+#if _MSC_VER
+  char *next_token = 0;
+#endif
 
   /* Split the given 'numero' onto its integral part and its fractional part */
   /* The fractional part first */
-  cents = strstr(numero, ".");
+#if _MSC_VER
+  cents = (char *)strstr(numero, ".");
+#else
+  cents = (char *)strstr(numero, ".");
+#endif
 
   if ( cents != NULL ) cents_len = strlen(cents);
 
   /* And now, the integral part */
-#ifndef __OpenBSD__
-  integral = strndupa(numero, strlen(numero)-cents_len);
-#else
-  integral = (char*)alloca(strlen(numero)-cents_len+1);
+  integral = (char*)malloc(strlen(numero)-cents_len+1);
   memset(integral, 0, strlen(numero)-cents_len+1);
+#if _MSC_VER
+  strncpy_s(integral, strlen(numero)-cents_len+1, numero, _TRUNCATE);
+#else
   integral = strncpy(integral, numero, strlen(numero)-cents_len);
 #endif
 
   /* Now remove the period from the fractional part */
   if ( cents_len <= 1 ) {
-#ifndef __OpenBSD__
-    cents = strndupa("00", 2);
-#else
-    cents = (char*)alloca(3);
+    cents = (char*)malloc(3);
     memset(cents, 0, 3);
+#if _MSC_VER
+  strncpy_s(cents, 3, "00", 2);
+#else
     cents = strncpy(cents, "00", 2);
 #endif
+    must_freed = 1;
 
   } else {
 
+#if _MSC_VER
+    cents = strtok_s(cents, ".", &next_token);
+#else
     cents = strtok(cents, ".");
+#endif
     /* And make sure that the fractionail part has only two digits */
     if ( strlen(cents) == 1 ) {
       *(cents+1) = '0';
@@ -95,11 +101,18 @@ cantidad(char* nombre, const char* numero, const int debug)
   memset(buffer, 0, MAXNUMERAL);
   numeral(buffer, integral, debug);
 
+  free(integral);
+  if ( must_freed ) free(cents);
+
   /* Capitalize the first letter */
   *buffer -= 32;
 
   /* And add the fractional part we need to add " pesos xx/100 M.N." */
+#if _MSC_VER
+  _snprintf_s(nombre, strlen(buffer)+19, _TRUNCATE, "%s pesos %02d/100 M.N.", buffer, atoi(cents));
+#else
   snprintf(nombre, strlen(buffer)+19, "%s pesos %02d/100 M.N.", buffer, atoi(cents));
+#endif
 
   return nombre;
 }

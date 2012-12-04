@@ -31,41 +31,14 @@ La función, por defecto, colorea en verde el campo cuando el dígito verificado
 Opciones
 --------
 
-Las opciones disponibles por el momento son:
-* legendOnFail -- Cadena de carácteres para ser desplegados contiguos al campo de introducción del R.F.C cuando la clave introducida no coincida con el dígito calculado. El valor, por defecto, es una cadena vacia,
-* legendOnSuccess -- Cadena de carácteres cuando el dígito calculado coincida con el suministrado. El valor por defecto es una cadena vacia,
-* withColors -- Variable de tipo booleana para instruir si el campo de entrada del RFC cambiara de color segun el resultado de la verificación.
-
 Ejemplos
 --------
 
-Para desplegar las leyendas 'Captura correcta' y 'Posible error en la captura' sólo sera necesario declararlo en las opciones de la manera siguiente:
-
-	$('#rfc').rfc_digito_verificador({
-		legendOnSuccess: "Captura correcta.",
-		legendOnFail: "Posible error en la captura."
-	});
-
-es posible agregar a la cadena de instruccuines de el selector algunos atributos CSS, por ejemplo:
-
-	$('#rfc').rfc_digito_verificador({
-		legendOnSuccess: "Captura correcta.",
-		legendOnFail: "Posible error en la captura."
-	}).css('text-transform', 'uppercase');
-
-el ejemplo anterior agregara las leyendas junto al campo de introducción de la clave del [R.F.C][2] y cambiara de color el fondo del campo también, pero si se quiere desabilitar lo opción del cambio de color solo sera necesario agregar, a la opciones de arriba la opción 'withColors' con el valor 'false':
-
-	$('#rfc').rfc_digito_verificador({
-		legendOnSuccess: "Captura correcta.",
-		legendOnFail: "Posible error en la captura.",
-		withColors: false
-	}).css('text-transform', 'uppercase');
-
-Se provee también un ejemplo de uso para una página web simple (rfc.html).
+Veáse el archivo rfc.html
 
 Autores
 -------
-LAE,
+Lae,
 Enrique Gámez <egamezf@gmail.com>
 
 Licencia

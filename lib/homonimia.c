@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     L.A.E.
+ *                     Lae
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,11 +133,6 @@
  * es posible que la clave sea diferente a la que se obtiene con el actual
  * nombre.
  */
-#ifndef __OpenBSD__
-# ifndef _GNU_SOURCE
-#  define _GNU_SOURCE
-# endif
-#endif
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -153,7 +148,7 @@
 int
 anexo1(const char caracter)
 {
-  char c = toupper(caracter);
+  char c = caracter;
   if ( c == ' ' || c == '0' ) return 0;
   else if ( c == '1' ) return 1;
   else if ( c == '2' ) return 2;
@@ -191,7 +186,7 @@ anexo1(const char caracter)
   else if ( c == 'X' ) return 37;
   else if ( c == 'Y' ) return 38;
   else if ( c == 'Z' ) return 39;
-  /*else if ( c == 'Ñ' ) return 40; */ /* This is for the Ñ which is not a single character */
+  else if ( c == '^' ) return 40; /* This is for the Ñ which is not a single character */
   else return -1;
   return -1;
 }
@@ -282,13 +277,23 @@ homonimia(char* clave, const char* nombre, const char* apellidos, const int debu
 
   if ( apellidos == NULL ) {
     copy = (char* )calloc(namelen + 1, sizeof(char));
+#if _MSC_VER
+    strncpy_s(copy, namelen+1, nombre, namelen);
+#else
     strncpy(copy, nombre, namelen);
+#endif
   } else {
     lastlen = strlen(apellidos);
     copy = (char* )calloc(namelen + lastlen + 2, sizeof(char));
+#if _MSC_VER
+    strncpy_s(copy, lastlen+1, apellidos, lastlen);
+    strncat_s(copy, lastlen+1, " ", 1);
+    strncat_s(copy, lastlen+1, nombre, namelen);
+#else
     strncpy(copy, apellidos, lastlen);
     strncat(copy, " ", 1); /* Add an space */
     strncat(copy, nombre, namelen); /* The order is important */
+#endif
   }
 
   /* Now convert all the characters to the numeric values defined in the
@@ -298,16 +303,16 @@ homonimia(char* clave, const char* nombre, const char* apellidos, const int debu
       /* Primer suma */
       valor = anexo1(*copy);
       if ( debug ) {
-	printf("Caracter [%c] = %d\t", *copy, valor);
-	printf("(%d * %d = %d) + ", (digito_anterior * 10 + decena(valor) ), decena(valor), (digito_anterior * 10 + decena(valor) ) * decena(valor));
+	printf("Caracter [%c] = %2d\t", *copy, valor);
+	printf("(%2d * %d = %3d) + ", (digito_anterior * 10 + decena(valor) ), decena(valor), (digito_anterior * 10 + decena(valor) ) * decena(valor));
       }
       suma += (digito_anterior * 10 + decena(valor) ) * decena(valor);
 
       /* Segunda suma */
       digito_anterior = valor % 10;
-      if ( debug ) printf("(%d * %d = %d) = ", valor, digito_anterior, valor * digito_anterior);
+      if ( debug ) printf("(%2d * %d = %3d) = ", valor, digito_anterior, valor * digito_anterior);
       suma += valor * digito_anterior;
-      if ( debug ) printf(" %d\t(suma acumulada)\n", suma);
+      if ( debug ) printf(" %4d\t(suma acumulada)\n", suma);
     }
     copy++;
   }
@@ -329,7 +334,11 @@ homonimia(char* clave, const char* nombre, const char* apellidos, const int debu
     coeficiente = 0;
   }
 
+#if _MSC_VER
+  _snprintf_s(clave, 3, 3, "%c%c", anexo2(coeficiente), anexo2(residuo));
+#else
   snprintf(clave, 3, "%c%c", anexo2(coeficiente), anexo2(residuo));
+#endif
   if ( debug ) printf("\tCoeficiente [%d], residuo [%d]\thomonimia [%s]\n", coeficiente, residuo, clave);
   return clave;
 }

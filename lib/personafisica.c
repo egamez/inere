@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     L.A.E.
+ *                     Lae
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,11 +52,6 @@
  *
  *
  */
-#ifndef __OpenBSD__
-# ifndef _GNU_SOURCE
-#  define _GNU_SOURCE
-# endif
-#endif
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -71,6 +66,12 @@
 #ifndef INERE_VERIFICADOR_INCLUDED_H
 #include "inere/verificador.h"
 #endif
+#ifndef INERE_UTIL_INCLUDED_H
+#include "inere/util.h"
+#endif
+
+/* Forward declaration to reuse... */
+int fisica_regla8(char* palabra, int debug);
 
 /**
  * Regla 1a.
@@ -93,23 +94,24 @@
  *			Apellido materno:	Mendez		M
  *			Nombre:			Eva		E
  *			Resultado de la expresion alfabetica:	IIME
- * OK!
+ *
  */
 void
 fisica_regla1(const char *paterno, const char *materno, const char *nombre, char *result)
 {
-  result[0] = toupper(*paterno++);
+  result[0] = *paterno++;
   while ( *paterno ) {
-    if ( tolower(*paterno) == 'a' || tolower(*paterno) == 'e' ||
-	 tolower(*paterno) == 'i' || tolower(*paterno) == 'o' ||
-	 tolower(*paterno) == 'u' ) {
-      result[1] = toupper(*paterno);
+    if ( *paterno == 'A' || *paterno == 'E' ||
+	 *paterno == 'I' || *paterno == 'O' ||
+	 *paterno == 'U' ) {
+      result[1] = *paterno;
       break;
     }
     paterno++;
   }
-  result[2] = toupper(*materno);
-  result[3] = toupper(*nombre);
+  result[2] = *materno;
+  result[3] = *nombre;
+  result[4] = 0;
 }
 
 /**
@@ -163,7 +165,11 @@ regla2(const char* year, const char* month, const char* day, char* result)
   mes = atoi(month);
   dia = atoi(day);
 
+#if _MSC_VER
+  _snprintf_s(result, 7, 7, "%02d%02d%02d", ano, mes, dia);
+#else
   snprintf(result, 7, "%02d%02d%02d", ano, mes, dia);
+#endif
   return result;
 }
 
@@ -205,10 +211,11 @@ fisica_regla3(const char *paterno, const char *materno, const char* nombre, char
 void
 fisica_regla4(const char *paterno, const char *materno, const char *nombre, char *result)
 {
-  result[0] = toupper(*paterno);
-  result[1] = toupper(*materno);
-  result[2] = toupper(*nombre++);
-  result[3] = toupper(*nombre);
+  result[0] = *paterno;
+  result[1] = *materno;
+  result[2] = *nombre++;
+  result[3] = *nombre;
+  result[4] = 0;
 }
 
 
@@ -256,30 +263,67 @@ fisica_regla6(char* nombre, const int debug)
   size_t len = 0;
   char* copy = 0;
   int applied = 0;
+#if _MSC_VER
+  char* next = NULL;
+#endif
 
   len = strlen(nombre);
   copy = (char*)calloc(len+1, sizeof(char));
   memset(copy, 0, len+1);
-  strncpy(copy, nombre, len+1);
+#if _MSC_VER
+  strncpy_s(copy, len+1, nombre, len);
+#else
+  strncpy(copy, nombre, len);
+#endif
   memset(nombre, 0, len+1);
 
-  for (ap = word; ap < &word[9] && (*ap = strsep(&copy, " \t")) != NULL; ) {
+#if _MSC_VER
+  *ap = strtok_s(copy, " \t\n", &next);
+  word[i++] = *ap;
+  while ( *ap != NULL ) {
+    *ap = strtok_s(copy, " \t\n", &next);
+    if ( *ap != NULL ) {
+      word[i++] = *ap;
+      counter++;
+    }
+  }
+  word[i] = NULL;
+  i = 0;
+#else
+  for (ap = word; ap < &word[9] && (*ap = strsep(&copy, " \t\n")) != NULL; ) {
     if ( **ap != '\0' ) ap++;
     counter++;
   }
   *ap = NULL;
+#endif
 
   /* Now make a loop for all the words in nombre, and append only those
-   * which are not MARIA or JOSE
+   * which are not MARIA or JOSE.
+   *
+   * If there name consist of one single word, do not apply the rule.
+   *
    */
-  for (i = 0; i < counter; i++ ) {
-    excluded = 0;
-    if ( strcasecmp(word[i], "MARIA") == 0 || strcasecmp(word[i], "JOSE") == 0 ) {
-      excluded = 1;
-      applied = 1;
-      if ( debug ) printf("Eliminando la palabra \"%s\".\n", word[i]);
+  if ( counter > 1 ) {
+    for (i = 0; i < counter; i++ ) {
+      excluded = 0;
+      if ( strcmp(word[i], "MARIA") == 0 || strcmp(word[i], "JOSE") == 0 ||
+	   fisica_regla8(word[i], debug) ) {
+	excluded = 1;
+	applied = 1;
+	if ( debug ) printf("Eliminando la palabra \"%s\".\n", word[i]);
+      }
+#if _MSC_VER
+      if ( !excluded ) strncat_s(nombre, _countof(nombre), word[i], strlen(word[i]));
+#else
+      if ( !excluded ) strncat(nombre, word[i], strlen(word[i]));
+#endif
     }
-    if ( !excluded ) strncat(nombre, word[i], strlen(word[i]));
+  } else {
+#if _MSC_VER
+    strncat_s(nombre, _countof(nombre), word[0], strlen(word[0]));
+#else
+    strncat(nombre, word[0], strlen(word[0]));
+#endif
   }
 
   return applied;
@@ -300,10 +344,11 @@ fisica_regla6(char* nombre, const int debug)
 void
 fisica_regla7(const char *apellido, const char *nombre, char *result)
 {
-  result[0] = toupper(*apellido++);
-  result[1] = toupper(*apellido);
-  result[2] = toupper(*nombre++);
-  result[3] = toupper(*nombre);
+  result[0] = *apellido++;
+  result[1] = *apellido;
+  result[2] = *nombre++;
+  result[3] = *nombre;
+  result[4] = 0;
 }
 
 
@@ -329,37 +374,62 @@ fisica_regla8(char* palabra, int debug)
   size_t len = 0;
   char *copy = NULL;
   int applied = 0;
+#if _MSC_VER
+  char* next = NULL;
+#endif
 
   len = strlen(palabra);
   copy = (char *)calloc(len+1, sizeof(char));
   memset(copy, 0, len+1);
-  strncpy(copy, palabra, len+1);
+#if _MSC_VER
+  strncpy_s(copy, len+1, palabra, len);
+#else
+  strncpy(copy, palabra, len);
+#endif
   memset(palabra, 0, len+1);
 
   /* Split the palabra onto its words */
-  for (ap = word; ap < &word[9] && (*ap = strsep(&copy, " \t")) != NULL;) {
+#if _MSC_VER
+  *ap = strtok_s(copy, " \t\n", &next);
+  word[i++] = *ap;
+  while ( *ap != NULL ) {
+    *ap = strtok_s(copy, " \t\n", &next);
+    if ( *ap != NULL ) {
+      word[i++] = *ap;
+      counter++;
+    }
+  }
+  word[i] = NULL;
+  i = 0;
+#else
+  for (ap = word; ap < &word[9] && (*ap = strsep(&copy, " \t\n")) != NULL;) {
    if (**ap != '\0')
      ap++;
    counter++;
   }
   *ap = NULL;
+#endif
 
   for (i = 0; i < counter; i++ ) {
 
     excluded = 0;
 
-    if      ( strcasecmp(word[i], "de")  == 0 ) excluded = 1;
-    else if ( strcasecmp(word[i], "del") == 0 ) excluded = 1;
-    else if ( strcasecmp(word[i], "la")  == 0 ) excluded = 1;
-    else if ( strcasecmp(word[i], "las") == 0 ) excluded = 1;
-    else if ( strcasecmp(word[i], "los") == 0 ) excluded = 1;
-    else if ( strcasecmp(word[i], "mc")  == 0 ) excluded = 1;
-    else if ( strcasecmp(word[i], "mac") == 0 ) excluded = 1;
-    else if ( strcasecmp(word[i], "mi")  == 0 ) excluded = 1;
-    else if ( strcasecmp(word[i], "van") == 0 ) excluded = 1;
-    else if ( strcasecmp(word[i], "von") == 0 ) excluded = 1;
-    else if ( strcasecmp(word[i], "y")   == 0 ) excluded = 1;
+    if      ( strcmp(word[i], "DE")  == 0 ) excluded = 1;
+    else if ( strcmp(word[i], "DEL") == 0 ) excluded = 1;
+    else if ( strcmp(word[i], "LA")  == 0 ) excluded = 1;
+    else if ( strcmp(word[i], "LAS") == 0 ) excluded = 1;
+    else if ( strcmp(word[i], "LOS") == 0 ) excluded = 1;
+    else if ( strcmp(word[i], "MC")  == 0 ) excluded = 1;
+    else if ( strcmp(word[i], "MAC") == 0 ) excluded = 1;
+    else if ( strcmp(word[i], "MI")  == 0 ) excluded = 1;
+    else if ( strcmp(word[i], "VAN") == 0 ) excluded = 1;
+    else if ( strcmp(word[i], "VON") == 0 ) excluded = 1;
+    else if ( strcmp(word[i], "Y")   == 0 ) excluded = 1;
+#if _MSC_VER
+    else strncat_s(palabra, _countof(palabra), word[i], strlen(word[i]));
+#else
     else strncat(palabra, word[i], strlen(word[i]));
+#endif
 
     if ( excluded && debug ) {
       printf("Eliminando la palabra \"%s\".\n", word[i]);
@@ -405,53 +475,57 @@ fisica_regla9(char *clave, int debug)
   int substituted = 0;
   char* correcta = NULL;
 
-  if      ( strcasecmp(clave, "BUEI") == 0 ) correcta = "BUEX";
-  else if ( strcasecmp(clave, "BUEI") == 0 ) correcta = "BUEX";
-  else if ( strcasecmp(clave, "BUEY") == 0 ) correcta = "BUEX";
-  else if ( strcasecmp(clave, "CACA") == 0 ) correcta = "CACX";
-  else if ( strcasecmp(clave, "CACO") == 0 ) correcta = "CACX";
-  else if ( strcasecmp(clave, "CAGA") == 0 ) correcta = "CAGX";
-  else if ( strcasecmp(clave, "CAGO") == 0 ) correcta = "CAGX";
-  else if ( strcasecmp(clave, "CAKA") == 0 ) correcta = "CAKX";
-  else if ( strcasecmp(clave, "COGE") == 0 ) correcta = "COGX";
-  else if ( strcasecmp(clave, "COJA") == 0 ) correcta = "COJX";
-  else if ( strcasecmp(clave, "COJE") == 0 ) correcta = "COJX";
-  else if ( strcasecmp(clave, "COJI") == 0 ) correcta = "COJX";
-  else if ( strcasecmp(clave, "COJO") == 0 ) correcta = "COJX";
-  else if ( strcasecmp(clave, "CULO") == 0 ) correcta = "CULX";
-  else if ( strcasecmp(clave, "FETO") == 0 ) correcta = "FETX";
-  else if ( strcasecmp(clave, "GUEY") == 0 ) correcta = "GUEX";
-  else if ( strcasecmp(clave, "JOTO") == 0 ) correcta = "JOTX";
-  else if ( strcasecmp(clave, "KACA") == 0 ) correcta = "KACX";
-  else if ( strcasecmp(clave, "KACO") == 0 ) correcta = "KACX";
-  else if ( strcasecmp(clave, "KAGA") == 0 ) correcta = "KAGX";
-  else if ( strcasecmp(clave, "KAGO") == 0 ) correcta = "KAGX";
-  else if ( strcasecmp(clave, "KOGE") == 0 ) correcta = "KOGX";
-  else if ( strcasecmp(clave, "KOJO") == 0 ) correcta = "KOJX";
-  else if ( strcasecmp(clave, "KAKA") == 0 ) correcta = "KAKX";
-  else if ( strcasecmp(clave, "KULO") == 0 ) correcta = "KULX";
-  else if ( strcasecmp(clave, "MAME") == 0 ) correcta = "MAMX";
-  else if ( strcasecmp(clave, "MAMO") == 0 ) correcta = "MAMX";
-  else if ( strcasecmp(clave, "MEAR") == 0 ) correcta = "MEAX";
-  else if ( strcasecmp(clave, "MEON") == 0 ) correcta = "MEOX";
-  else if ( strcasecmp(clave, "MION") == 0 ) correcta = "MIOX";
-  else if ( strcasecmp(clave, "MOCO") == 0 ) correcta = "MOCX";
-  else if ( strcasecmp(clave, "MULA") == 0 ) correcta = "MULX";
-  else if ( strcasecmp(clave, "PEDA") == 0 ) correcta = "PEDX";
-  else if ( strcasecmp(clave, "PEDO") == 0 ) correcta = "PEDX";
-  else if ( strcasecmp(clave, "PENE") == 0 ) correcta = "PENX";
-  else if ( strcasecmp(clave, "PUTA") == 0 ) correcta = "PUTX";
-  else if ( strcasecmp(clave, "PUTO") == 0 ) correcta = "PUTX";
-  else if ( strcasecmp(clave, "QULO") == 0 ) correcta = "QULX";
-  else if ( strcasecmp(clave, "RATA") == 0 ) correcta = "RATX";
-  else if ( strcasecmp(clave, "RUIN") == 0 ) correcta = "RUIX";
+  if      ( strcmp(clave, "BUEI") == 0 ) correcta = "BUEX";
+  else if ( strcmp(clave, "BUEI") == 0 ) correcta = "BUEX";
+  else if ( strcmp(clave, "BUEY") == 0 ) correcta = "BUEX";
+  else if ( strcmp(clave, "CACA") == 0 ) correcta = "CACX";
+  else if ( strcmp(clave, "CACO") == 0 ) correcta = "CACX";
+  else if ( strcmp(clave, "CAGA") == 0 ) correcta = "CAGX";
+  else if ( strcmp(clave, "CAGO") == 0 ) correcta = "CAGX";
+  else if ( strcmp(clave, "CAKA") == 0 ) correcta = "CAKX";
+  else if ( strcmp(clave, "COGE") == 0 ) correcta = "COGX";
+  else if ( strcmp(clave, "COJA") == 0 ) correcta = "COJX";
+  else if ( strcmp(clave, "COJE") == 0 ) correcta = "COJX";
+  else if ( strcmp(clave, "COJI") == 0 ) correcta = "COJX";
+  else if ( strcmp(clave, "COJO") == 0 ) correcta = "COJX";
+  else if ( strcmp(clave, "CULO") == 0 ) correcta = "CULX";
+  else if ( strcmp(clave, "FETO") == 0 ) correcta = "FETX";
+  else if ( strcmp(clave, "GUEY") == 0 ) correcta = "GUEX";
+  else if ( strcmp(clave, "JOTO") == 0 ) correcta = "JOTX";
+  else if ( strcmp(clave, "KACA") == 0 ) correcta = "KACX";
+  else if ( strcmp(clave, "KACO") == 0 ) correcta = "KACX";
+  else if ( strcmp(clave, "KAGA") == 0 ) correcta = "KAGX";
+  else if ( strcmp(clave, "KAGO") == 0 ) correcta = "KAGX";
+  else if ( strcmp(clave, "KOGE") == 0 ) correcta = "KOGX";
+  else if ( strcmp(clave, "KOJO") == 0 ) correcta = "KOJX";
+  else if ( strcmp(clave, "KAKA") == 0 ) correcta = "KAKX";
+  else if ( strcmp(clave, "KULO") == 0 ) correcta = "KULX";
+  else if ( strcmp(clave, "MAME") == 0 ) correcta = "MAMX";
+  else if ( strcmp(clave, "MAMO") == 0 ) correcta = "MAMX";
+  else if ( strcmp(clave, "MEAR") == 0 ) correcta = "MEAX";
+  else if ( strcmp(clave, "MEON") == 0 ) correcta = "MEOX";
+  else if ( strcmp(clave, "MION") == 0 ) correcta = "MIOX";
+  else if ( strcmp(clave, "MOCO") == 0 ) correcta = "MOCX";
+  else if ( strcmp(clave, "MULA") == 0 ) correcta = "MULX";
+  else if ( strcmp(clave, "PEDA") == 0 ) correcta = "PEDX";
+  else if ( strcmp(clave, "PEDO") == 0 ) correcta = "PEDX";
+  else if ( strcmp(clave, "PENE") == 0 ) correcta = "PENX";
+  else if ( strcmp(clave, "PUTA") == 0 ) correcta = "PUTX";
+  else if ( strcmp(clave, "PUTO") == 0 ) correcta = "PUTX";
+  else if ( strcmp(clave, "QULO") == 0 ) correcta = "QULX";
+  else if ( strcmp(clave, "RATA") == 0 ) correcta = "RATX";
+  else if ( strcmp(clave, "RUIN") == 0 ) correcta = "RUIX";
 
   if ( debug && correcta != NULL ) {
     printf("Palabra inconveniente para formar parte de la clave del Registro Federal de Contribuyentes (%s)... sustituida por \"%s\".\n", clave, correcta);
     substituted = 1;
 
     memset(clave, 0, 5);
+#if _MSC_VER
+    strncpy_s(clave, 5, correcta, 4);
+#else
     strncpy(clave, correcta, 4);
+#endif
   }
 
   return substituted;
@@ -498,7 +572,11 @@ fisica_clave_abreviada(char* clave, const char *nombre, const char *paterno, con
   /*
    * Nombre
    */
+#if _MSC_VER
+  name = _strdup(nombre);
+#else
   name = strndup(nombre, strlen(nombre));
+#endif
   res = 0;
   res = fisica_regla6(name, debug);
   if ( debug && res ) {
@@ -513,7 +591,11 @@ fisica_clave_abreviada(char* clave, const char *nombre, const char *paterno, con
   /*
    * Apellido paterno
    */
+#if _MSC_VER
+  lastname1 = _strdup(paterno);
+#else
   lastname1 = strndup(paterno, strlen(paterno));
+#endif
   res = 0;
   res = fisica_regla8(lastname1, debug);
   if ( debug && res ) {
@@ -524,7 +606,11 @@ fisica_clave_abreviada(char* clave, const char *nombre, const char *paterno, con
    * Apellido materno
    */
   if ( materno != NULL ) {
+#if _MSC_VER
+    lastname2 = _strdup(materno);
+#else
     lastname2 = strndup(materno, strlen(materno));
+#endif
     res = 0;
     res = fisica_regla8(lastname2, debug);
     if ( debug && res ) {
@@ -580,7 +666,11 @@ fisica_clave_abreviada(char* clave, const char *nombre, const char *paterno, con
   regla2(year, month, day, fecha);
   if ( debug ) printf("Fecha [%s].\n", fecha);
 
+#if _MSC_VER
+  _snprintf_s(clave, 11, 11, "%s%s", result, fecha);
+#else
   snprintf(clave, 11, "%s%s", result, fecha);
+#endif
 
   return clave;
 }
@@ -592,44 +682,78 @@ clave_rfc_persona_fisica(char* clave, const char *nombre, const char *paterno, c
   char clave_diferenciadora[3];
   char verificador[2];
   char digito = 0;
+  char* unombre = 0;
+  char* upaterno = 0;
+  char* umaterno = 0;
   char* apellidos = NULL;
   size_t apellidos_len = 0;
+  char tmp_clave[14];
 
-  memset(clave, 0, 14);
+  unombre = to_upper_case_and_convert((unsigned char*)nombre);
+  upaterno = to_upper_case_and_convert((unsigned char*)paterno);
+  if ( materno != NULL ) umaterno = to_upper_case_and_convert((unsigned char*)materno);
 
-  fisica_clave_abreviada(clave, nombre, paterno, materno, year, month, day, debug);
+  memset(tmp_clave, 0, 14);
+  fisica_clave_abreviada(tmp_clave, unombre, upaterno, umaterno, year, month, day, debug);
 
   /* Ahora obten la clave diferenciadora de homonimias */
-  apellidos_len = strlen(paterno);
-  if ( materno != NULL ) {
-     apellidos_len += strlen(materno) + 2;
+  apellidos_len = strlen(upaterno);
+  if ( umaterno != NULL ) {
+     apellidos_len += strlen(umaterno) + 2;
      apellidos = (char*)calloc(apellidos_len, sizeof(char));
      memset(apellidos, 0, apellidos_len);
-     strncpy(apellidos, paterno, strlen(paterno));
+#if _MSC_VER
+     strncpy_s(apellidos, strlen(upaterno)+1, upaterno, strlen(upaterno));
+     strncat_s(apellidos, apellidos_len, " ", 1);
+     strncat_s(apellidos, apellidos_len, umaterno, strlen(umaterno));
+#else
+     strncpy(apellidos, upaterno, strlen(upaterno));
      strncat(apellidos, " ", 1);
-     strncat(apellidos, materno, strlen(materno));
+     strncat(apellidos, umaterno, strlen(umaterno));
+#endif
 
   } else {
     apellidos = (char*)calloc(apellidos_len + 1, sizeof(char));
     memset(apellidos, 0, apellidos_len + 1);
-    strncpy(apellidos, paterno, apellidos_len);
+#if _MSC_VER
+    strncpy_s(apellidos, apellidos_len+1, upaterno, apellidos_len);
+#else
+    strncpy(apellidos, upaterno, apellidos_len);
+#endif
 
   }
 
   /* Ahora obten la clave diferenciadora de homonimias */
   memset(clave_diferenciadora, 0, 3);
-  homonimia(clave_diferenciadora, nombre, apellidos, debug);
+  homonimia(clave_diferenciadora, unombre, apellidos, debug);
+
+  if ( umaterno != NULL ) free(umaterno);
+  free(upaterno);
+  free(unombre);
 
   /* Agrega la clave */
-  strncat(clave, clave_diferenciadora, 2);
+#if _MSC_VER
+  strncat_s(tmp_clave, 14, clave_diferenciadora, 2);
+#else
+  strncat(tmp_clave, clave_diferenciadora, 2);
+#endif
 
   /* Libera memoria */
   free(apellidos);
 
   /* Ahora obten el digito verificador */
-  digito = digito_verificador(clave, debug);
+  digito = digito_verificador(tmp_clave, debug);
+#if _MSC_VER
+  _snprintf_s(verificador, 2, 2, "%c", digito);
+  strncat_s(tmp_clave, 14, verificador, 1);
+#else
   snprintf(verificador, 2, "%c", digito);
-  strncat(clave, verificador, 1);
+  strncat(tmp_clave, verificador, 1);
+#endif
+
+  /* Now translate any '^' which stands for a 'Ñ' */
+  memset(clave, 0, 18);
+  clave = (char*)recover_translations(tmp_clave, (unsigned char*)clave);
 
   return clave;
 }

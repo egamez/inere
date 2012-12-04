@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     L.A.E.
+ *                     Lae
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,27 +97,29 @@
  *	9	09		M	22		Y	35
  *	A	10		N	23		Z	36
  *	B	11		&	24		ESPACIO	37
- *	C	12		O	25		Ñ	38
+ *	C	12		O	25		Ã‘	38
  *
  * Todos los demas caracteres que no se encuentren en la tabla, les sera
  * asignado el valor cero.
  *
- * BUG in https://www.recaudanet.gob.mx/recaudanet/rfc.jsp
- * Input was 06/074/197 when the correct one should be 06/04/1970
  */
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #ifndef INERE_VERIFICADOR_INCLUDED_H
 #include "inere/verificador.h"
+#endif
+#ifndef INERE_UTIL_INCLUDED_H
+#include "inere/util.h"
 #endif
 
 int
 anexo3(const char caracter)
 {
   /* Convert the caracter given to uppercase */
-  char c = toupper(caracter);
+  char c = caracter;
   if      ( c == '0' ) return 0;
   else if ( c == '1' ) return 1;
   else if ( c == '2' ) return 2;
@@ -156,7 +158,7 @@ anexo3(const char caracter)
   else if ( c == 'Y' ) return 35;
   else if ( c == 'Z' ) return 36;
   else if ( c == ' ' ) return 37;
-  /*else if ( c == 'Ñ' ) return 40;*/
+  else if ( c == '^' ) return 38; /* Ã‘ */
   else return 0;
   return 0;
 }
@@ -179,10 +181,10 @@ digito_verificador(const char* rfc, const int debug)
 
   if ( length > 12 ) {
     /* The rfc length shouldn't be larger than 12 characters */
-    fprintf(stderr, "Error. The RFC length shouldn't be larger than 12 characters. The number of characters passed were: %ld.\n", length);
+    fprintf(stderr, "Error. The RFC length shouldn't be larger than 12 characters. The number of characters passed were: %d.\n", length);
     return 0;
   } else if ( length < 11 ) {
-    fprintf(stderr, "Error. The RFC length must be of at least 11 characters long (for personas morales. The number of characters passed was: %ld.\n", length);
+    fprintf(stderr, "Error. The RFC length must be of at least 11 characters long (for personas morales. The number of characters passed was: %d.\n", length);
     return 0;
   }
 
@@ -222,13 +224,20 @@ verifica_rfc(const char* rfc, const int debug)
 {
   char result = 0;
   char copy[13];
-  const size_t len = strlen(rfc);
+  char* buffer = 0;
+  size_t len = 0;
 
+  buffer = to_upper_case_and_convert((unsigned char*)rfc);
+
+  /* Now get the verification digit */
+  len = strlen(buffer);
   memset(copy, 0, 13);
-  memcpy(copy, rfc, len-1);
+  memcpy(copy, buffer, len-1);
 
   result = digito_verificador(copy, debug);
-  if ( result == rfc[len-1] ) result = 0;
+  if ( result == buffer[len-1] ) result = 0;
+
+  free(buffer);
 
   return result;
 }

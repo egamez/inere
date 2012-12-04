@@ -2,7 +2,7 @@
  * obten_rfc.c
  *
  * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>, and
- *                     L.A.E.
+ *                     Lae
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
 int
 main(int argc, char* argv[])
 {
-  char rfc[14];
+  char rfc[18];
   char* nombre = NULL;
   char* primer_apellido = NULL;
   char* segundo_apellido = NULL;
@@ -50,7 +50,7 @@ main(int argc, char* argv[])
   char* day = NULL;
 
   if ( argc < 6 ) {
-    fprintf(stderr, "Sintax:\n%s <dia> <mes> <año> <nombre> <primer-apellido> [<segundo-apellido>]\n", argv[0]);
+    fprintf(stderr, "Sintax:\n%s <dia> <mes> <aÃ±o> <nombre> <primer-apellido> [<segundo-apellido>]\n", argv[0]);
     return 1;
   }
   day = argv[1];
@@ -60,7 +60,7 @@ main(int argc, char* argv[])
   primer_apellido = argv[5];
   if ( argc == 7 ) segundo_apellido = argv[6];
 
-  memset(rfc, 0, 14);
+  memset(rfc, 0, 18);
 
   clave_rfc_persona_fisica(rfc, nombre, primer_apellido, segundo_apellido, year, month, day, 0);
 

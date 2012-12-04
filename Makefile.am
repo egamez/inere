@@ -6,8 +6,10 @@ EXTRA_DIST = autogen.sh README.md \
 	examples/obten_homonimia.c \
 	examples/obten_rfc.c \
 	examples/verifica_rfc.c \
+	python/inere.c \
+	python/setup.py \
 	js/README.md \
-	js/jquery.digito_verificador.js \
+	js/jquery.rfc_digito_verificador.js \
 	js/rfc.html
 
 CLEANFILES = *~ core* *.core

@@ -9,4 +9,4 @@ rfc_LDFLAGS = $(top_srcdir)/lib/libinere.la
 
 CLEANFILES = *~
 
-AM_CPPFLAGS = -pedantic -pedantic-errors -Wextra -Wall -W -fPIC -pipe -funsigned-char -ansi -pthread -I$(top_srcdir)/include
+AM_CPPFLAGS = -D_GNU_SOURCE -pedantic -pedantic-errors -Wextra -Wall -W -fPIC -pipe -funsigned-char -ansi -pthread -I$(top_srcdir)/include

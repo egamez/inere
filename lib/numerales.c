@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     L.A.E.
+ *                     Lae
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,11 +65,6 @@
  *  - Numero: 0000001
  *
  */
-#ifndef __OpenBSD__
-# ifndef _GNU_SOURCE
-#  define _GNU_SOURCE
-# endif
-#endif
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -183,11 +178,22 @@ millones(const unsigned int numero)
 char*
 swap_and_add(char* dst, char* buffer)
 {
+#if _MSC_VER
+  char* tmp = _strdup(dst);
+#else
   char* tmp = strndup(dst, strlen(dst)+1);
+#endif
+
   memset(dst, 0, MAXNUMERAL);
+#if _MSC_VER
+  strncpy_s(dst, strlen(buffer)+1, buffer, _TRUNCATE);
+  if ( strlen(tmp) ) strncat_s(dst, strlen(buffer)+1, " ", 1);
+  strncat_s(dst, strlen(buffer)+1, tmp, strlen(tmp));
+#else
   strncpy(dst, buffer, strlen(buffer));
   if ( strlen(tmp) ) strncat(dst, " ", 1);
   strncat(dst, tmp, strlen(tmp));
+#endif
   free(tmp);
   return dst;
 }
@@ -213,20 +219,37 @@ construye_clase(const unsigned int unidad, const unsigned int decena, const unsi
 
   /* Build the name */
   if ( centena_str != NULL ) {
+#if _MSC_VER
+    if ( decena_str == NULL && unidad_str == NULL ) strncpy_s(buffer, strlen(cien())+1, cien(), _TRUNCATE);
+    else					    strncpy_s(buffer, strlen(centena_str)+1, centena_str, _TRUNCATE);
+#else
     if ( decena_str == NULL && unidad_str == NULL ) strncpy(buffer, cien(), strlen(cien()));
     else					    strncpy(buffer, centena_str, strlen(centena_str));
+#endif
+
   }
 
   if ( decena_str != NULL ) {
+#if _MSC_VER
+    if ( centena_str != NULL ) strncat_s(buffer, _countof(buffer), " ", 1);
+    strncat_s(buffer, _countof(buffer), decena_str, strlen(decena_str));
+#else
     if ( centena_str != NULL ) strncat(buffer, " ", 1);
     strncat(buffer, decena_str, strlen(decena_str));
+#endif
 
   }
 
   if ( unidad_str != NULL ) {
+#if _MSC_VER
+    if ( decena_str != NULL ) 	    strncat_s(buffer, _countof(buffer), " y ", 3);
+    else if ( centena_str != NULL ) strncat_s(buffer, _countof(buffer), " ", 1);
+    strncat_s(buffer, _countof(buffer), unidad_str, strlen(unidad_str));
+#else
     if ( decena_str != NULL ) 	    strncat(buffer, " y ", 3);
     else if ( centena_str != NULL ) strncat(buffer, " ", 1);
     strncat(buffer, unidad_str, strlen(unidad_str));
+#endif
   }
 
   if ( debug ) printf("construye_clase: Numero [%d] = [%s]\n", centena*100+decena*10+unidad, buffer);
@@ -256,7 +279,11 @@ numeral(char* nombre, const char* numero, const int debug)
    */
   if ( strlen(numero) == 1 ) {
     buffer = unidades((unsigned int)(*numero-48));
+#if _MSC_VER
+    strncpy_s(nombre, strlen(buffer)+1, buffer, _TRUNCATE);
+#else
     strncpy(nombre, buffer, strlen(buffer));
+#endif
     return nombre;
   }
 
@@ -320,7 +347,11 @@ numeral(char* nombre, const char* numero, const int debug)
 
       } else {
 	/* Set the numeral */
+#if _MSC_VER
+	strncpy_s(nombre, strlen(buffer)+1, buffer, _TRUNCATE);
+#else
 	strncpy(nombre, buffer, strlen(buffer));
+#endif
 
       }
       unidad = decena = centena = 0; /* Reset the current numbers */
@@ -359,7 +390,11 @@ numeral(char* nombre, const char* numero, const int debug)
 
     } else {
       /* Set the numeral */
+#if _MSC_VER
+      strncpy_s(nombre, strlen(buffer)+1, buffer, strlen(buffer));
+#else
       strncpy(nombre, buffer, strlen(buffer));
+#endif
 
     }
 
