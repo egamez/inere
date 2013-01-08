@@ -9,7 +9,7 @@ nobase_dist_include_HEADERS = $(top_srcdir)/include/inere/cantidades.h \
 		$(top_srcdir)/include/inere/verificador.h \
 		$(top_srcdir)/include/inere/util.h
 AM_CPPFLAGS = -D_GNU_SOURCE -pedantic -pedantic-errors -Wextra -Wall -W -fPIC -pipe -funsigned-char -ansi -pthread -I$(top_srcdir)/include
-libinere_la_LDFLAGS = -version-info 0:4:0
+libinere_la_LDFLAGS = -version-info 0:5:0
 INCLUDES = -I$(top_srcdir)
 CLEANFILES = *~
 library_includedir = $(includedir)/inere
