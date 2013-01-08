@@ -60,6 +60,8 @@ to_upper_case_and_convert(const unsigned char* in)
   /* Start the convertion */
   /* Start the convertion */
   while ( *in ) {
+
+    /* The octect indicator for the UTF-8 encoding */
     if ( *in == 0xc3 ) {
       in++;
       if      ( *in == 0xa1 || *in == 0xa0 || *in == 0x81 || *in == 0x80 ) out[j] = 0x41; /* A */
@@ -68,6 +70,25 @@ to_upper_case_and_convert(const unsigned char* in)
       else if ( *in == 0xb3 || *in == 0xb2 || *in == 0x93 || *in == 0x92 ) out[j] = 0x4f; /* O */
       else if ( *in == 0xba || *in == 0xb9 || *in == 0x9a || *in == 0x99 ) out[j] = 0x55; /* U */
       else if ( *in == 0xb1 || *in == 0x91 ) out[j] = 0x5e; /* ñ or Ñ to ^*/
+    /* For the ISO-8859-* encoding system */
+    } else if ( *in == 0xc0 || *in == 0xc1 || *in == 0xe0 || *in == 0xe1 ) {
+      out[j] = 0x41; /* A */
+
+    } else if ( *in == 0xc8 || *in == 0xc9 || *in == 0xe8 || *in == 0xe9 ) {
+      out[j] = 0x45; /* E */
+
+    } else if ( *in == 0xcc || *in == 0xcd || *in == 0xec || *in == 0xed ) {
+      out[j] = 0x49; /* I */
+
+    } else if ( *in == 0xd2 || *in == 0xd3 || *in == 0xf2 || *in == 0xf3 ) {
+      out[j] = 0x4f; /* O */
+
+    } else if ( *in == 0xd9 || *in == 0xda || *in == 0xf9 || *in == 0xfa ) {
+      out[j] = 0x55; /* U */
+
+    } else if ( *in == 0xd1 || *in == 0xc1 ) {
+      out[j] = 0x41; /* enhe */
+
     } else {
       out[j] = toupper(*in);
     }
