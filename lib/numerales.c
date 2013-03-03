@@ -62,7 +62,7 @@
  * BUGS:
  *  - Plurales
  *  - Sustantivos masculino y femenino
- *  - Numero: 0000001
+ *  - Cantidad: 123456789012
  *
  */
 #include <string.h>
@@ -151,54 +151,6 @@ cien(void)
 }
 
 char*
-mil(void)
-{
-  return "mil";
-}
-
-char*
-millones(const unsigned int numero)
-{
-  if ( numero == 1 ) return "millon";
-  else if ( numero == 2 ) return "billon";
-  else if ( numero == 3 ) return "trillon";
-  else if ( numero == 4 ) return "cuatrillon";
-  else if ( numero == 5 ) return "quintillon";
-  else if ( numero == 6 ) return "sextillon";
-  else if ( numero == 7 ) return "septillon";
-  else if ( numero == 8 ) return "octillon";
-  else if ( numero == 9 ) return "nonillon";
-  return NULL;
-}
-
-/*
- * Function to swap strings
- * dst must always have length = MAXNUMERAL
- */
-char*
-swap_and_add(char* dst, char* buffer)
-{
-#if _MSC_VER
-  char* tmp = _strdup(dst);
-#else
-  char* tmp = strndup(dst, strlen(dst)+1);
-#endif
-
-  memset(dst, 0, MAXNUMERAL);
-#if _MSC_VER
-  strncpy_s(dst, strlen(buffer)+1, buffer, _TRUNCATE);
-  if ( strlen(tmp) ) strncat_s(dst, strlen(buffer)+1, " ", 1);
-  strncat_s(dst, strlen(buffer)+1, tmp, strlen(tmp));
-#else
-  strncpy(dst, buffer, strlen(buffer));
-  if ( strlen(tmp) ) strncat(dst, " ", 1);
-  strncat(dst, tmp, strlen(tmp));
-#endif
-  free(tmp);
-  return dst;
-}
-
-char*
 construye_clase(const unsigned int unidad, const unsigned int decena, const unsigned int centena, char* buffer, const int debug)
 {
   char* unidad_str = NULL;
@@ -258,6 +210,26 @@ construye_clase(const unsigned int unidad, const unsigned int decena, const unsi
 }
 
 /**
+ * Helper function to add the corresponding class and period name
+ * for the numeral.
+ */
+char*
+class_name(unsigned int class_number)
+{
+  if ( class_number % 2 ) return " mil ";
+  else if ( class_number == 2  ) return " millon ";
+  else if ( class_number == 4  ) return " billon ";
+  else if ( class_number == 6  ) return " trillon ";
+  else if ( class_number == 8  ) return " cuatrillon ";
+  else if ( class_number == 10 ) return " quintillon ";
+  else if ( class_number == 12 ) return " sextillon ";
+  else if ( class_number == 14 ) return " septillon ";
+  else if ( class_number == 16 ) return " octillon ";
+  else if ( class_number == 18 ) return " nonillon ";
+  return NULL;
+}
+
+/**
  *
  */
 char*
@@ -266,12 +238,12 @@ numeral(char* nombre, const char* numero, const int debug)
   int i = 0;
   char* copy = NULL;
   char* buffer = NULL;
+  unsigned int free_digits = 0;
+  unsigned int classes = 0;
+  div_t division;
   unsigned int unidad = 0;
   unsigned int decena = 0;
   unsigned int centena = 0;
-  unsigned int orden = 0;
-  unsigned int clase = 1; /* We have at least one clase */
-  unsigned int periodo = 0;
   const size_t number_length = strlen(numero);
 
   /* There is one trivial option. The one in which the number given has
@@ -293,117 +265,95 @@ numeral(char* nombre, const char* numero, const int debug)
    */
   copy = (char*)calloc(number_length+1, sizeof(char));
   memset(copy, 0, number_length+1);
-  /* Remove any character that it isn't a decimal digit one */
+  /* Remove any character that it isn't a decimal digit one or a leading 0s */
   while ( *numero ) {
     if ( isdigit(*numero) ) {
+      if ( *numero == '0' && i == 0 ) {
+	/* Avoid passing leading zeroes. */
+	numero++;
+	continue;
+      }
+
       *copy++ = *numero;
       i++;
     }
     numero++;
   }
-  *copy-- = 0; /* Set the null character at the end, en move back one more */
+  *copy = 0; /* Set the null character at the end, and move back one more */
 
-  /* Now, you need to split the number onto its classes.
-   * The copy pointer is currently at the beginning of the number, so you just
-   * need to reverse the string.
+  /* Rewind the pointers */
+  copy -= i;
+  numero -= number_length;
+
+  /* Compute a division on the 'copy' string to extract the number
+   * of classes in which the numeral will be splitted
    */
-   while (i) {
+  division = div(strlen(copy), 3);
+  free_digits = division.rem;
+  classes = division.quot;
 
-    orden++;
-    if ( debug ) printf("numeral: digito [%c], index = %d\n", *copy, i);
-
-    /* Now, to generate the numeral, you need to build it from blocks
-     * This blocks are collections of 3 digits, named 'clase'
-     */
-    if ( orden == 1 ) {
-      unidad = (unsigned int)(*copy - 48);
-
-    } else if ( orden == 2 ) {
-      decena = (unsigned int)(*copy - 48);
-
-    } else if ( orden == 3 ) {
-      centena = (unsigned int)(*copy - 48);
-
-      /* Reset the 'orden' counter. */
-      orden = 0;
-
-      if ( buffer == NULL ) buffer = (char*)calloc(MAXNUMERAL, sizeof(char));
-
-      memset(buffer, 0, MAXNUMERAL);
-      construye_clase(unidad, decena, centena, buffer, debug);
-
-      /* And add one 'clase' more */
-      clase++;
-      if ( clase % 2 ) {
-	if ( strlen(buffer) ) swap_and_add(nombre, "mil");
-	periodo++; /* Add one periodo */
-      }
-
-
-      /* Check if we already have some previous periods */
-      if ( nombre != NULL ) {
-	/* You need to swap the names */
-        swap_and_add(nombre, buffer);
-
-      } else {
-	/* Set the numeral */
-#if _MSC_VER
-	strncpy_s(nombre, strlen(buffer)+1, buffer, _TRUNCATE);
-#else
-	strncpy(nombre, buffer, strlen(buffer));
-#endif
-
-      }
-      unidad = decena = centena = 0; /* Reset the current numbers */
-      free(buffer);
-      buffer = NULL;
-
-    }
-
-    copy--;
-    i--;
-  }
-
-  /* Now, recover the last step in case that the number doesn't
-   * complete a clase
+  /* Now, start creating the numeral for the digits that no complete
+   * a full class
    */
-  if ( unidad || decena || centena ) {
+  if ( free_digits ) {
+    if ( free_digits == 2 ) decena = (unsigned int)(*copy++ - 48);
+    unidad = (unsigned int)(*copy++ - 48);
 
     if ( buffer == NULL ) buffer = (char*)calloc(MAXNUMERAL, sizeof(char));
+    memset(buffer, 0, MAXNUMERAL);
+    construye_clase(unidad, decena, 0, buffer, debug);
+    /* add buffer to nombre */
+#if _MSC_VER
+    strncat_s(nombre, _countof(nombre), buffer, _TRUNCATE);
+#else
+    strncat(nombre, buffer, strlen(buffer));
+#endif
 
+  }
+
+  /* Check if we need to add a suffix to the previous quantity */
+  if ( classes && division.rem ) {
+#if _MSC_VER
+    strncat_s(nombre, _countof(nombre), class_name(classes), _TRUNCATE);
+#else
+    strncat(nombre, class_name(classes), strlen(class_name(classes)));
+#endif
+  }
+
+  /* Now convert the remaining digits to its numeral */
+  while ( classes ) {
+
+    centena = (unsigned int)(*copy++ - 48);
+    decena  = (unsigned int)(*copy++ - 48);
+    unidad  = (unsigned int)(*copy++ - 48);
+
+    if ( buffer == NULL ) buffer = (char*)calloc(MAXNUMERAL, sizeof(char));
     memset(buffer, 0, MAXNUMERAL);
     construye_clase(unidad, decena, centena, buffer, debug);
-
-    if ( periodo ) {
-      if ( strcmp(buffer, "un") ) swap_and_add(nombre, "millones");
-      else			  swap_and_add(nombre, "millon");
-    }
-
-    /* After splitting the numbers in groups of three, add ... */
-    if ( !(clase % 2) ) {
-      if ( strlen(buffer) ) swap_and_add(nombre, "mil");
-    }
-
-    if ( nombre != NULL ) {
-      /* You need to swap the names */
-      swap_and_add(nombre, buffer);
-
-    } else {
-      /* Set the numeral */
+    /* add buffer to nombre */
 #if _MSC_VER
-      strncpy_s(nombre, strlen(buffer)+1, buffer, strlen(buffer));
+    strncat_s(nombre, _countof(nombre), buffer, _TRUNCATE);
 #else
-      strncpy(nombre, buffer, strlen(buffer));
+    strncat(nombre, buffer, strlen(buffer));
+#endif
+
+    /* Check if you need to add some suffix */
+    if ( classes > 1 ) {
+#if _MSC_VER
+      strncat_s(nombre, _countof(nombre), class_name(classes-1), _TRUNCATE);
+#else
+      strncat(nombre, class_name(classes-1), strlen(class_name(classes-1)));
 #endif
 
     }
-
+    classes--;
   }
 
   /* Freed space */
   if ( buffer != NULL ) free(buffer);
 
-  free(++copy); /* You need to add because you decrement one extra location */
+  copy -= i;
+  free(copy); /* You need to add because you decrement one extra location */
 
   return nombre;
 }
