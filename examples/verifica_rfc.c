@@ -52,7 +52,7 @@ main(int argc, char* argv[])
   if ( result == 0 ) {
     printf("Digito de verificacion ('%c') coincide con la clave del R.F.C. suministrada.\n", clave[len-1]);
   } else {
-    printf("Clave de el RFC incorrecta, el digito verificador para la clave suministrada es \"%c\", mientras que el digito suministrado es \"%c\".\n", result, clave[len-1]);
+    printf("Clave del R.F.C. muy probablemente sea incorrecta, el digito verificador para la clave suministrada deberia ser \"%c\", mientras que el digito suministrado es \"%c\".\n", result, clave[len-1]);
   }
 
   free(clave);
