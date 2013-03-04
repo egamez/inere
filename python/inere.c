@@ -172,6 +172,7 @@ static PyMethodDef InereMethods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
+#ifdef PYTHON_ABI_VERSION
 static struct PyModuleDef ineremodule = {
 	PyModuleDef_HEAD_INIT,
 	"inere",
@@ -194,3 +195,19 @@ PyInit_inere(void)
 
   return m;
 }
+#else
+PyMODINIT_FUNC
+initinere(void)
+{
+  PyObject *m;
+
+  m = Py_InitModule("inere", InereMethods);
+  if ( m == NULL ) return;
+
+  InereError = PyErr_NewException("inere.error", NULL, NULL);
+  if ( InereError == NULL ) return;
+  Py_INCREF(InereError);
+  PyModule_AddObject(m, "error", InereError);
+
+}
+#endif
