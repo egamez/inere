@@ -271,9 +271,7 @@ homonimia(char* clave, const char* nombre, const char* apellidos, const int debu
   unsigned int valor = 0;
   unsigned int digito_anterior = 0;
   int suma = 0;
-  unsigned int coeficiente = 0;
-  unsigned int residuo = 0;
-  unsigned int i = 0;
+  div_t result;
 
   if ( apellidos == NULL ) {
     copy = (char* )calloc(namelen + 1, sizeof(char));
@@ -310,7 +308,7 @@ homonimia(char* clave, const char* nombre, const char* apellidos, const int debu
 
       /* Segunda suma */
       digito_anterior = valor % 10;
-      if ( debug ) printf("(%2d * %d = %3d) = ", valor, digito_anterior, valor * digito_anterior);
+      if ( debug ) printf("(%2d * %d = %3d) : ", valor, digito_anterior, valor * digito_anterior);
       suma += valor * digito_anterior;
       if ( debug ) printf(" %4d\t(suma acumulada)\n", suma);
     }
@@ -322,23 +320,13 @@ homonimia(char* clave, const char* nombre, const char* apellidos, const int debu
 
   /* Now, obtain the two characters as for the homonimia */
   suma = suma % 1000; /* Toma unicamente las tres ultimas cifras */
-  residuo = suma % 34;
-  if ( suma >= 34 ) {
-    for (i = 1; ; i++ ) {
-      if ( (i * 34) == (suma - residuo) ) {
-	coeficiente = i;
-	break;
-      }
-    }
-  } else {
-    coeficiente = 0;
-  }
+  result = div(suma, 34);
 
 #if _MSC_VER
-  _snprintf_s(clave, 3, 3, "%c%c", anexo2(coeficiente), anexo2(residuo));
+  _snprintf_s(clave, 3, 3, "%c%c", anexo2(result.quot), anexo2(result.rem));
 #else
-  snprintf(clave, 3, "%c%c", anexo2(coeficiente), anexo2(residuo));
+  snprintf(clave, 3, "%c%c", anexo2(result.quot), anexo2(result.rem));
 #endif
-  if ( debug ) printf("\tCoeficiente [%d], residuo [%d]\thomonimia [%s]\n", coeficiente, residuo, clave);
+  if ( debug ) printf("\tCoeficiente [%d], residuo [%d]\thomonimia [%s]\n", result.quot, result.rem, clave);
   return clave;
 }
