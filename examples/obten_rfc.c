@@ -62,8 +62,8 @@ main(int argc, char* argv[])
 
   memset(rfc, 0, 18);
 
-  clave_rfc_persona_fisica(rfc, nombre, primer_apellido, segundo_apellido, year, month, day, 0);
+  clave_rfc_persona_fisica(rfc, nombre, primer_apellido, segundo_apellido, year, month, day, 1);
 
-  printf("La clave de el RFC es: %s\n", rfc);
+  printf("La clave del RFC es: %s\n", rfc);
   return 0;
 }
