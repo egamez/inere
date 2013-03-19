@@ -190,19 +190,21 @@ digito_verificador(const char* rfc, const int debug)
 
   if ( length == 11 ) {
     /*You need to add a zero value for this character, and advance the counter*/
-    printf("Adding an extra space at the beggining of the RFC.\n");
+    if ( debug ) printf("Adding an extra space at the beggining of the RFC.\n");
     suma += anexo3(' ') * index--;
   }
   while ( *rfc ) {
+    if ( debug ) printf("verificador.c: caracter '%c', valor %2d : ( %2d * %2d)", *rfc, anexo3(*rfc), anexo3(*rfc), index);
     suma += anexo3(*rfc++) * index--;
+    if ( debug ) printf(" : %4d (suma acumulada)\n", suma);
   }
 
   /* Now get the residual of dividing 'suma' over 11 */
   remainder = suma % 11;
   /* Now, apply the crieria to determine the caracter diferenciador */
-  if ( remainder == 0 ) result = '0';
+  if	  ( remainder == 0 ) result = '0';
   else if ( remainder == 1 ) result = 'A'; /* 11 - 10 = 1 */
-  else result = (11 - remainder) + 48; /* 48 is the '0' in ascii */
+  else			     result = (11 - remainder) + 48; /* 48 is the '0' in ascii */
 
   if ( debug ) printf("Suma [%d], remainder [%d], digit [%c]\n", suma, remainder, result);
   return result;
