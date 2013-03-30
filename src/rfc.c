@@ -62,7 +62,6 @@ usage()
   printf(" -a/--ano=AÑO\t\tFija el año de nacimiento.\n");
   printf(" -b/--verifica=RFC\tVerifica que la clave del RFC suministrada\n");
   printf("\t\t\tcoincida con el digito tambien suministrado.\n");
-  printf(" -k/--debug\t\tSet the debug mode.\n");
   printf(" -v/--verbose\t\tSet the verbose mode.\n");
   printf(" -h/--help\t\tImprime este mensaje.\n");
   printf("\n\nBugs to: Enrique Gamez <egamez@edisson.com.mx>\n");
@@ -73,7 +72,6 @@ main(int argc, char* argv[])
 {
   int ch;
   int want_homonimia = 0;
-  int want_debug = 0;
   int want_verificador = 0;
   int want_rfc = 0;
   int want_verbose = 0;
@@ -101,13 +99,12 @@ main(int argc, char* argv[])
       {"mes",		required_argument,	NULL,	'm'},
       {"ano",		required_argument,	NULL,	'a'},
       {"verifica",	required_argument,	NULL,	'b'},
-      {"debug",		no_argument,		NULL,	'k'},
       {"verbose",	no_argument,		NULL,	'v'},
       {"help",		no_argument,		NULL,	'h'},
       {NULL,		0,			NULL,	0}
     };
 
-  while ((ch=getopt_long(argc,argv,"cg:rn:p:t:d:m:a:b:kvh",longopts,NULL)) != -1 ) {
+  while ((ch=getopt_long(argc,argv,"cg:rn:p:t:d:m:a:b:vh",longopts,NULL)) != -1 ) {
     switch(ch) {
       case 'c':
 	/* Get the clave diferenciadora de homonimias */
@@ -170,11 +167,6 @@ main(int argc, char* argv[])
 	snprintf(rfc, strlen(optarg)+1, optarg);
 	break;
 
-      case 'k':
-	/* Debug mode */
-	want_debug = 1;
-	break;
-
       case 'v':
 	/* Verbosity */
 	want_verbose = 1;
@@ -229,7 +221,7 @@ main(int argc, char* argv[])
       printf("Fecha de nacimiento:\n\tDia: %s\n\tMes: %s\n\tAno: %s\n", dia, mes, ano);
     }
     memset(rfc, 0, 18);
-    clave_rfc_persona_fisica(rfc, nombre, paterno, materno, ano, mes, dia, want_debug);
+    clave_rfc_persona_fisica(rfc, nombre, paterno, materno, ano, mes, dia, want_verbose);
     if ( want_verbose ) printf("RFC: ");
     printf("%s\n", rfc);
 
@@ -269,11 +261,11 @@ main(int argc, char* argv[])
       strncpy(uapellidos, upaterno, strlen(upaterno));
     }
 
-    if ( want_verbose || want_debug ) {
+    if ( want_verbose ) {
       printf("Nombre completo del contribuyente, para el cual se calculara la clave diferenciadora de homonimias: \"%s %s %s\".\n", nombre, paterno, (materno != NULL ? materno : ""));
     }
     memset(clave_diferenciadora, 0, 3);
-    homonimia(clave_diferenciadora, unombre, uapellidos, want_debug);
+    homonimia(clave_diferenciadora, unombre, uapellidos, want_verbose);
 
     if ( want_verbose ) printf("Clave diferenciadora de homonimias:");
     printf("%s\n", clave_diferenciadora);
@@ -288,8 +280,8 @@ main(int argc, char* argv[])
     char* clave_corta = 0;
 
     clave_corta = to_upper_case_and_convert((unsigned char*)rfc_corto);
-    digito = digito_verificador(clave_corta, want_debug);
-    if ( want_verbose || want_debug ) printf("Digito verificador para la version incompleta del RFC '%s': ", rfc_corto);
+    digito = digito_verificador(clave_corta, want_verbose);
+    if ( want_verbose ) printf("Digito verificador para la version incompleta del RFC '%s': ", rfc_corto);
     printf("%c\n", digito);
     free(clave_corta);
 
@@ -300,7 +292,7 @@ main(int argc, char* argv[])
     char* tmp_clave = 0;
 
     tmp_clave = to_upper_case_and_convert((unsigned char*)rfc);
-    result = verifica_rfc(tmp_clave, 0);
+    result = verifica_rfc(tmp_clave, want_verbose);
 
     len = strlen(tmp_clave);
     if ( result == 0 ) {
