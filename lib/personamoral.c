@@ -28,6 +28,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 
 void split(const char *name, char ***words, size_t *len, const int verbose);
 
@@ -126,6 +127,35 @@ void split(const char *name, char ***words, size_t *len, const int verbose);
  *	Luis Molina Llorantes y Cía., S. de R.L.	LML-860911
  *
  */
+char*
+moral_regla3(char *palabra, const int verbose)
+{
+  const size_t len = strlen(palabra);
+  char* copy = NULL;
+  if ( len == 1 ) return palabra;
+  if (	(*palabra == 'C' && *(palabra+1) == 'H') ||
+	(*palabra == 'C' && *(palabra+1) == 'h') ||
+	(*palabra == 'c' && *(palabra+1) == 'h') ||
+	(*palabra == 'c' && *(palabra+1) == 'H') ||
+	(*palabra == 'L' && *(palabra+1) == 'L') ||
+	(*palabra == 'L' && *(palabra+1) == 'l') ||
+	(*palabra == 'l' && *(palabra+1) == 'L') ||
+	(*palabra == 'l' && *(palabra+1) == 'l') ) {
+    if ( verbose ) printf("moral_regla3: Aplicando...");
+    copy = strndup(palabra, len);
+    memset(palabra, 0, len + 1);
+    *palabra++ = *copy++;
+    copy++;
+    while ( *copy ) *palabra++ = *copy++;
+    *palabra = 0;
+    palabra -= (len-1);
+    copy -= len;
+    free(copy);
+    if ( verbose ) printf(" Ok!\n");
+  }
+
+  return palabra;
+}
 
 /**
  * Regla 4a.
@@ -220,6 +250,12 @@ void split(const char *name, char ***words, size_t *len, const int verbose);
  *		(VEINTIUNO)
  *
  */
+int
+moral_regla10(char *numero, char *result[], const int debug)
+{
+  int n = 0;
+  return n;
+}
 
 /**
  * Regla 11a.
@@ -256,6 +292,59 @@ void split(const char *name, char ***words, size_t *len, const int verbose);
  *	EL C@FE.NET					CFE-030210
  *
  */
+char*
+moral_regla12(char *palabra, const int verbose)
+{
+  const size_t len = strlen(palabra);
+
+  if ( len == 1 ) {
+    if ( isalnum(*palabra) ) {
+      /*Este es un caractecter que no necesita ser interpretado por esta regla*/
+      return palabra;
+    } else {
+      char *nombre = NULL;
+      if ( verbose ) printf("moral_regla12: Aplicando regla 12. Interpretando caracteres individuales...");
+      if      ( *palabra == '@'  ) nombre = "ARROBA";
+      else if ( *palabra == '\'' ) nombre = "APOSTROFE";
+      else if ( *palabra == '%'  ) nombre = "PORCIENTO";
+      else if ( *palabra == '#'  ) nombre = "NUMERO";
+      else if ( *palabra == '!'  ) nombre = "ADMIRACION";
+      else if ( *palabra == '.'  ) nombre = "PUNTO";
+      else if ( *palabra == '$'  ) nombre = "PESOS";
+      else if ( *palabra == '"'  ) nombre = "COMILLAS";
+      else if ( *palabra == '-'  ) nombre = "GUION";
+      else if ( *palabra == '/'  ) nombre = "DIAGONAL";
+      else if ( *palabra == '+'  ) nombre = "SUMA";
+      else if ( *palabra == '('  ) nombre = "ABRE PARENTESIS";
+      else if ( *palabra == ')'  ) nombre = "CIERRA PARENTESIS";
+
+      if ( nombre ) {
+	if ( verbose ) printf(" caracter %c interpretado como: %s\n", *palabra, nombre);
+	palabra = (char *)realloc(palabra, strlen(nombre));
+	memset(palabra, 0, strlen(nombre)+1);
+	sprintf(palabra, "%s", nombre);
+      }
+    }
+  } else {
+    /* Elimina de 'p' los caracteres que no sean letras */
+    int i = 0;
+    char *copy = strndup(palabra, len);
+    memset(palabra, 0, len + 1);
+    while ( *copy ) {
+      if ( !isalpha(*copy) ) {
+	copy++;
+	continue;
+      }
+      *palabra++ = *copy++;
+      i++;
+    }
+    *palabra = 0;
+    palabra -= i;
+    copy -= len;
+    free(copy);
+  }
+  return palabra;
+}
 
 /**
  * OBSERVACIÓN:
@@ -310,6 +399,42 @@ clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char
 }
 
 /**
+ * Auxiliar function to remove any '.' or ',' character.
+ *
+ */
+char*
+remove_punctuation(char* word)
+{
+  int i = 0;
+  const size_t len = strlen(word);
+  char *copy = strndup(word, len);
+
+  /* Does this word has only one character */
+  if ( len < 2 ) {
+    return word;
+  }
+
+  /* Reset the word */
+  memset(word, 0, len + 1);
+
+  while ( *copy ) {
+    if ( *copy == '.' || *copy == ',' ) {
+      copy++;
+      continue;
+    }
+    *word++ = *copy++;
+    i++;
+  }
+  *word = 0;
+  word -= i;
+  copy -= len;
+  free(copy);
+
+  return word;
+}
+
+
+/**
  * Function to convert a single string onto an its words as an array
  * of strings.
  */
@@ -321,12 +446,14 @@ split(const char *name, char ***words, size_t *len, const int verbose)
   char **list = NULL;
   char **tmp = NULL;
   char *last = NULL;
+  char *numeral[4]; /* 3 numerales, maximo */
+  int n = 0; /* cantidad de numerales */
 
   /* Initialize the results */
   *words = NULL;
   *len = 0;
 
-  copy = strndup(name, strlen(name) + 1);
+  copy = strndup(name, strlen(name));
   if ( copy == NULL ) {
     fprintf(stderr, "split: Not enough memory to copy name");
     return;
@@ -337,9 +464,7 @@ split(const char *name, char ***words, size_t *len, const int verbose)
 	(p = strtok_r(NULL, " \t\n", &last)) ) {
 
     /* Remove any punctuation sign */
-
-    /* Apply rule 3 */
-    /* Do not take into account composite characters */
+    p = remove_punctuation(p);
 
     /* Apply rule 9 */
     if ( !strcasecmp(p, "EL") ||
@@ -380,6 +505,22 @@ split(const char *name, char ***words, size_t *len, const int verbose)
       break;
     }
 
+    /* Apply rule 3
+     * Do not take into account composite characters
+     */
+    p = moral_regla3(p, verbose);
+
+    /* Apply rule 12
+     */
+    p = moral_regla12(p, verbose);
+
+    /* Apply rule 10
+     * Sustituye numeros arabigos. Para este caso, tanto 'p' como el
+     * resultado de aplicar la regla puede resultar en una o mas palabras
+     * y cada una de ellas de logitud mayor a la de 'p'
+     */
+    n = moral_regla10(p, numeral, verbose);
+ 
     tmp = realloc(list, (sizeof * list) * (*len + 1));
     if ( tmp == NULL ) {
       fprintf(stderr, "Failed to allocate memory for more words.");
@@ -391,7 +532,7 @@ split(const char *name, char ***words, size_t *len, const int verbose)
 
     list[*len] = strndup(p, strlen(p) + 1);
     if ( list[*len] == NULL ) {
-      fprintf(stderr, "");
+      fprintf(stderr, "Unable to duplicate string.");
       *words = list;
       return;
     }
