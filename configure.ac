@@ -38,7 +38,8 @@ XML2_LIB=`$XML2_CONFIG --libs`
 AC_SUBST(XML2_LIB)
 XML2_INCLUDE=`$XML2_CONFIG --cflags`
 AC_SUBST(XML2_INCLUDE)
-
+XML2_PREFIX=`$XML2_CONFIG --prefix`
+AC_SUBST(XML2_PREFIX)
 
 # xslt
 AC_PATH_PROG(XSLT_CONFIG, xslt-config)
@@ -88,5 +89,6 @@ AC_CHECK_FUNCS([strsep strcasecmp])
 
 AC_CONFIG_FILES([Makefile
                  lib/Makefile
-                 src/Makefile])
+                 src/Makefile
+		 python/setup.py])
 AC_OUTPUT
