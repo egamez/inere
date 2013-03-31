@@ -5,6 +5,7 @@
 #include "inere/verificador.h"
 #include "inere/util.h"
 #include "inere/cantidades.h"
+#include "inere/verifica_sello_digital.h"
 
 static PyObject *InereError;
 
@@ -156,6 +157,32 @@ inere_cantidadconletras(PyObject *self, PyObject *args, PyObject *keywds)
 
 }
 
+static PyObject *
+inere_verificasello(PyObject *self, PyObject *args, PyObject *keywds)
+{
+  const char *cfd;
+  const char *stylesheet;
+  int debug;
+  int result = 0;
+  static char *kwdlist[] = {"cfd",
+			   "stylesheet",
+			   "debug",
+			   NULL};
+
+  if ( !PyArg_ParseTupleAndKeywords(args, keywds, "ss|i", kwdlist,
+					&cfd, &stylesheet, &debug) )
+    return NULL;
+
+  /* Verifica el sello */
+  result = verifica_sello_digital(cfd, (const unsigned char *)stylesheet, debug);
+
+  if ( result == 1 ) return Py_BuildValue("O", Py_True);
+  else		     return Py_BuildValue("O", Py_False);
+
+  return NULL;
+}
+
+
 static PyMethodDef InereMethods[] = {
 	{"rfc", (PyCFunction)inere_rfc,
 	 METH_VARARGS | METH_KEYWORDS,
@@ -169,6 +196,9 @@ static PyMethodDef InereMethods[] = {
 	{"cantidadconletras", (PyCFunction)inere_cantidadconletras,
 	 METH_VARARGS | METH_KEYWORDS,
 	 "Función para expresar la cantidad dada a su representación con letras, en pesos mexicanos."},
+	{"verificasello", (PyCFunction)inere_verificasello,
+	 METH_VARARGS | METH_KEYWORDS,
+	 "Función para verificar la correctez del sello digital que ampara la ntegridad del CFD"},
 	{NULL, NULL, 0, NULL}
 };
 
