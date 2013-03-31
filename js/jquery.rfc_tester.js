@@ -56,6 +56,9 @@ var inere = {
 				var input = inere.normalizeClave( $( this ).val().toUpperCase() );
 				var message = null;
 				var sugerencia = null;
+
+				if ( settings.change ) settings.change.call( this );
+
 				if ( settings.selfcomplete ) {
 
 					// Check if we have gathered enough information.
@@ -86,7 +89,6 @@ var inere = {
 								if ( settings.error ) settings.error.call( this, "Error:\n" + message, sugerencia );
 							}
 
-						if ( settings.change ) settings.change.call( this, resultado, clave_homonimia, digito_verificador );
 
 						} else {
 							// We can't gathered all the information to selfcomplete.
@@ -139,8 +141,6 @@ var inere = {
 						message = message + "\n" + "Clave del R.F.C. no bien formada.";
 					}
 
-					if ( settings.change ) settings.change.call( this, resultado, clave_homonimia, digito_verificador );
-
 					if ( message ) {
 						if ( settings.error ) settings.error.call( this, "Error:\n" + message, sugerencia );
 					} else {
@@ -171,8 +171,6 @@ var inere = {
 					} else {
 						if ( settings.success ) settings.success.call( this, input );
 					}
-					if ( settings.change ) settings.change.call( this, resultado, clave_homonimia, digito_verificador );
-
 				}
 			});
 		});
@@ -502,6 +500,7 @@ var inere = {
 		if ( dia.length === 1 ) dia = '0' + dia;
 		if ( mes.length === 1 ) mes = '0' + mes;
 		if ( ano.length === 1 ) ano = '0' + ano;
+		else if ( ano.length === 4 ) ano = ano.substr(2);
 		return ano + mes + dia;
 	},
 
