@@ -19,12 +19,12 @@ El otro modo del plugin, es la de hacer unas cuantas pruebas con la clave del [R
 * Verifica que la clave capturada coincida exactamente con la que el plugin calcula (sólo claves para personas fisicas),
 * Verifica que la clave capturada tenga la forma canónica de los carácteres permitidos para estás clave (claves para personas fisicas y morales.)
 
-Los procedimientos para la obtención de los parametros para la verificación de las claves son los descritos en el [Instructivo para formación del Registro Federal de Contribuyentes][4].
+Los procedimientos para la obtención de los parametros para la verificación de las claves son los descritos en el [Instructivo para formación del Registro Federal de Contribuyentes][3].
 
 Ejemplos.
 --------
 
-Para el modo de completar (veáse el archivo selfcomplete.html)
+Para el modo de completar (veáse el archivo [selfcomplete.html][5])
 
 ```javascript
 	$( "#rfc" ).rfc_tester({
@@ -42,7 +42,7 @@ Para el modo de completar (veáse el archivo selfcomplete.html)
 	});
 ```
 
-Para el modo de verificación (veáse el archivo verifica.html)
+Para el modo de verificación (veáse el archivo [verifica.html][6])
 
 ```javascript
                 var container = $( "<span/>" ).attr( "class", "rfc-message" );
@@ -65,7 +65,7 @@ Para el modo de verificación (veáse el archivo verifica.html)
                 }).after( container );
 ```
 
-Para el cálculo de la clave del [R.F.C][2] (veáse el archivo rfc.html)
+Para el cálculo de la clave del [R.F.C][2] (veáse el archivo [rfc.html][7])
 
 ```javascript
                 $( "form#rfc-form" ).submit( function() {
@@ -95,3 +95,6 @@ Licensed under the [GPL][4] license
 [2]: http://www.sat.gob.mx/sitio_internet/21_12672.html
 [3]: http://www.sisi.org.mx/jspsi/documentos/2006/seguimiento/06101/0610100107106_065.doc
 [4]: http://www.gnu.org/licenses/gpl-3.0.html
+[5]: https://github.com/egamez/inere/blob/master/js/selfcomplete.html
+[6]: https://github.com/egamez/inere/blob/master/js/verifica.html
+[7]: https://github.com/egamez/inere/blob/master/js/rfc.html
