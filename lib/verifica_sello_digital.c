@@ -252,7 +252,7 @@ decode_seal(const xmlChar* sello, int *len, BIO *bio_err, int verbose)
  *	0	En caso de error.
  */
 int
-valida_sello(const xmlChar *cadena, const xmlChar *sello, const int sello_len, EVP_PKEY* pkey, BIO *bio_err, int verbose)
+valida_sello(const xmlChar *cadena, const xmlChar *sello, const int sello_len, EVP_PKEY* pkey, const char *md_algo, BIO *bio_err, int verbose)
 {
   int result = 0;
 
@@ -260,7 +260,7 @@ valida_sello(const xmlChar *cadena, const xmlChar *sello, const int sello_len, E
   const EVP_MD *md;
 
   OpenSSL_add_all_digests();
-  md = EVP_sha1();
+  md = EVP_get_digestbyname(md_algo);
   EVP_MD_CTX_init(&ctx);
   EVP_DigestInit_ex(&ctx, md, NULL);
 
@@ -305,7 +305,9 @@ verifica_sello_digital(const char *filename, const xmlChar *stylesheet, const in
   xmlNodePtr cfd = NULL;
   xmlDocPtr doc = NULL;
   xmlChar *seal = NULL;
+  xmlChar *version = NULL;
   int seal_len = 0;
+  const char *md_algo;
 
   BIO *bio_err = NULL;
   EVP_PKEY *pkey = NULL;
@@ -330,14 +332,20 @@ verifica_sello_digital(const char *filename, const xmlChar *stylesheet, const in
 
       if ( xmlStrcmp(node->name, (const xmlChar *)"Comprobante") == 0 ) {
 
+	version = xmlGetProp(node, (const xmlChar *)"version");
+	if ( version == NULL ) {
+	  fprintf(stderr, "verifica_sello_digital: No se encotró la versión del comprobante digital. Imposible realizar la verificación.\n");
+	  return 8;
+	}
+
 	certificado = xmlGetProp(node, (const xmlChar *)"certificado");
 	if ( certificado == NULL ) {
-	  fprintf(stderr, "verifica_sello_digital: No se encontró el certificado de sello digital que ampara el CFD, o posiblemente este no sea un CFD. Imposible realizar la verificación.");
+	  fprintf(stderr, "verifica_sello_digital: No se encontró el certificado de sello digital que ampara el CFD, o posiblemente este no sea un CFD. Imposible realizar la verificación.\n");
 	  return 1;
 	}
 	sello = xmlGetProp(node, (const xmlChar *)"sello");
 	if ( sello == NULL ) {
-	  fprintf(stderr, "verifica_sello_digital: No se encontró el sello digital del comprobante fiscal. Imposible realizar la verificación.");
+	  fprintf(stderr, "verifica_sello_digital: No se encontró el sello digital del comprobante fiscal. Imposible realizar la verificación.\n");
 	  return 2;
 	}
 
@@ -347,6 +355,13 @@ verifica_sello_digital(const char *filename, const xmlChar *stylesheet, const in
   }
 
   bio_err = BIO_new_fp(stderr, BIO_NOCLOSE);
+
+  if ( xmlStrcmp(version, (const xmlChar *)"2.0") ) {
+    md_algo = "sha1";
+  } else {
+    md_algo = "md5";
+  }
+  if ( verbose ) printf("verifica_sello_digital: Utilizando el algoritmo %s para resumir la cadena original.\n", md_algo);
 
   if ( verbose ) {
     printf("verifica_sello_digital: Sello digital en el comprobante:\n%s\nCertificado de sello digital en el comprobante:\n%s\n", sello, certificado);
@@ -382,12 +397,13 @@ verifica_sello_digital(const char *filename, const xmlChar *stylesheet, const in
   }
 
   /* Now verify the signature. */
-  result = valida_sello(*cadena, seal, seal_len, pkey, bio_err, verbose);
+  result = valida_sello(*cadena, seal, seal_len, pkey, md_algo, bio_err, verbose);
 
   EVP_PKEY_free(pkey);
 
   BIO_free_all(bio_err);
   xmlFree(seal);
+  xmlFree(version);
   xmlFree(sello);
   xmlFree(certificado);
 
