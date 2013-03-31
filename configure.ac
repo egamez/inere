@@ -90,5 +90,6 @@ AC_CHECK_FUNCS([strsep strcasecmp])
 AC_CONFIG_FILES([Makefile
                  lib/Makefile
                  src/Makefile
+		 examples/Makefile
 		 python/setup.py])
 AC_OUTPUT
