@@ -1,40 +1,86 @@
-[jQuery][1] plugin para verificar la clave de el [R.F.C][2]
+Plugin para [jQuery][1] para verificar y obtener la clave de el [R.F.C][2]
 ====
 
-Este plugin fue creado para facilitar la captura de la clave del [R.F.C][2], es decir, ayudar a visualizar posibles errores en su captura. El método para lograrlo es a través de la comparación de el dígito verificador suministrado por la captura y uno que se calcula dentro de la función.
+Este plugin fue creado para facilitar la captura de la clave del [R.F.C][2], es decir, ayudar a visualizar posibles errores en su captura.
 
-Este plugin está basados en el plugin [password_strength][3] de Sagie Maoz.
+El plugin opera principalmente en dos escenarios. Completa la clave del [R.F.C][2] al momento mismo de la captura (únicamente para el caso de la clave para una persona fisica), o verifica que no halla posibles errores al termino de la captura.
 
-El procedimiento para verificar la clave se basa en la comparación de el dígito varificador (último carácter de la clave del [R.F.C][2]). Para esto, se raliza el calculo de el dígito verificador para después compararlo con el suministrado.
+Complementa la clave.
+---------------------
 
-El procedimiento para el calculo de este dígito está descrito en el [Instructivo para formación del Registro Federal de Contribuyentes][4].
+En este modo, el plugin se encargara de completar la clave del [R.F.C][2] calculando tanto la clave diferenciadora de homonimia, como el digito verificador que se obtendría.
 
-Uso
----
+La manera de completar la clave es a través de la recopilación previa del nombre, junto con los apellidos, del contribuyente y la introducción de la clave hasta la parte que corresponde a la fecha de nacimiento de la persona. Una vez compilada está información, el plugin completara toda la clave.
 
-Para su uso únicamente es necesario llamar a la función para un campo de tipo texto:
+El otro modo del plugin, es la de hacer unas cuantas pruebas con la clave del [R.F.C][2], capturada completamente, y utizando el nombre (previamente capturado) de la persona. Las pruebas a realizar son:
 
-	$( '#rfc' ).rfc_digito_verificador();
+* Verifica que la clave diferenciadora de homonimia, que se obtiene directamente del nombre, coincida con la capturada (sólo claves para personas fisicas, por el momento),
+* Verifica que el digito verificador, que acompaña a cada clave, coincida con el que se calcula por el plugin (clave de personas fisicas y personas morales),
+* Verifica que la clave capturada coincida exactamente con la que el plugin calcula (sólo claves para personas fisicas),
+* Verifica que la clave capturada tenga la forma canónica de los carácteres permitidos para estás clave (claves para personas fisicas y morales.)
 
-La función elimina cualquier espacio o guion antes de realizar el calculo de el dígito, de modo que la introducción, del [R.F.C][2] en el campo, puede incluir estos carácteres para mejorar su lectura.
+Los procedimientos para la obtención de los parametros para la verificación de las claves son los descritos en el [Instructivo para formación del Registro Federal de Contribuyentes][4].
 
-=== Persona física / Persona moral
-
-La función opera con ambos tipos de claves sin ningun problema (hasta el momento.)
-
-Resultados
-----------
-
-La función, por defecto, colorea en verde el campo cuando el dígito verificador suminstrado coincide con el calculado, en caso contrario el campo el coloreado con un fundo guinda.
-
-
-Opciones
+Ejemplos.
 --------
 
-Ejemplos
---------
+Para el modo de completar (veáse el archivo selfcomplete.html)
 
-Veáse el archivo rfc.html
+```javascript
+	$( "#rfc" ).rfc_tester({
+		nombre: $( "#nombre" ),
+		primerapellido: $( "#paterno" ),
+		segundoapellido: $( "#materno" ),
+		selfcomplete: true,
+		success: function( clave ) {
+			$( this ).val( clave );
+		},
+		error: function( message, sugerencia ) {
+			alert( message );
+			console.log( "Sugerencia: " + sugerencia );
+		}
+	});
+```
+
+Para el modo de verificación (veáse el archivo verifica.html)
+
+```javascript
+                var container = $( "<span/>" ).attr( "class", "rfc-message" );
+
+                $( "#rfc" ).rfc_tester({
+                        nombre: $( "#nombre" ),
+                        primerapellido: $( "#paterno" ),
+                        segundoapellido: $( "#materno" ),
+                        success: function( clave ) {
+                                container.text( "Ok" ).attr( "class", "rfc-message" );
+                        },
+                        error: function( message, sugerencia ) {
+                                container.text( "Error" ).attr( "class", "rfc-message" );
+                                alert( message );
+                                console.log( "Sugerencia: " + sugerencia );
+                        },
+                        change: function( clave, homonimia, verificador ) {
+                                container.text( "" ).attr( "class", "rfc-message" );
+                        }
+                }).after( container );
+```
+
+Para el cálculo de la clave del [R.F.C][2] (veáse el archivo rfc.html)
+
+```javascript
+                $( "form#rfc-form" ).submit( function() {
+                        var clave = $( "#rfc" ).rfc_tester( "clave",
+                                                        $( "#nombre" ).val().toUpperCase(),
+                                                        $( "#paterno" ).val().toUpperCase(),
+                                                        $( "#materno" ).val().toUpperCase(),
+                                                        $( "#dia" ).val(),
+                                                        $( "#mes" ).val(),
+                                                        $( "#year" ).val() );
+                        $( "#rfc" ).val( clave );
+                        return false;
+                });
+```
+
 
 Autores
 -------
@@ -43,10 +89,9 @@ Enrique Gámez <egamezf@gmail.com>
 
 Licencia
 --------
-Licensed under the [GPL][5] license
+Licensed under the [GPL][4] license
 
 [1]: http://jquery.com/
 [2]: http://www.sat.gob.mx/sitio_internet/21_12672.html
-[3]: http://archive.plugins.jquery.com/project/password_strength
-[4]: http://www.sisi.org.mx/jspsi/documentos/2006/seguimiento/06101/0610100107106_065.doc
-[5]: http://www.gnu.org/licenses/gpl-3.0.html
+[3]: http://www.sisi.org.mx/jspsi/documentos/2006/seguimiento/06101/0610100107106_065.doc
+[4]: http://www.gnu.org/licenses/gpl-3.0.html
