@@ -1,0 +1,51 @@
+<!doctype html>
+ 
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Completa la clave del R.F.C. (persona fisica)</title>
+  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="jquery.rfc_tester.min.js"></script>
+  <script>
+	$(function() {
+
+		$( "#rfc" ).rfc_tester({
+			nombre: $( "#nombre" ),
+			primerapellido: $( "#paterno" ),
+			segundoapellido: $( "#materno" ),
+			selfcomplete: true,
+			success: function( clave ) {
+				$( this ).val( clave );
+			},
+			error: function( message, sugerencia ) {
+				alert( message );
+				console.log( "Sugerencia: " + sugerencia );
+			}
+		});
+
+	});
+  </script>
+</head>
+<body>
+ 
+  <form>
+    <p>
+      <label for="nombre">Nombre:</label>
+      <input type="text" name="nombre" id="nombre"/>
+    </p>
+    <p>
+      <label for="paterno">Apellido paterno:</label>
+      <input type="text" name="paterno" id="paterno"/>
+    </p>
+    <p>
+      <label for="materno">Apellido materno:</label>
+      <input type="text" name="materno" id="materno"/>
+    </p>
+    <p>
+      <label for="rfc">Clave del R.F.C.:</label>
+      <input type="text" name="rfc" id="rfc" size="13"/>
+    </p>
+  </form>
+ 
+</body>
+</html>
