@@ -3,6 +3,7 @@ inere
 
 Es una libreria con algunas funciones utiles para el calculo, y verificación de la clave del R.F.C proporcionada a todos los contribuyentes en México, por el Servicio de Administración Tributaria ([SAT][1]).
 
+Además de función para verificar que el sello digital, de los comprobantes digitales (que viene incluído en el CFD) corresponde con la información que ampara dicho comprobante.
 
 Funciones
 ---------
@@ -15,7 +16,7 @@ Estas son algunas de las funciones en la libreria:
 * digito_verificador -- Función para obtener el dígito verificador de la clave del RFC.
 * numeral -- Función que convierte el número en su numeral.
 * cantidad -- Función para obtener la representacion con letra de alguna cantidad en pesos mexicanos.
-
+* verifica_sello_digital -- Función para verificar que el sello digital del comprobante, corresponda a la información misma del comprobante.
 
 Uso
 ---
@@ -74,9 +75,21 @@ La función 'numeral' se encarga de regresar el numeral correspondiente al núme
 	        const int debug);
 
 
+La función 'verifica_sello_digital' se encarga de validar que el sello digital, contenido el el comprobante fiscal mismo, corresponda a la información que el comprobante ampara. Es decir, verifica únicamente la integridad de la información mercantil que el comprobante ampara, mediante el uso del sello digital.
+
+	int
+	verifica_sello_digital(const char* filename,
+			       const xmlChar *stylesheet,
+			       int verbose);
+
+La función leera el comprobante digital en la ruta de archivo indicada en la variable 'filename', obtendra la cadena original del comprobante utilizando la stylesheet indicada pot la ruta de archivo 'stylesheet'. La variable 'verbose' con valor diferente de cero, causaran que la funcón envie algunas de las acciones que se ejecutan a 'stdout'.
+
+En caso de que la información mercantil coincida con el sello digital del comprobante, la función regresara el valor '1', en caso contrario el valor sera '0'.
+
 ### Programas
 
 La libreria cuenta con dos programas, uno para efectos del calculo de la clave de el RFC (por el momento únicamente para personas fisicas) y otro para la representación con letra de cantidades en pesos mexicanos.
+
 
 #### rfc
 
@@ -98,7 +111,6 @@ El programa 'rfc' tiene las siguientes opciones
 	-a/--ano=AÑO           Fija el año de nacimiento.
 	-b/--verifica=RFC      Verifica que la clave del RFC suministrada
                                coincida con el digito tambien suministrado.
-	-k/--debug             Set the debug mode.
 	-v/--verbose           Set the verbose mode.
 	-h/--help              Imprime este mensaje.
 
