@@ -1,0 +1,56 @@
+<!doctype html>
+ 
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Verifica la clave del R.F.C.</title>
+  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="jquery.rfc_tester.min.js"></script>
+  <script>
+	$(function() {
+
+		var container = $( "<span/>" ).attr( "class", "rfc-message" );
+
+		$( "#rfc" ).rfc_tester({
+			nombre: $( "#nombre" ),
+			primerapellido: $( "#paterno" ),
+			segundoapellido: $( "#materno" ),
+			success: function( clave ) {
+				container.text( "Ok" ).attr( "class", "rfc-message" );
+			},
+			error: function( message, sugerencia ) {
+				container.text( "Error" ).attr( "class", "rfc-message" );
+				alert( message );
+				console.log( "Sugerencia: " + sugerencia );
+			},
+			change: function( clave, homonimia, verificador ) {
+				container.text( "" ).attr( "class", "rfc-message" );
+			}
+		}).after( container );
+
+	});
+  </script>
+</head>
+<body>
+ 
+  <form>
+    <p>
+      <label for="nombre">Nombre:</label>
+      <input type="text" name="nombre" id="nombre"/>
+    </p>
+    <p>
+      <label for="paterno">Apellido paterno:</label>
+      <input type="text" name="paterno" id="paterno"/>
+    </p>
+    <p>
+      <label for="materno">Apellido materno:</label>
+      <input type="text" name="materno" id="materno"/>
+    </p>
+    <p>
+      <label for="rfc">Clave del R.F.C.:</label>
+      <input type="text" name="rfc" id="rfc" size="13"/>
+    </p>
+  </form>
+ 
+</body>
+</html>
