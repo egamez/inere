@@ -1,55 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+ 
+<html lang="es">
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  <title>Verifica RFC: Ejemplo</title>
-  <script type="text/javascript" src="jquery-1.6.3.min.js"></script>
-  <script type="text/javascript" src="jquery.rfc_tester.min.js"></script>
-  <script type="text/javascript">
-	$( document ).ready(function() {
+  <meta charset="utf-8" />
+  <title>Calcula la clave del R.F.C.</title>
+  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="jquery.rfc_tester.min.js"></script>
+  <script>
+	$(function() {
 
-		$( '#rfc' ).rfc_tester({
-			nombre: $( '#nombre' ),
-			primerapellido: $( '#paterno' ),
-			segundoapellido: $( '#materno' ),
-			selfcomplete: true,
-			change: function( clave, homonimia, digito ) {
-				console.log("Clave [" + clave + "], Homonimia [" + homonimia + "], digito verificador [" + digito + "]");
-			},
-			success: function( clave ) {
-				$( this ).val( clave );
-			},
-			error: function( message, sugerencia ) {
-				alert( message );
-				console.log("Sugerencia: " + sugerencia );
-			}
+		$( "form#rfc-form" ).submit( function() {
+			var clave = $( "#rfc" ).rfc_tester( "clave",
+							$( "#nombre" ).val().toUpperCase(),
+							$( "#paterno" ).val().toUpperCase(),
+							$( "#materno" ).val().toUpperCase(),
+							$( "#dia" ).val(),
+							$( "#mes" ).val(),
+							$( "#year" ).val() );
+			$( "#rfc" ).val( clave );
+			return false;
 		});
 
 	});
   </script>
 </head>
 <body>
-  <form id="rfc-form" name="rfc-form">
+ 
+  <form type="post" id="rfc-form" name="rfc-form">
     <p>
-    <label for="nombre">Nombre:</label>
-    <input type="text" name="nombre" id="nombre"/>
+      <label for="nombre">Nombre:</label>
+      <input type="text" name="nombre" id="nombre"/>
     </p>
     <p>
-    <label for="paterno">Apellido paterno:</label>
-    <input type="text" name="paterno" id="paterno"/>
+      <label for="paterno">Apellido paterno:</label>
+      <input type="text" name="paterno" id="paterno"/>
     </p>
     <p>
-    <label for="materno">Apellido materno:</label>
-    <input type="text" name="materno" id="materno"/>
+      <label for="materno">Apellido materno:</label>
+      <input type="text" name="materno" id="materno"/>
     </p>
     <p>
-<!--
-      <button type="submit" name="subit-rfc">Calcula</button>
--->
+      <label for="dia">Dia:</label>
+      <input type="text" name="dia" id="dia" size="2"/>
+      <label for="mes">Mes:</label>
+      <input type="text" name="mes" id="mes" size="2"/>
+      <label for="year">Año:</label>
+      <input type="text" name="year" id="year" size="4"/>
+    </p>
+    <p>
+      <label for="rfc">Clave del R.F.C.:</label>
       <input type="text" name="rfc" id="rfc" size="13"/>
+      <button type="submit" name="calcula-rfc">Calcula</button>
     </p>
   </form>
+ 
 </body>
 </html>
