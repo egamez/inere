@@ -3,9 +3,9 @@ from distutils.core import setup, Extension
 module1 = Extension('inere',
 		    define_macros = [('MAJOR_VERSION', '0'),
 				     ('MINOR_VERSION', '3')],
-		    include_dirs = ['../include'],
-		    libraries = ['inere'],
-		    library_dirs = ['../lib/.libs'],
+		    include_dirs = ['../include', '/usr/local/include/libxml2', '/usr/local/include'],
+		    library_dirs = ['../lib/.libs', '/usr/local/lib'],
+		    libraries = ['inere', 'crypto', 'xslt', 'xml2', 'iconv'],
 		    sources = ['inere.c'])
 
 setup (	name = 'inere',
