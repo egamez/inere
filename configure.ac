@@ -63,20 +63,18 @@ AC_SUBST(XSLT_INCLUDE)
 
 
 # OpenSSL
-AC_DEFINE([EDISSON_OPENSSL_INCDIR], [], [Directory where the OpenSSL headers files are])
+AC_DEFINE([EDISSON_OPENSSL_INCDIR], [/usr/include], [Directory where the OpenSSL headers files are])
 EDISSON_OPENSSL_INCDIR="$opensslhdrval"
 AC_SUBST(EDISSON_OPENSSL_INCDIR)
-AC_MSG_RESULT($opensslhdrval)
+#AC_MSG_RESULT($opensslhdrval)
 
 opensslhdr=yes
-AC_CHECK_HEADER(pem.h ,AC_DEFINE(EDISSON_HAVE_OPENSSL,1,
+AC_CHECK_HEADERS(openssl/pem.h ,AC_DEFINE(EDISSON_HAVE_OPENSSL,1,
 [Define if you have the <openssl/pem.h> header]),
 opensslhdr=no)
 OPENSSL_LIBS=
 AC_CHECK_LIB(crypto,X509_get_pubkey,OPENSSL_LIBS="-lcrypto $OPENSSL_LIBS")
 AC_SUBST(OPENSSL_LIBS)
-
-
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
