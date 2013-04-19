@@ -30,7 +30,12 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "inere/personamoral.h"
+#include "inere/numerales.h"
+
+/*
 void split(const char *name, char ***words, size_t *len, const int verbose);
+*/
 
 /**
  * Anexo VI.
@@ -251,9 +256,29 @@ moral_regla3(char *palabra, const int verbose)
  *
  */
 int
-moral_regla10(char *numero, char *result[], const int debug)
+moral_regla10(char *numero, char *result[], const int verbose)
 {
   int n = 0;
+  char *buffer = NULL;
+  char *token = NULL;
+
+  /* Check if this 'numero' is really a numnber. Check the firs char only */
+  if ( isdigit(*numero) ) {
+
+    buffer = (char *)calloc(MAXNUMERAL, sizeof(char));
+    memset(buffer, 0, MAXNUMERAL);
+    numeral(buffer, numero, verbose);
+
+    /* Now, copy at most three words onto 'result' */
+    for ( (token = strsep(&buffer, " "));
+	  token != NULL || n < 3;
+	  n++ ) {
+
+      result[n] = token;
+      n++;
+    }
+    free(buffer);
+  }
   return n;
 }
 
@@ -320,9 +345,7 @@ moral_regla12(char *palabra, const int verbose)
 
       if ( nombre ) {
 	if ( verbose ) printf(" caracter %c interpretado como: %s\n", *palabra, nombre);
-	palabra = (char *)realloc(palabra, strlen(nombre));
-	memset(palabra, 0, strlen(nombre)+1);
-	sprintf(palabra, "%s", nombre);
+	palabra = nombre;
       }
     }
   } else {
@@ -332,6 +355,7 @@ moral_regla12(char *palabra, const int verbose)
     memset(palabra, 0, len + 1);
     while ( *copy ) {
       if ( !isalpha(*copy) ) {
+	if ( verbose ) printf("moral_regla12: Eliminando de la palabra el caracter '%c'.\n", *copy);
 	copy++;
 	continue;
       }
