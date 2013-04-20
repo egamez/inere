@@ -27,7 +27,7 @@ verifica_rfc: verifica_rfc.o
 	$(CC) $(DBG) -o $@ verifica_rfc.o $(LIBS)
 
 moral: moral.o
-	$(CC) $(DBG) -o $@ $< $(LIBS)
+	$(CC) $(DBG) -o $@ moral.o $(LIBS)
 
 clean:
 	rm -f obten_rfc obten_rfc.o obten_homonimia obten_homonimia.o obten_digito obten_digito.o verifica_rfc verifica_rfc.o moral moral.o
