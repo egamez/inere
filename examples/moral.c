@@ -33,24 +33,19 @@
 int
 main(int argc, char *argv[])
 {
-  char **palabras = NULL;
-  size_t len = 0;
-  size_t i = 0;
+  char clave[13];
+  int verbose = 1;
 
-  if ( argc < 2 ) {
-    fprintf(stderr, "Sintax:\n\n\t%s <nombre-de-la-persona-moral>\n\n", argv[0]);
+  if ( argc < 5 ) {
+    fprintf(stderr, "Sintax:\n\n\t%s <denominacion-social> <ano> <mes> <dia>\n\n", argv[0]);
     return 1;
   }
 
-  split(argv[1], &palabras, &len, 1);
-  for (i = 0; i < len; i++ ) {
-    printf("[%s]\n", palabras[i]);
-  }
+  /*moral_clave_abreviada(clave, argv[1], argv[2], argv[3], argv[4], verbose);*/
+  memset(clave, 0, 13);
+  clave_rfc_persona_moral(clave, argv[1], argv[2], argv[3], argv[4], verbose);
 
-  for (i = 0; i < len; i++) {
-    free(palabras[i]);
-  }
-  free(palabras);
+  printf("Clave: %s\n", clave);
 
   return 0;
 }
