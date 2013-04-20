@@ -77,6 +77,20 @@ void split(const char *name, char ***words, size_t *len, const int verbose);
  *	   Resultado de la expresión alfabética:		SIA
  *
  */
+char*
+moral_regla1(char* result, char *palabras[], const int verbose)
+{
+  memset(result, 0, 4);
+  if ( verbose )
+    printf("Aplicando regla 1:\n\t%-20s %c\n\t%-20s %c\n\t%-20s %c\n", palabras[0],
+							toupper(*palabras[0]),
+							palabras[1],
+							toupper(*palabras[1]),
+							palabras[2],
+							toupper(*palabras[2]));
+  snprintf(result, 4, "%c%c%c", toupper(*palabras[0]), toupper(*palabras[1]), toupper(*palabras[2]));
+  return result;
+}
 
 /**
  * Regla 2a.
@@ -220,6 +234,19 @@ moral_regla3(char *palabra, const int verbose)
  *	Distribuidora Ges, S.A.				DGE-850628
  *
  */
+char*
+moral_regla6(char* result, char *palabras[], const int verbose)
+{
+  memset(result, 0, 4);
+  if ( verbose )
+    printf("Aplicando regla 6:\n\t%-20s %c\n\t%-20s %c%c\n", palabras[0],
+							toupper(*palabras[0]),
+							palabras[1],
+							toupper(*palabras[1]),
+							toupper(*(palabras[1]+1)));
+  snprintf(result, 4, "%c%c%c", toupper(*palabras[0]), toupper(*palabras[1]), toupper(*(palabras[1]+1)));
+  return result;
+}
 
 /**
  * Regla 7a.
@@ -232,6 +259,18 @@ moral_regla3(char *palabra, const int verbose)
  *	Electrólisis, S.A.				ELE-840821
  *
  */
+char*
+moral_regla7(char* result, const char *palabra, const int verbose)
+{
+  memset(result, 0, 4);
+  if ( verbose )
+    printf("Aplicando regla 7:\n\t%-20s %c%c%c\n", palabra,
+						toupper(*palabra),
+						toupper(*(palabra+1)),
+						toupper(*(palabra+2)));
+  snprintf(result, 4, "%c%c%c", toupper(*palabra), toupper(*(palabra + 1)), toupper(*(palabra+2)));
+  return result;
+}
 
 /**
  * Regla 8a.
@@ -244,6 +283,25 @@ moral_regla3(char *palabra, const int verbose)
  *	Z, S.A.						ZXX-860110
  *
  */
+char*
+moral_regla8(char* result, const char *palabra, const int verbose)
+{
+  const size_t len = strlen(palabra);
+
+  memset(result, 0, 4);
+  if ( len == 1 ) {
+    snprintf(result, 4, "%cXX", toupper(*palabra));
+    if ( verbose )
+      printf("Aplicando regla 8:\n\t%-20s %cXX\n", palabra, toupper(*palabra));
+  } else {
+    snprintf(result, 4, "%c%cX", toupper(*palabra), toupper(*(palabra+1)));
+    if ( verbose )
+      printf("Aplicando regla 8:\n\t%-20s %c%cX\n", palabra,
+						    toupper(*palabra),
+						    toupper(*(palabra+1)));
+  }
+  return result;
+}
 
 /**
  * Regla 9a.
@@ -421,7 +479,6 @@ clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char
   char clave_diferenciadora[3];
   char tmp_clave[12];
   char digito = 0;
-  char nombre[256];
   size_t i = 0;
   size_t len;
 
@@ -439,15 +496,26 @@ clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char
    */
   memset(result, 0, 4);
   if ( len >= 3 ) {
-    /* Extrae las primeras letras de las tres primeras palabras */
-    snprintf(result, 4, "%c%c%c", toupper(*palabras[0]), toupper(*palabras[1]), toupper(*palabras[2]));
+    /* Este es el caso estandar, al menos tres palabras para formar
+     * la clave
+     */
+    moral_regla1(result, palabras, verbose);
 
   } else {
-    /* Aplica algunas de las reglas para obtener formar la clave */
+    /* Aplica algunas de las reglas para formar la clave */
     if ( len == 1 ) {
-      snprintf(result, 4, "%c%c%c", toupper(*palabras[0]), toupper(*(palabras[0] + 1)), toupper(*(palabras[0]+2)));
+      /* Las reglas aplicables a este caso son la regla 7 u 8 */
+      if ( strlen(palabras[0]) > 2 ) {
+	/* La longitud del nombre es suficiente para formar la clave. */
+	moral_regla7(result, palabras[0], verbose);
+      } else {
+	/* Sera necesario completar con letras extra el nombre, para formar...*/
+	moral_regla8(result, palabras[0], verbose);
+
+      }
+
     } else {
-      snprintf(result, 4, "%c%c%c", toupper(*palabras[0]), toupper(*palabras[1]), toupper(*(palabras[1]+1)));
+      moral_regla6(result, palabras, verbose);
     }
   }
 
