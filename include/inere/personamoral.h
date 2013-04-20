@@ -26,17 +26,12 @@
  */
 #ifndef INERE_PERSONAMORAL_INCLUDED_H
 #define INERE_PERSONAMORAL_INCLUDED_H
-#include <string.h>
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-extern char* moral_clave_abreviada(char* clave, const char *denominacion_social, const char *year, const char* month, const char *day, const int debug);
-
 extern char* clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char *year, const char* month, const char *day, const int debug);
-
-extern void split(const char *name, char ***words, size_t *len, const int verbose);
 
 #if defined(__cplusplus)
 }
