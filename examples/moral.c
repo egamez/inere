@@ -34,18 +34,17 @@ int
 main(int argc, char *argv[])
 {
   char clave[13];
-  int verbose = 1;
+  int verbose = 0;
 
   if ( argc < 5 ) {
     fprintf(stderr, "Sintax:\n\n\t%s <denominacion-social> <ano> <mes> <dia>\n\n", argv[0]);
     return 1;
   }
 
-  /*moral_clave_abreviada(clave, argv[1], argv[2], argv[3], argv[4], verbose);*/
   memset(clave, 0, 13);
   clave_rfc_persona_moral(clave, argv[1], argv[2], argv[3], argv[4], verbose);
 
-  printf("Clave: %s\n", clave);
+  printf("Clave del R.F.C.: %s\n", clave);
 
   return 0;
 }
