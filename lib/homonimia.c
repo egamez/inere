@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     Lae
- * All rights reserved.
+ * Copyright (c) 2012,	Lae,
+ *			Enrique Gámez Flores <egamez@edisson.com.mx>
+ * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -128,7 +128,7 @@
  */
 
 /**
- * OBSERVACION:
+ * OBSERVACIÓN:
  * Debido a que el RFC no cambia debido a un cambio en el tipo de sociedad
  * es posible que la clave sea diferente a la que se obtiene con el actual
  * nombre.
@@ -160,32 +160,32 @@ anexo1(const char caracter)
   else if ( c == '8' ) return 8;
   else if ( c == '9' ) return 9;
   else if ( c == '&' ) return 10;
-  else if ( c == 'A' ) return 11;
-  else if ( c == 'B' ) return 12;
-  else if ( c == 'C' ) return 13;
-  else if ( c == 'D' ) return 14;
-  else if ( c == 'E' ) return 15;
-  else if ( c == 'F' ) return 16;
-  else if ( c == 'G' ) return 17;
-  else if ( c == 'H' ) return 18;
-  else if ( c == 'I' ) return 19;
-  else if ( c == 'J' ) return 21;
-  else if ( c == 'K' ) return 22;
-  else if ( c == 'L' ) return 23;
-  else if ( c == 'M' ) return 24;
-  else if ( c == 'N' ) return 25;
-  else if ( c == 'O' ) return 26;
-  else if ( c == 'P' ) return 27;
-  else if ( c == 'Q' ) return 28;
-  else if ( c == 'R' ) return 29;
-  else if ( c == 'S' ) return 32;
-  else if ( c == 'T' ) return 33;
-  else if ( c == 'U' ) return 34;
-  else if ( c == 'V' ) return 35;
-  else if ( c == 'W' ) return 36;
-  else if ( c == 'X' ) return 37;
-  else if ( c == 'Y' ) return 38;
-  else if ( c == 'Z' ) return 39;
+  else if ( c == 'A' || c == 'a' ) return 11;
+  else if ( c == 'B' || c == 'b' ) return 12;
+  else if ( c == 'C' || c == 'c' ) return 13;
+  else if ( c == 'D' || c == 'd' ) return 14;
+  else if ( c == 'E' || c == 'e' ) return 15;
+  else if ( c == 'F' || c == 'f' ) return 16;
+  else if ( c == 'G' || c == 'g' ) return 17;
+  else if ( c == 'H' || c == 'h' ) return 18;
+  else if ( c == 'I' || c == 'i' ) return 19;
+  else if ( c == 'J' || c == 'j' ) return 21;
+  else if ( c == 'K' || c == 'k' ) return 22;
+  else if ( c == 'L' || c == 'l' ) return 23;
+  else if ( c == 'M' || c == 'm' ) return 24;
+  else if ( c == 'N' || c == 'n' ) return 25;
+  else if ( c == 'O' || c == 'o' ) return 26;
+  else if ( c == 'P' || c == 'p' ) return 27;
+  else if ( c == 'Q' || c == 'q' ) return 28;
+  else if ( c == 'R' || c == 'r' ) return 29;
+  else if ( c == 'S' || c == 's' ) return 32;
+  else if ( c == 'T' || c == 't' ) return 33;
+  else if ( c == 'U' || c == 'u' ) return 34;
+  else if ( c == 'V' || c == 'v' ) return 35;
+  else if ( c == 'W' || c == 'w' ) return 36;
+  else if ( c == 'X' || c == 'x' ) return 37;
+  else if ( c == 'Y' || c == 'y' ) return 38;
+  else if ( c == 'Z' || c == 'z' ) return 39;
   else if ( c == '^' ) return 40; /* This is for the Ñ which is not a single character */
   else return -1;
   return -1;
