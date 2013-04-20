@@ -32,10 +32,12 @@
 
 #include "inere/personamoral.h"
 #include "inere/numerales.h"
+#include "inere/homonimia.h"
+#include "inere/verificador.h"
 
-/*
+
 void split(const char *name, char ***words, size_t *len, const int verbose);
-*/
+
 
 /**
  * Anexo VI.
@@ -116,6 +118,25 @@ void split(const char *name, char ***words, size_t *len, const int verbose);
  *	Artículos de Caza y Pesca, S. de R. L.		ACP-860215
  *
  */
+char*
+moral_regla2(const char* year, const char* month, const char* day, char* result)
+{
+  int ano = 0;
+  int mes = 0;
+  int dia = 0;
+
+  ano = atoi(year) % 100;
+  mes = atoi(month);
+  dia = atoi(day);
+
+#if _MSC_VER
+  _snprintf_s(result, 7, 7, "%02d%02d%02d", ano, mes, dia);
+#else
+  snprintf(result, 7, "%02d%02d%02d", ano, mes, dia);
+#endif
+  return result;
+}
+
 
 
 /**
@@ -271,9 +292,8 @@ moral_regla10(char *numero, char *result[], const int verbose)
 
     /* Now, copy at most three words onto 'result' */
     for ( (token = strsep(&buffer, " "));
-	  token != NULL || n < 3;
-	  n++ ) {
-
+	  token != NULL && n < 3;
+	  token = strsep(&buffer, " ")) {
       result[n] = token;
       n++;
     }
@@ -354,7 +374,8 @@ moral_regla12(char *palabra, const int verbose)
     char *copy = strndup(palabra, len);
     memset(palabra, 0, len + 1);
     while ( *copy ) {
-      if ( !isalpha(*copy) ) {
+      /*if ( !isalpha(*copy) ) {*/
+      if ( !isalnum(*copy) ) {
 	if ( verbose ) printf("moral_regla12: Eliminando de la palabra el caracter '%c'.\n", *copy);
 	copy++;
 	continue;
@@ -392,9 +413,15 @@ moral_regla12(char *palabra, const int verbose)
  * entradas en el cadena de nombres hasta acompletar tres.
  */
 char*
-moral_clave_abreviada(char* clave, const char* denominacion_social, const char* year, const char* month, const char* day, const int verbose)
+clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char *year, const char* month, const char *day, const int verbose)
 {
   char **palabras = NULL;
+  char fecha[7];
+  char result[4];
+  char clave_diferenciadora[3];
+  char tmp_clave[12];
+  char digito = 0;
+  char nombre[256];
   size_t i = 0;
   size_t len;
 
@@ -407,18 +434,47 @@ moral_clave_abreviada(char* clave, const char* denominacion_social, const char* 
     }
   }
 
+  /* Ahora, de acuerdo con la cantidad de palabras en 'palabras'
+   * determina si necesitas las demas reglas de complementacion
+   */
+  memset(result, 0, 4);
+  if ( len >= 3 ) {
+    /* Extrae las primeras letras de las tres primeras palabras */
+    snprintf(result, 4, "%c%c%c", toupper(*palabras[0]), toupper(*palabras[1]), toupper(*palabras[2]));
+
+  } else {
+    /* Aplica algunas de las reglas para obtener formar la clave */
+    if ( len == 1 ) {
+      snprintf(result, 4, "%c%c%c", toupper(*palabras[0]), toupper(*(palabras[0] + 1)), toupper(*(palabras[0]+2)));
+    } else {
+      snprintf(result, 4, "%c%c%c", toupper(*palabras[0]), toupper(*palabras[1]), toupper(*(palabras[1]+1)));
+    }
+  }
+
   /* Free space. */
   for (i = 0; i <= len; i++) {
     free(palabras[i]);
   }
   free(palabras);
 
-  return clave;
-}
+  /* Ahora obten la clave diferenciadora de homonimias
+   */
+  memset(clave_diferenciadora, 0, 3);
+  homonimia(clave_diferenciadora, denominacion_social, NULL, verbose);
 
-char*
-clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char *year, const char* month, const char *day, const int verbose)
-{
+  /* Ahora aplica la regla 2, para completar la clave */
+  memset(fecha, 0, 7);
+  moral_regla2(year, month, day, fecha);
+
+  /* Ahora obten el digito verificador */
+  memset(tmp_clave, 0, 12);
+  snprintf(tmp_clave, 12, "%s%s%s", result, fecha, clave_diferenciadora);
+  digito = digito_verificador(tmp_clave, verbose);
+
+  /* Arma la clave */
+  memset(clave, 0, 13);
+  snprintf(clave, 13, "%s%c", tmp_clave, digito);
+
   return clave;
 }
 
@@ -472,6 +528,7 @@ split(const char *name, char ***words, size_t *len, const int verbose)
   char *last = NULL;
   char *numeral[4]; /* 3 numerales, maximo */
   int n = 0; /* cantidad de numerales */
+  int i = 0;
 
   /* Initialize the results */
   *words = NULL;
@@ -534,7 +591,7 @@ split(const char *name, char ***words, size_t *len, const int verbose)
      */
     p = moral_regla3(p, verbose);
 
-    /* Apply rule 12
+    /* Apply rule 12 @
      */
     p = moral_regla12(p, verbose);
 
@@ -544,23 +601,47 @@ split(const char *name, char ***words, size_t *len, const int verbose)
      * y cada una de ellas de logitud mayor a la de 'p'
      */
     n = moral_regla10(p, numeral, verbose);
+    if ( n > 0 ) {
+      /* Agrega el numeral a la lista de palabras para formar la clave */
+      for (i = 0; i < n; i++ ) {
+        tmp = realloc(list, (sizeof * list) * (*len + 1));
+        if ( tmp == NULL ) {
+          fprintf(stderr, "Failed to allocate memory for more words.");
+          *words = list;
+          return;
+        }
+
+        list = tmp;
+
+        list[*len] = strndup(numeral[i], strlen(numeral[i]) + 1);
+        if ( list[*len] == NULL ) {
+          fprintf(stderr, "No fue posible duplicar la cadena.");
+          *words = list;
+          return;
+        }
+        (*len)++;
+      }
+
+    } else {
  
-    tmp = realloc(list, (sizeof * list) * (*len + 1));
-    if ( tmp == NULL ) {
-      fprintf(stderr, "Failed to allocate memory for more words.");
-      *words = list;
-      return;
-    }
+      tmp = realloc(list, (sizeof * list) * (*len + 1));
+      if ( tmp == NULL ) {
+        fprintf(stderr, "Failed to allocate memory for more words.");
+        *words = list;
+        return;
+      }
 
-    list = tmp;
+      list = tmp;
 
-    list[*len] = strndup(p, strlen(p) + 1);
-    if ( list[*len] == NULL ) {
-      fprintf(stderr, "Unable to duplicate string.");
-      *words = list;
-      return;
+      list[*len] = strndup(p, strlen(p) + 1);
+      if ( list[*len] == NULL ) {
+        fprintf(stderr, "No fue posible duplicar la cadena.");
+        *words = list;
+        return;
+      }
+      (*len)++;
+
     }
-    (*len)++;
 
   }
 
