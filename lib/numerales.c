@@ -172,10 +172,10 @@ construye_clase(const unsigned int unidad, const unsigned int decena, const unsi
   /* Build the name */
   if ( centena_str != NULL ) {
 #if _MSC_VER
-    if ( decena_str == NULL && unidad_str == NULL ) strncpy_s(buffer, strlen(cien())+1, cien(), _TRUNCATE);
+    if ( decena_str == NULL && unidad_str == NULL && centena == 1 ) strncpy_s(buffer, strlen(cien())+1, cien(), _TRUNCATE);
     else					    strncpy_s(buffer, strlen(centena_str)+1, centena_str, _TRUNCATE);
 #else
-    if ( decena_str == NULL && unidad_str == NULL ) strncpy(buffer, cien(), strlen(cien()));
+    if ( decena_str == NULL && unidad_str == NULL && centena == 1 ) strncpy(buffer, cien(), strlen(cien()));
     else					    strncpy(buffer, centena_str, strlen(centena_str));
 #endif
 
