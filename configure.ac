@@ -18,16 +18,16 @@ AC_PROG_LIBTOOL
 AM_INIT_AUTOMAKE
 
 # Checks for header files.
-AC_CHECK_HEADERS([stdlib.h string.h])
+AC_CHECK_HEADERS([stdlib.h string.h iconv.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
-AC_CHECK_FUNCS([strsep strcasecmp])
+AC_CHECK_FUNCS([strsep strcasecmp iconv])
 
 
-# Checks for libraries.
+# Checks for extra libraries.
 
 # xml2
 AC_PATH_PROGS(XML2_CONFIG, xml2-config)
@@ -88,6 +88,23 @@ AC_CHECK_HEADERS([openssl/evp.h])
 OPENSSL_LIBS=
 AC_CHECK_LIB(crypto, X509_get_pubkey, OPENSSL_LIBS="-lcrypto")
 AC_SUBST(OPENSSL_LIBS)
+
+# Now capture the input charset
+DEFAULT_CHARSET="UTF-8"
+AC_ARG_WITH([input-charset],
+	[AS_HELP_STRING([--with-input-charset@<:@=CHARSET@:>@],
+		[Especifica el set de caracteres en el que se codifica @<:@UTF-8@:>@])],
+	[
+		if test "x$withval" = "xyes"; then
+			AC_DEFINE_UNQUOTED([INERE_LOCAL_CHARSET], ["$DEFAULT_CHARSET"], [Se ha especificado el set de caracteres local])
+		else
+			AC_DEFINE_UNQUOTED([INERE_LOCAL_CHARSET], ["$withval"], [Se ha especificado el set de caracteres local])
+		fi
+	],
+	[
+		AC_DEFINE_UNQUOTED([INERE_LOCAL_CHARSET], ["$DEFAULT_CHARSET"], [Se ha especificado el set de caracteres local])
+	])
+
 
 AC_CONFIG_FILES([Makefile
                  lib/Makefile

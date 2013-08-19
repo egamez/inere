@@ -24,13 +24,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef INERE_UTIL_INCLUDED_H
+#include "inere/util.h"
+#endif
+
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 
-#ifndef INERE_UTIL_INCLUDED_H
-#include "inere/util.h"
-#endif
+#include <iconv.h>
+
+#include "config.h"
 
 unsigned int
 ustr_len(const unsigned char* s)
@@ -46,19 +50,42 @@ ustr_len(const unsigned char* s)
 }
 
 char*
-to_upper_case_and_convert(const unsigned char* in)
+to_upper_case_and_convert(const unsigned char* buffer)
 {
+  iconv_t desc = NULL;
+  char *inbuf;
+  char *outbuf;
+  char *in = NULL;
+  size_t res = 0;
+  size_t inbytes = 0;
+  size_t outbytes = 0;
   char* out = NULL;
   int j = 0;
   size_t len = 0;
 
-  /* Allocate the memory for the converted string */
-  len = ustr_len(in);
-  out = (char*)calloc(len + 1, sizeof(char));
-  memset(out, 0, len + 1);
+  /* Allocate the descriptor for the character conversion */
+  desc = iconv_open("UTF-8//TRANSLIT", INERE_LOCAL_CHARSET);
 
-  /* Start the convertion */
-  /* Start the convertion */
+  /* Check for errors */
+
+  inbytes = strlen((char *)buffer);
+  outbytes = 2*inbytes;
+  inbuf = (char *)buffer;
+  in = (char *)calloc(outbytes, sizeof(char));
+  outbuf = in;
+  res = iconv(desc, &inbuf, &inbytes, &outbuf, &outbytes);
+
+  /* Close the conversion descriptor */
+  iconv_close(desc);
+
+  printf("Input [%s]\noutput [%s]\n", buffer, in);
+
+  /* Allocate the memory for the converted string */
+  outbytes = strlen(in);
+  len = ustr_len((unsigned char *)in);
+  out = (char*)calloc(len + 1, sizeof(char));
+
+  /* Start the character conversion */
   while ( *in ) {
 
     /* The octect indicator for the UTF-8 encoding */
@@ -70,31 +97,18 @@ to_upper_case_and_convert(const unsigned char* in)
       else if ( *in == 0xb3 || *in == 0xb2 || *in == 0x93 || *in == 0x92 ) out[j] = 0x4f; /* O */
       else if ( *in == 0xba || *in == 0xb9 || *in == 0x9a || *in == 0x99 ) out[j] = 0x55; /* U */
       else if ( *in == 0xb1 || *in == 0x91 ) out[j] = 0x5e; /* ñ or Ñ to ^*/
-    /* For the ISO-8859-* encoding system */
-    } else if ( *in == 0xc0 || *in == 0xc1 || *in == 0xe0 || *in == 0xe1 ) {
-      out[j] = 0x41; /* A */
 
-    } else if ( *in == 0xc8 || *in == 0xc9 || *in == 0xe8 || *in == 0xe9 ) {
-      out[j] = 0x45; /* E */
-
-    } else if ( *in == 0xcc || *in == 0xcd || *in == 0xec || *in == 0xed ) {
-      out[j] = 0x49; /* I */
-
-    } else if ( *in == 0xd2 || *in == 0xd3 || *in == 0xf2 || *in == 0xf3 ) {
-      out[j] = 0x4f; /* O */
-
-    } else if ( *in == 0xd9 || *in == 0xda || *in == 0xf9 || *in == 0xfa ) {
-      out[j] = 0x55; /* U */
-
-    } else if ( *in == 0xd1 || *in == 0xc1 ) {
-      out[j] = 0x41; /* enhe */
-
-    } else {
+    } else { /* An ASCII character */
       out[j] = toupper(*in);
+
     }
+
     in++;
     j++;
   }
+  in -= outbytes;
+  free(in);
+
   return out;
 }
 
@@ -102,14 +116,43 @@ unsigned char*
 recover_translations(const char* in, unsigned char* out)
 {
   int j = 0;
+  iconv_t desc;
+  char *inbuf;
+  char *outbuf;
+  char source[] = "Ñ";
+  char *enhe = NULL;
+  size_t res = 0;
+  size_t inbytes = 0;
+  size_t outbytes = 0;
+
+  /* Allocate the descriptor for the character conversion */
+  desc = iconv_open(INERE_LOCAL_CHARSET, "UTF-8");
+
+  /* Check for errors */
+
+  inbytes = 2; /* The ñ character is represented by two bytes in UTF-8 */
+  outbytes = 2*inbytes;
+  inbuf = source;
+  enhe = (char *)calloc(outbytes, sizeof(char));
+  outbuf = enhe;
+  res = iconv(desc, &inbuf, &inbytes, &outbuf, &outbytes);
+  outbytes = strlen(enhe);
+
+  /* Close the conversion descriptor */
+  iconv_close(desc);
+
   while ( *in ) {
     if ( *in == '^' ) {
-      out[j++] = 0xc3;
-      out[j++] = 0x91;
+      /* Convert the UTF-8 Ñ to the a Ñ in the local charset */
+      while ( *enhe ) {
+	out[j++] = *enhe++;
+      }
     } else {
       out[j++] = *in;
     }
     in++;
   }
+
+  /* Give the result */
   return out;
 }
