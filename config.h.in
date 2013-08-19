@@ -1,11 +1,5 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Define if you have the <openssl/pem.h> header */
-#undef EDISSON_HAVE_OPENSSL
-
-/* Directory where the OpenSSL headers files are */
-#undef EDISSON_OPENSSL_INCDIR
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
@@ -15,8 +9,8 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* Define to 1 if you have the <openssl/pem.h> header file. */
-#undef HAVE_OPENSSL_PEM_H
+/* Define to 1 if you have the <openssl/evp.h> header file. */
+#undef HAVE_OPENSSL_EVP_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H

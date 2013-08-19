@@ -12,7 +12,7 @@ nobase_dist_include_HEADERS = $(top_srcdir)/include/inere/cantidades.h \
 		$(top_srcdir)/include/inere/verificador.h \
 		$(top_srcdir)/include/inere/verifica_sello_digital.h \
 		$(top_srcdir)/include/inere/util.h
-INCLUDES = -I$(top_srcdir) -I$(EDISSON_OPENSSL_INCDIR) $(XML2_INCLUDE) $(XSLT_INCLUDE)
+INCLUDES = -I$(top_srcdir) $(XML2_INCLUDE) $(XSLT_INCLUDE)
 AM_CPPFLAGS = -D_GNU_SOURCE -pedantic -pedantic-errors -Wall -W -fPIC -pipe -funsigned-char -ansi -pthread -I$(top_srcdir)/include $(INCLUDES)
 libinere_la_LDFLAGS = -version-info 1:1:0
 CLEANFILES = *~

@@ -2,7 +2,7 @@
 CC		:= gcc
 DBG		:= -g -O2
 XTRACCFLAGS	:= -D_GNU_SOURCE -fPIC -pipe -funsigned-char -ansi -pedantic -pedantic-errors
-INCLUDES	:= -I../include -I@EDISSON_OPENSSL_INCDIR@ @XML2_INCLUDE@ @XSLT_INCLUDE@
+INCLUDES	:= -I../include -I@OPENSSL_INC_DIR@  @XML2_INCLUDE@ @XSLT_INCLUDE@
 LIBS		:= -L../lib/.libs -linere -Wl,-rpath=../lib/.libs @XSLT_LIB@ @XML2_LIB@ @OPENSSL_LIBS@
 
 WARNINGS	:= -Wextra -Wall -W
