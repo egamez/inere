@@ -34,7 +34,7 @@
 
 #include <iconv.h>
 
-#include "config.h"
+#include "inere/config.h"
 
 unsigned int
 ustr_len(const unsigned char* s)
