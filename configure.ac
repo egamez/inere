@@ -4,7 +4,7 @@
 AC_PREREQ([2.64])
 AC_INIT([inere], [0.1.1], [egamez@edisson.com.mx])
 AC_CONFIG_SRCDIR([src/rfc.c])
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([include/inere/config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
@@ -91,19 +91,13 @@ AC_SUBST(OPENSSL_LIBS)
 
 # Now capture the input charset
 DEFAULT_CHARSET="UTF-8"
-AC_ARG_WITH([input-charset],
-	[AS_HELP_STRING([--with-input-charset@<:@=CHARSET@:>@],
-		[Especifica el set de caracteres en el que se codifica @<:@UTF-8@:>@])],
-	[
-		if test "x$withval" = "xyes"; then
-			AC_DEFINE_UNQUOTED([INERE_LOCAL_CHARSET], ["$DEFAULT_CHARSET"], [Se ha especificado el set de caracteres local])
-		else
-			AC_DEFINE_UNQUOTED([INERE_LOCAL_CHARSET], ["$withval"], [Se ha especificado el set de caracteres local])
-		fi
-	],
-	[
-		AC_DEFINE_UNQUOTED([INERE_LOCAL_CHARSET], ["$DEFAULT_CHARSET"], [Se ha especificado el set de caracteres local])
-	])
+if test "$LANG" ; then
+    DEFAULT_CHARSET=`echo $LANG | cut -d '.' -f 2 | cut -d '@' -f 1`
+    AC_MSG_NOTICE([$DEFAULT_CHARSET character set used for character conversions.])
+else
+    AC_MSG_NOTICE([Using utf-8 as default character set for conversions.])
+fi
+AC_DEFINE_UNQUOTED([INERE_LOCAL_CHARSET], ["$DEFAULT_CHARSET"], [Character set to be used for character conversions to UTF-8l])
 
 
 AC_CONFIG_FILES([Makefile
