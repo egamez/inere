@@ -78,8 +78,6 @@ to_upper_case_and_convert(const unsigned char* buffer)
   /* Close the conversion descriptor */
   iconv_close(desc);
 
-  printf("Input [%s]\noutput [%s]\n", buffer, in);
-
   /* Allocate the memory for the converted string */
   outbytes = strlen(in);
   len = ustr_len((unsigned char *)in);
