@@ -72,6 +72,21 @@ convert_to_pem(const xmlChar *c, xmlChar *res, int verbose)
   return res;
 }
 
+void
+local_error_function(void *ctx, const char* mess, ...)
+{
+   char *errMsg;
+   va_list args;
+   va_start(args, mess);
+   vasprintf(&errMsg, mess, args);
+   va_end(args);
+   if ( !strncmp("compilation error", errMsg, 17) &&
+	!strncmp("xsl:version: only 1.0 features are supported", errMsg, 44) ) {
+     fprintf(stderr, "%s", errMsg);
+   }
+   free(errMsg);
+}
+
 /**
  * Extrae la cadena original del comprobante fiscal
  */
@@ -85,6 +100,8 @@ cadena_original(const xmlChar *stylesheet, xmlDocPtr doc, xmlChar** cadena, int 
 
   xmlSubstituteEntitiesDefault(1);
   xmlLoadExtDtdDefaultValue = 1;
+
+  xsltSetGenericErrorFunc(stderr, local_error_function);
 
   style = xsltParseStylesheetFile(stylesheet);
   if ( style == NULL ) {
