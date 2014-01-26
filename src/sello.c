@@ -57,8 +57,11 @@ main(int argc, char *argv[])
     if ( result == 1 )
       printf("Ok.\n");
 
-    else
+    else if ( result == 0 ) 
       printf("Sello digital en el documento no válido.\n");
+
+    else
+      printf("No fue posible realizar el test.\n");
 
   }
 
