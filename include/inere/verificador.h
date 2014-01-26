@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     Lae
+ * Copyright (c) 2012-2014, L3a,
+ *			    Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,9 +31,9 @@
 extern "C" {
 #endif
 
-extern char digito_verificador(const char* rfc, const int debug);
+extern unsigned char digito_verificador(const char* rfc, const int debug);
 
-extern char verifica_rfc(const char* rfc, const int debug);
+extern unsigned char verifica_rfc(const char* rfc, const int debug);
 
 #if defined(__cplusplus)
 }
