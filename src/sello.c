@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     Lae
+ * Copyright (c) 2013, 2014, L3a,
+ *			     Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,35 +24,43 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef EDISSON_VERIFICA_SELLO_DIGITAL
+#include "inere/verifica_sello_digital.h"
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "inere/verifica_sello_digital.h"
-
+/**
+ * Programa para verificar el sello digital de(los) comprobante(s)
+ * digital(es)
+ */
 int
 main(int argc, char *argv[])
 {
   int result = 0;
   int debug = 0;
+  int i = 0;
 
   if ( argc < 3 ) {
-    fprintf(stderr, "Sintax:\n\n\t%s <CFD instance> <cadenaorigina-stylesheet-path> [<debug-flag>]\n\n", argv[0]);
+    fprintf(stderr, "Uso:\n\n\t%s RUTA-DEL-ARCHIVO-DE-LA-CADENAORIGINAL CFDi(s)\n\n", argv[0]);
     return 1;
   }
 
-  if ( argc == 4 ) debug = 1;
+  for (i = 2; i < argc; i++) {
 
-  /* Verify the "sello digital" */
-  result = verifica_sello_digital(argv[1], (const unsigned char *)argv[2], debug);
+    /* Verifica el "sello digital" */
+    result = verifica_sello_digital(argv[i], (const unsigned char *)argv[1], debug);
 
-  if ( result == 1 ) {
-    printf("Documento con sello digital válido.\n");
-  } else {
-    fprintf(stderr, "El sello digital del documento no coincide.\n");
-    return 2;
+    if ( argc > 3 ) printf("%s: ", argv[i]);
+
+    if ( result == 1 )
+      printf("Ok.\n");
+
+    else
+      printf("Sello digital en el documento no válido.\n");
+
   }
-
 
   return 0;
 }
