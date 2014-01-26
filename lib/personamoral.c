@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013,	Lae
- *			Enrique Gámez Flores <egamez@edisson.com.mx>,
+ * Copyright (c) 2013,2014, L3a,
+ *			    Enrique Gámez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,16 +24,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef INERE_PERSONAMORAL_INCLUDED_H
+#include "inere/personamoral.h"
+#endif
+#ifndef INERE_NUMERALES_INCLUDED_H
+#include "inere/numerales.h"
+#endif
+#ifndef INERE_HOMONIMIA_INCLUDED_H
+#include "inere/homonimia.h"
+#endif
+#ifndef INERE_VERIFICADOR_INCLUDED_H
+#include "inere/verificador.h"
+#endif
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-
-#include "inere/personamoral.h"
-#include "inere/numerales.h"
-#include "inere/homonimia.h"
-#include "inere/verificador.h"
 
 
 void split(const char *name, char ***words, size_t *len, const int verbose);
@@ -238,13 +245,26 @@ char*
 moral_regla6(char* result, char *palabras[], const int verbose)
 {
   memset(result, 0, 4);
-  if ( verbose )
-    printf("Aplicando regla 6:\n\t%-20s %c\n\t%-20s %c%c\n", palabras[0],
+  if ( strlen(palabras[1]) > 1 ) {
+    if ( verbose )
+      printf("Aplicando regla 6:\n\t%-20s %c\n\t%-20s %c%c\n", palabras[0],
 							toupper(*palabras[0]),
 							palabras[1],
 							toupper(*palabras[1]),
 							toupper(*(palabras[1]+1)));
-  snprintf(result, 4, "%c%c%c", toupper(*palabras[0]), toupper(*palabras[1]), toupper(*(palabras[1]+1)));
+    snprintf(result, 4, "%c%c%c", toupper(*palabras[0]), toupper(*palabras[1]), toupper(*(palabras[1]+1)));
+
+  } else {
+    /* In this case you must have to complement the three code letters
+     * adding an X at the end.
+     */
+    if ( verbose )
+      printf("Aplicando regla 6 y agredando una X al final para completar la clave:\n\t%-20s %c\n\t%-20s %c\n", palabras[0], toupper(*palabras[0]), palabras[1], toupper(*palabras[1]));
+
+    snprintf(result, 4, "%c%cX", toupper(*palabras[0]), toupper(*palabras[1]));
+
+  }
+
   return result;
 }
 
@@ -262,13 +282,37 @@ moral_regla6(char* result, char *palabras[], const int verbose)
 char*
 moral_regla7(char* result, const char *palabra, const int verbose)
 {
+  const size_t len = strlen(palabra);
+
   memset(result, 0, 4);
-  if ( verbose )
-    printf("Aplicando regla 7:\n\t%-20s %c%c%c\n", palabra,
+  if ( len >= 3 ) {
+    if ( verbose )
+      printf("Aplicando regla 7:\n\t%-20s %c%c%c\n", palabra,
 						toupper(*palabra),
 						toupper(*(palabra+1)),
 						toupper(*(palabra+2)));
-  snprintf(result, 4, "%c%c%c", toupper(*palabra), toupper(*(palabra + 1)), toupper(*(palabra+2)));
+    snprintf(result, 4, "%c%c%c", toupper(*palabra), toupper(*(palabra + 1)), toupper(*(palabra+2)));
+
+  } else if ( len == 2 ) {
+    /* In this case you must have to add one X at the end of the result */
+    if ( verbose )
+      printf("Aplicando regla 7 agregando una X al final:\n\t%-20s %c%c\n",
+		palabra,
+		toupper(*palabra),
+		toupper(*(palabra+1)));
+
+    snprintf(result, 4, "%c%cX", toupper(*palabra), toupper(*(palabra + 1)));
+
+  } else {
+    /* In this case you must have to add two Xs at the end of the code */
+    if ( verbose )
+      printf("Aplicando regla 7 agregando dos letras X al final:\n\t%-20s %c\n",
+		palabra,
+		toupper(*palabra));
+    snprintf(result, 4, "%cXX", toupper(*palabra));
+
+  }
+
   return result;
 }
 
