@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     Lae
+ * Copyright (c) 2012-2014, L3a,
+ *			    Enrique Gámez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,17 +103,17 @@
  * asignado el valor cero.
  *
  */
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <stdlib.h>
-
 #ifndef INERE_VERIFICADOR_INCLUDED_H
 #include "inere/verificador.h"
 #endif
 #ifndef INERE_UTIL_INCLUDED_H
 #include "inere/util.h"
 #endif
+
+#include <string.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
 
 int
 anexo3(const char caracter)
@@ -170,31 +170,22 @@ anexo3(const char caracter)
  * que posiblemente se trate de un RFC de una persona moral, agrega el valor
  * correspondiente a un espacio al inicio de la secuencia de valores.
  */
-char
+unsigned char
 digito_verificador(const char* rfc, const int debug)
 {
   unsigned int suma = 0;
   unsigned int index = 13;
   unsigned int remainder = 0;
-  char result = 0;
+  unsigned char result = 0;
   size_t length = strlen(rfc);
-
-  if ( length > 12 ) {
-    /* The rfc length shouldn't be larger than 12 characters */
-    fprintf(stderr, "Error. The RFC length shouldn't be larger than 12 characters. The number of characters passed were: %d.\n", length);
-    return 0;
-  } else if ( length < 11 ) {
-    fprintf(stderr, "Error. The RFC length must be of at least 11 characters long (for personas morales. The number of characters passed was: %d.\n", length);
-    return 0;
-  }
 
   if ( length == 11 ) {
     /*You need to add a zero value for this character, and advance the counter*/
-    if ( debug ) printf("Adding an extra space at the beggining of the RFC.\n");
+    if ( debug ) printf("digito_verificador: Agregando un espacio en blanco, al inicio de la clave del R.F.C.\n");
     suma += anexo3(' ') * index--;
   }
   while ( *rfc ) {
-    if ( debug ) printf("verificador.c: caracter '%c', valor %2d : ( %2d * %2d)", *rfc, anexo3(*rfc), anexo3(*rfc), index);
+    if ( debug ) printf("digito_verificador: caracter '%c', valor %2d : ( %2d * %2d)", *rfc, anexo3(*rfc), anexo3(*rfc), index);
     suma += anexo3(*rfc++) * index--;
     if ( debug ) printf(" : %4d (suma acumulada)\n", suma);
   }
@@ -214,17 +205,18 @@ digito_verificador(const char* rfc, const int debug)
  * Funcion para verificar un RFC
  *
  * La funcion regresara
- *      0 si la clave de el RFC es correcta.
- *      > 0 si la clave de el RFC no es correcta.
+ *	100 si el test no puede realizarse.
+ *        0 si la clave de el RFC es correcta.
+ *       >0 si la clave de el RFC no es correcta.
  *
  * en particular, la funcion regresara el valor correcto del digito
  * verificador para la clave proporcionada.
  *
  */
-char
+unsigned char
 verifica_rfc(const char* rfc, const int debug)
 {
-  char result = 0;
+  unsigned char result = 0;
   char copy[13];
   char* buffer = 0;
   size_t len = 0;
@@ -233,6 +225,18 @@ verifica_rfc(const char* rfc, const int debug)
 
   /* Now get the verification digit */
   len = strlen(buffer);
+  if ( len > 12 ) {
+    /* The rfc length shouldn't be larger than 12 characters */
+    fprintf(stderr, "digito_verificador: Error. La clave del R.F.C., sin su dígito verificador, no debe exceder 12 carácteres. La cantidad de carácteres en la clave del R.F.C. a verificar, sin el dígito verificador fue: %d.\n", len);
+    free(buffer);
+    return 100;
+
+  } else if ( len < 11 ) {
+    fprintf(stderr, "digito_verificador: Error. La clave del R.F.C. a verificar, debe contener al menos 11 carácteres, sin su dígito verificador (al menos para personas morales.) El número de carácteres en la clave a verificar fue: %d.\n", len);
+    free(buffer);
+    return 100;
+  }
+
   memset(copy, 0, 13);
   memcpy(copy, buffer, len-1);
 
