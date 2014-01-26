@@ -1,8 +1,8 @@
 /**
  * obten_digito.c
  *
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>, and
- *                     Lae
+ * Copyright (c) 2012-2014, L3a,
+ *			    Enrique Gámez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ main(int argc, char* argv[])
   char* clave = 0;
 
   if ( argc < 2 ) {
-    fprintf(stderr, "Uso:\n\n\t%s <clave-de-el-RFC>\n",  argv[0]);
+    fprintf(stderr, "Uso:\n\n\t%s CLAVE-DEL-RFC\n",  argv[0]);
     return 1;
   }
 
@@ -51,6 +51,8 @@ main(int argc, char* argv[])
   len = strlen(clave);
   if ( result == 0 ) {
     printf("Digito de verificacion ('%c') coincide con la clave del R.F.C. suministrada.\n", clave[len-1]);
+  } else if ( result == 100 ) {
+    printf("El test no pudo ser realizado.\n");
   } else {
     printf("Clave del R.F.C. muy probablemente sea incorrecta, el digito verificador para la clave suministrada deberia ser \"%c\", mientras que el digito suministrado es \"%c\".\n", result, clave[len-1]);
   }
