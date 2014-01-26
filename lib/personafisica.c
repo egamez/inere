@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     Lae
+ * Copyright (c) 2012-2014, L3a,
+ *			    Enrique Gámez Flores <egamez@edisson.com.mx>,
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -306,8 +306,8 @@ fisica_regla6(char* nombre, const int debug)
   if ( counter > 1 ) {
     for (i = 0; i < counter; i++ ) {
       excluded = 0;
-      if ( strcmp(word[i], "MARIA") == 0 || strcmp(word[i], "JOSE") == 0 ||
-	   fisica_regla8(word[i], debug) ) {
+      if ( strcmp(word[i], "MARIA") == 0 || strcmp(word[i], "MA.") == 0 ||
+	   strcmp(word[i], "JOSE" ) == 0 || fisica_regla8(word[i], debug) ) {
 	excluded = 1;
 	applied = 1;
 	if ( debug ) printf("Eliminando la palabra \"%s\".\n", word[i]);
@@ -536,8 +536,10 @@ fisica_regla9(char *clave, int debug)
   else if ( strcmp(clave, "RATA") == 0 ) correcta = "RATX";
   else if ( strcmp(clave, "RUIN") == 0 ) correcta = "RUIX";
 
-  if ( debug && correcta != NULL ) {
-    printf("Palabra inconveniente para formar parte de la clave del Registro Federal de Contribuyentes (%s)... sustituida por \"%s\".\n", clave, correcta);
+  if ( correcta != NULL ) {
+    if ( debug )
+      printf("Palabra inconveniente para formar parte de la clave del Registro Federal de Contribuyentes (%s)... sustituida por \"%s\".\n", clave, correcta);
+
     substituted = 1;
 
     memset(clave, 0, 5);
