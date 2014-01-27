@@ -225,13 +225,13 @@ verifica_rfc(const char* rfc, const int debug)
 
   /* Now get the verification digit */
   len = strlen(buffer);
-  if ( len > 12 ) {
+  if ( len > 13 ) {
     /* The rfc length shouldn't be larger than 12 characters */
     fprintf(stderr, "digito_verificador: Error. La clave del R.F.C., sin su dígito verificador, no debe exceder 12 carácteres. La cantidad de carácteres en la clave del R.F.C. a verificar, sin el dígito verificador fue: %d.\n", len);
     free(buffer);
     return 100;
 
-  } else if ( len < 11 ) {
+  } else if ( len < 12 ) {
     fprintf(stderr, "digito_verificador: Error. La clave del R.F.C. a verificar, debe contener al menos 11 carácteres, sin su dígito verificador (al menos para personas morales.) El número de carácteres en la clave a verificar fue: %d.\n", len);
     free(buffer);
     return 100;
