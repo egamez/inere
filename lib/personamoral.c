@@ -453,6 +453,7 @@ moral_regla12(char *palabra, const int verbose)
       if ( verbose ) printf("moral_regla12: Aplicando regla 12. Interpretando caracteres individuales...");
       if      ( *palabra == '@'  ) nombre = "ARROBA";
       else if ( *palabra == '\'' ) nombre = "APOSTROFE";
+      else if ( *palabra == '&'  ) nombre = "AMPERSAND";
       else if ( *palabra == '%'  ) nombre = "PORCIENTO";
       else if ( *palabra == '#'  ) nombre = "NUMERO";
       else if ( *palabra == '!'  ) nombre = "ADMIRACION";
