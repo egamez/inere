@@ -360,8 +360,16 @@ fisica_regla6(char* nombre, const int debug)
 void
 fisica_regla7(const char *apellido, const char *nombre, char *result)
 {
+  memset(result, 0, 5);
   result[0] = *apellido++;
-  result[1] = *apellido;
+  while ( *apellido ) {
+    if ( *apellido == 'A' || *apellido == 'E' || *apellido == 'I' ||
+	 *apellido == 'O' || *apellido == 'U' ) {
+      result[1] = *apellido;
+      break;
+    }
+    apellido++;
+  }
   result[2] = *nombre++;
   result[3] = *nombre;
   result[4] = 0;
@@ -451,8 +459,8 @@ fisica_regla8(char* palabra, int debug)
 #endif
     }
 
-    if ( excluded && debug ) {
-      printf("Eliminando la palabra \"%s\".\n", word[i]);
+    if ( excluded ) {
+      if ( debug ) printf("Eliminando la palabra \"%s\".\n", word[i]);
       applied = 1;
     }
 
