@@ -2,6 +2,7 @@
 #include <Python.h>
 
 #include "inere/personafisica.h"
+#include "inere/personamoral.h"
 #include "inere/verificador.h"
 #include "inere/util.h"
 #include "inere/cantidades.h"
@@ -12,9 +13,11 @@ static PyObject *InereError;
 static PyObject *
 inere_rfc(PyObject *self, PyObject *args, PyObject *keywds)
 {
-  const char *nombre;
-  const char *paterno;
-  const char *materno;
+  const char *nombre = NULL;
+  const char *paterno = NULL;
+  const char *materno = NULL;
+  const char *razonsocial = NULL;
+  const char *tiposociedad = NULL;
   int day;
   int month;
   int year;
@@ -22,23 +25,62 @@ inere_rfc(PyObject *self, PyObject *args, PyObject *keywds)
   char dia[3];
   char mes[3];
   char anio[5];
-  static char *kwlist[] = {"nombre",
-			   "paterno",
-			   "materno",
-			   "día",
+  static char *kwlist[] = {"día",
 			   "mes",
 			   "año",
+			   "nombre",
+			   "paterno",
+			   "materno",
+			   "razonsocial",
+			   "tiposociedad",
 			   NULL};
 
-  if ( !PyArg_ParseTupleAndKeywords(args, keywds, "sssiii", kwlist, &nombre,
-				    &paterno, &materno, &day, &month, &year) )
+  if ( !PyArg_ParseTupleAndKeywords(args, keywds, "iii|sssss", kwlist, &day,
+				    &month, &year, &nombre, &paterno, &materno,
+				    &razonsocial, &tiposociedad) )
     return NULL;
+
+  /* Now, make some checks on the options passed */
+  if ( nombre == razonsocial ) {
+    /* There's no way to perform any calculation at all */
+    PyErr_SetString(InereError, "Es necesario especificar el nombre de la persona física, o la razón social de la persona moral.");
+    return NULL;
+
+  } else if ( razonsocial == NULL ) {
+    /* This is the case for a persona fisica, check that you have at least
+     * one apellido, passed as apellido paterno
+     */
+    if ( paterno == NULL ) {
+      /* There's no way to perform any calculation at all */
+      PyErr_SetString(InereError, "Es necesario especificar al menos una apellido, para la persona fisica. El apellido deberá ser dado como si se tratase de un apellido paterno (aunque no lo sea.)");
+      return NULL;
+
+    }
+
+  } else {
+    /* Este es el posiblemente el caso de una persona moral, verifica que el
+     * nombre no halla sido pasado como argumento, tambien.
+     */
+    if ( nombre != NULL ) {
+      /* No es posible realizar el calculo de la clave */
+      PyErr_SetString(InereError, "Ambos, razón social y nombre fueron especificados, no se realizara el calculo de la clave del R.F.C");
+      return NULL;
+
+    }
+
+  }
 
   memset(rfc, 0, 18);
   sprintf(dia, "%d", day);
   sprintf(mes, "%d", month);
   sprintf(anio, "%d", year);
-  clave_rfc_persona_fisica(rfc, nombre, paterno, materno, anio, mes, dia, 0);
+  if ( razonsocial == NULL ) {
+    /* Clave del R.F.C. para una persona fisica */
+    clave_rfc_persona_fisica(rfc, nombre, paterno, materno, anio, mes, dia, 0);
+  } else {
+    /* Clave del R.F.C. para una persona moral */
+    clave_rfc_persona_moral(rfc, razonsocial, tiposociedad, anio, mes, dia, 0);
+  }
 
   if ( !strlen(rfc) ) {
     /* An error has ocurred */
@@ -52,9 +94,11 @@ inere_rfc(PyObject *self, PyObject *args, PyObject *keywds)
 static PyObject *
 inere_rfcinfo(PyObject *self, PyObject *args, PyObject *keywds)
 {
-  const char *nombre;
-  const char *paterno;
-  const char *materno;
+  const char *nombre = NULL;
+  const char *paterno = NULL;
+  const char *materno = NULL;
+  const char *razonsocial = NULL;
+  const char *tiposociedad = NULL;
   int day;
   int month;
   int year;
@@ -65,24 +109,63 @@ inere_rfcinfo(PyObject *self, PyObject *args, PyObject *keywds)
   char dia[3];
   char mes[3];
   char anio[5];
-  static char *kwlist[] = {"nombre",
-			   "paterno",
-			   "materno",
-			   "día",
+  static char *kwlist[] = {"día",
 			   "mes",
 			   "año",
+			   "nombre",
+			   "paterno",
+			   "materno",
+			   "razonsocial",
+			   "tiposociedad",
 			   NULL};
 
-  if ( !PyArg_ParseTupleAndKeywords(args, keywds, "sssiii", kwlist, &nombre,
-				    &paterno, &materno, &day, &month, &year) )
+  if ( !PyArg_ParseTupleAndKeywords(args, keywds, "iii|sssss", kwlist, &day,
+				    &month, &year, &nombre, &paterno, &materno,
+				    &razonsocial, &tiposociedad) )
     return NULL;
+
+  /* Now, make some checks on the options passed */
+  if ( nombre == razonsocial ) {
+    /* There's no way to perform any calculation at all */
+    PyErr_SetString(InereError, "Es necesario especificar el nombre de la persona física, o la razón social de la persona moral.");
+    return NULL;
+
+  } else if ( razonsocial == NULL ) {
+    /* This is the case for a persona fisica, check that you have at least
+     * one apellido, passed as apellido paterno
+     */
+    if ( paterno == NULL ) {
+      /* There's no way to perform any calculation at all */
+      PyErr_SetString(InereError, "Es necesario especificar al menos una apellido, para la persona fisica. El apellido deberá ser dado como si se tratase de un apellido paterno (aunque no lo sea.)");
+      return NULL;
+
+    }
+
+  } else {
+    /* Este es el posiblemente el caso de una persona moral, verifica que el
+     * nombre no halla sido pasado como argumento, tambien.
+     */
+    if ( nombre != NULL ) {
+      /* No es posible realizar el calculo de la clave */
+      PyErr_SetString(InereError, "Ambos, razón social y nombre fueron especificados, no se realizara el calculo de la clave del R.F.C");
+      return NULL;
+
+    }
+
+  }
 
   sprintf(dia, "%d", day);
   sprintf(mes, "%d", month);
   sprintf(anio, "%d", year);
 
   memset(rfc, 0, 18);
-  clave_rfc_persona_fisica(rfc, nombre, paterno, materno, anio, mes, dia, 0);
+  if ( razonsocial == NULL ) {
+    /* Clave del R.F.C. para una persona fisica */
+    clave_rfc_persona_fisica(rfc, nombre, paterno, materno, anio, mes, dia, 0);
+  } else {
+    /* Clave del R.F.C. para una persona moral */
+    clave_rfc_persona_moral(rfc, razonsocial, tiposociedad, anio, mes, dia, 0);
+  }
 
   len = strlen(rfc);
   if ( len == 0 ) {
