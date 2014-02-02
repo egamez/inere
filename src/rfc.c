@@ -51,12 +51,14 @@ usage()
 {
   printf("Programa para obtener, o verificar algunos parametros asociados con la clave\n");
   printf("del R.F.C.\n\nSintáxis:\n\n");
-  printf(" -c/--homonimia\t\tObten la clave diferenciadora de homonimias. Se\n");
+  printf(" -o/--homonimia\t\tObten la clave diferenciadora de homonimias. Se\n");
   printf("\t\t\trequerira tanto el nombre como los apellidos.\n");
   printf(" -g/--digito=RFC\tObten el digito verificador para este RFC abreviado. \n");
   printf(" -r/--rfc\t\tObten la clave del Registro Federal de Contribuyentes.\n");
   printf(" -s/--razon-social\tFija la razón social que se utilizara para el calculo de\n");
   printf("\t\t\tla clave del R.F.C.\n");
+  printf(" -i/--tipo-de-sociedad\tFija el tipo de sociedad de la razón social para el\n");
+  printf("\t\t\tcalculo de la clave del R.F.C.\n");
   printf(" -n/--nombre=NOMBRE\tFija el nombre que se utilizara para el calculo de la\n");
   printf("\t\t\tclave del R.F.C.\n");
   printf(" -p/--paterno=APELLIDO\tFija el apellido paterno (o el apellido unico en caso de\n");
@@ -84,6 +86,7 @@ main(int argc, char *argv[])
   int want_verbose = 0;
   int want_verify = 0;
   char *razonsocial = NULL;
+  char *tiposociedad = NULL;
   char *nombre = NULL;
   char *paterno = NULL;
   char *materno = NULL;
@@ -97,10 +100,11 @@ main(int argc, char *argv[])
 
   /* options descriptor */
   static struct option longopts[] = {
-      {"homonimia",	no_argument,		NULL,	'c'},
+      {"homonimia",	no_argument,		NULL,	'o'},
       {"digito",	required_argument,	NULL,	'g'},
       {"rfc",		no_argument,		NULL,	'r'},
       {"razon-social",	required_argument,	NULL,	's'},
+      {"tipo-de-socieda",	required_argument,	NULL,	'i'},
       {"nombre",	required_argument,	NULL,	'n'},
       {"paterno",	required_argument,	NULL,	'p'},
       {"materno",	required_argument,	NULL,	't'},
@@ -113,9 +117,9 @@ main(int argc, char *argv[])
       {NULL,		0,			NULL,	0}
     };
 
-  while ((ch=getopt_long(argc,argv,"cg:rs:n:p:t:d:m:a:b:vh",longopts,NULL)) != -1 ) {
+  while ((ch=getopt_long(argc,argv,"og:rs:i:n:p:t:d:m:a:b:vh",longopts,NULL)) != -1 ) {
     switch(ch) {
-      case 'c':
+      case 'o':
 	/* Get the clave diferenciadora de homonimias */
 	want_homonimia = 1;
 	want_rfc = 0;
@@ -140,6 +144,11 @@ main(int argc, char *argv[])
       case 's':
 	/* La razón social fue fijada */
 	razonsocial = optarg;
+	break;
+
+      case 'i':
+	/* Tipo de sociedad de la persona moral */
+	tiposociedad = optarg;
 	break;
 
       case 'n':
@@ -251,6 +260,7 @@ main(int argc, char *argv[])
 	if ( materno != NULL ) printf("Segundo apellido: %s\n", materno);
       } else {
 	printf("Razón social: %s\n", razonsocial);
+	if ( tiposociedad != NULL ) printf("Tipo de sociedad: %s\n", tiposociedad);
       }
 
       printf("Fecha:\n\tDia: %s\n\tMes: %s\n\tAño: %s\n", dia, mes, ano);
@@ -260,7 +270,7 @@ main(int argc, char *argv[])
     if ( razonsocial == NULL )
       clave_rfc_persona_fisica(rfc, nombre, paterno, materno, ano, mes, dia, want_verbose);
     else
-      clave_rfc_persona_moral(rfc, razonsocial, ano, mes, dia, want_verbose);
+      clave_rfc_persona_moral(rfc, razonsocial, tiposociedad, ano, mes, dia, want_verbose);
 
     if ( want_verbose ) printf("\nClave del R.F.C.: ");
     printf("%s\n", rfc);
@@ -322,6 +332,7 @@ main(int argc, char *argv[])
     } else {
       /* Persona moral */
       unombre = to_upper_case_and_convert((unsigned char*)razonsocial);
+      if ( tiposociedad != NULL ) upaterno = to_upper_case_and_convert((unsigned char*)tiposociedad);
     }
 
     if ( want_verbose ) {
@@ -331,12 +342,18 @@ main(int argc, char *argv[])
 	else		       printf("\".\n");
 
       } else {
-	printf("Nombre del contribuyente, para el cual se calculara la clave diferenciadora de homonimias: \"%s\".\n", nombre);
+	printf("Nombre del contribuyente, para el cual se calculara la clave diferenciadora de homonimias: \"%s", nombre);
+	if ( tiposociedad != NULL ) printf(", %s", tiposociedad);
+	printf("\"\n");
       }
 
     }
     memset(clave_diferenciadora, 0, 3);
-    homonimia(clave_diferenciadora, unombre, uapellidos, want_verbose);
+    if ( tiposociedad == NULL )
+      homonimia(clave_diferenciadora, unombre, uapellidos, want_verbose);
+    else
+      homonimia(clave_diferenciadora, unombre, upaterno, want_verbose);
+
 
     if ( want_verbose ) printf("Clave diferenciadora de homonimias:");
     printf("%s\n", clave_diferenciadora);
