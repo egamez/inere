@@ -41,6 +41,8 @@ with_xml2_include=`$XML2_CONFIG --prefix`
 AC_MSG_NOTICE([using XMl2 headers at $with_xml2_include])
 with_xml2_lib=`$XML2_CONFIG --prefix`
 AC_MSG_NOTICE([using XML2 libraries at $with_xml2_lib])
+XML2_PREFIX=`$XML2_CONFIG --prefix`
+AC_SUBST(XML2_PREFIX)
 
 XML2_LIB=`$XML2_CONFIG --libs`
 AC_SUBST(XML2_LIB)
