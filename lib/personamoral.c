@@ -259,7 +259,7 @@ moral_regla6(char* result, char *palabras[], const int verbose)
      * adding an X at the end.
      */
     if ( verbose )
-      printf("Aplicando regla 6 y agredando una X al final para completar la clave:\n\t%-20s %c\n\t%-20s %c\n", palabras[0], toupper(*palabras[0]), palabras[1], toupper(*palabras[1]));
+      printf("Aplicando regla 6, y regla 8 (agregando una X al final para completar la clave):\n\t%-20s %c\n\t%-20s %c\n", palabras[0], toupper(*palabras[0]), palabras[1], toupper(*palabras[1]));
 
     snprintf(result, 4, "%c%cX", toupper(*palabras[0]), toupper(*palabras[1]));
 
@@ -296,7 +296,7 @@ moral_regla7(char* result, const char *palabra, const int verbose)
   } else if ( len == 2 ) {
     /* In this case you must have to add one X at the end of the result */
     if ( verbose )
-      printf("Aplicando regla 7 agregando una X al final:\n\t%-20s %c%c\n",
+      printf("Aplicando regla 7, y regla 8 (agregando una X al final de la clave):\n\t%-20s %c%c\n",
 		palabra,
 		toupper(*palabra),
 		toupper(*(palabra+1)));
@@ -306,7 +306,7 @@ moral_regla7(char* result, const char *palabra, const int verbose)
   } else {
     /* In this case you must have to add two Xs at the end of the code */
     if ( verbose )
-      printf("Aplicando regla 7 agregando dos letras X al final:\n\t%-20s %c\n",
+      printf("Aplicando regla 7, y regla 8 (agregando dos letras X al final de la clave):\n\t%-20s %c\n",
 		palabra,
 		toupper(*palabra));
     snprintf(result, 4, "%cXX", toupper(*palabra));
@@ -510,13 +510,11 @@ moral_regla12(char *palabra, const int verbose)
  */
 
 /**
- * La manera en la que se obtendra la clave del R.F.C., para una persona moral
- * sera creando un arreglo de tres caracteres, para siempre aplicar la regla 1,
- * es decir, en caso de requerir aplicar las reglas 3a a 12a se crearan tantas
- * entradas en el cadena de nombres hasta acompletar tres.
+ * Para el calculo de la clave del R.F.C. de una persona moral se encuentra
+ * que hay dos modos utilizados para generar la clave....
  */
 char*
-clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char *year, const char* month, const char *day, const int verbose)
+clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char *tipo_de_sociedad, const char *year, const char* month, const char *day, const int verbose)
 {
   char **palabras = NULL;
   char fecha[7];
@@ -526,8 +524,20 @@ clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char
   char digito = 0;
   size_t i = 0;
   size_t len;
+  char *nombre = NULL;
+  size_t tamano = 0;
 
-  /* Split the name */
+  /* Split the name
+   * Make an array with all the words in 'denominacion_social'
+   * The function split will also apply the rules:
+   *
+   *	- Regla 3
+   *	- Regla 4 -- TODO
+   *	- Regla 9
+   *	- Regla 10
+   *	- Regla 11
+   *	- Regla 12
+   */
   split(denominacion_social, &palabras, &len, verbose);
   if ( verbose ) {
     printf("%d palabras forman la denominación social:\n", len);
@@ -536,32 +546,26 @@ clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char
     }
   }
 
-  /* Ahora, de acuerdo con la cantidad de palabras en 'palabras'
-   * determina si necesitas las demas reglas de complementacion
+  /* Now, acording to all thw words in the array 'palabras'
+   * choose the proper rule to build up the R.F.C. code
    */
   memset(result, 0, 4);
   if ( len >= 3 ) {
     /* Este es el caso estandar, al menos tres palabras para formar
      * la clave
+     *
+     *	Regla 1
      */
     moral_regla1(result, palabras, verbose);
 
-  } else {
-    /* Aplica algunas de las reglas para formar la clave */
-    if ( len == 1 ) {
-      /* Las reglas aplicables a este caso son la regla 7 u 8 */
-      if ( strlen(palabras[0]) > 2 ) {
-	/* La longitud del nombre es suficiente para formar la clave. */
-	moral_regla7(result, palabras[0], verbose);
-      } else {
-	/* Sera necesario completar con letras extra el nombre, para formar...*/
-	moral_regla8(result, palabras[0], verbose);
+  } else if ( len == 2 ) {
+    /* Para este caso aplica la Regla 6 */
+    moral_regla6(result, palabras, verbose);
 
-      }
+  } else if ( len == 1 ) {
+    /* Aplica la regla 7 */
+    moral_regla7(result, palabras[0], verbose);
 
-    } else {
-      moral_regla6(result, palabras, verbose);
-    }
   }
 
   /* Free space. */
@@ -571,9 +575,21 @@ clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char
   free(palabras);
 
   /* Ahora obten la clave diferenciadora de homonimias
+   * En algunas ocasiones, para determinar esta clave para una persona
+   * moral, se incluye el tipo de sociedad y en otras ocasiones no.
+   * Entonces...
    */
   memset(clave_diferenciadora, 0, 3);
-  homonimia(clave_diferenciadora, denominacion_social, NULL, verbose);
+  if ( tipo_de_sociedad != NULL ) {
+    tamano = strlen(denominacion_social) + strlen(tipo_de_sociedad) + 1;
+    nombre = (char *)calloc(tamano, sizeof(char));
+    snprintf(nombre, tamano, "%s %s", denominacion_social, tipo_de_sociedad);
+    homonimia(clave_diferenciadora, nombre, NULL, verbose);
+    free(nombre);
+
+  } else {
+    homonimia(clave_diferenciadora, denominacion_social, NULL, verbose);
+  }
 
   /* Ahora aplica la regla 2, para completar la clave */
   memset(fecha, 0, 7);
@@ -596,7 +612,7 @@ clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char
  *
  */
 char*
-remove_punctuation(char* word)
+remove_punctuation(char* word, int verbose)
 {
   int i = 0;
   const size_t len = strlen(word);
@@ -611,9 +627,17 @@ remove_punctuation(char* word)
   memset(word, 0, len + 1);
 
   while ( *copy ) {
-    if ( *copy == '.' || *copy == ',' ) {
+    if ( *copy == '.' ) {
+      /* Replace the '.' by a space, i.e. Regla 3 */
+      if ( verbose ) printf("Regla 4. Cambiando un '.' por un ' '\n"); 
+      *word++ = ' ';
       copy++;
       continue;
+
+    } else if ( *copy == ',' ) {
+      copy++;
+      continue;
+
     }
     *word++ = *copy++;
     i++;
@@ -658,7 +682,8 @@ split(const char *name, char ***words, size_t *len, const int verbose)
 	(p = strtok_r(NULL, " \t\n", &last)) ) {
 
     /* Remove any punctuation sign */
-    p = remove_punctuation(p);
+    /* This call may also be used to apply Rule 4 */
+    p = remove_punctuation(p, verbose);
 
     /* Apply rule 9 */
     if ( !strcasecmp(p, "EL") ||
@@ -685,26 +710,12 @@ split(const char *name, char ***words, size_t *len, const int verbose)
       continue;
     }
 
-    /* Applyt rule 5. */
-    if ( !strcasecmp(p, "SA") ||
-	 !strcasecmp(p, "AR") ||
-	 !strcasecmp(p, "S") ||
-	 !strcasecmp(p, "SNC") ||
-	 !strcasecmp(p, "SCL") ||
-	 !strcasecmp(p, "AC") ) {
-      if ( verbose ) {
-	printf("split: Aplicando Regla 5. Eliminando la palabra '%s' y las subsiguientes a ésta.\n", p);
-      }
-      p = NULL;
-      break;
-    }
-
     /* Apply rule 3
      * Do not take into account composite characters
      */
     p = moral_regla3(p, verbose);
 
-    /* Apply rule 12 @
+    /* Apply rule 12
      */
     p = moral_regla12(p, verbose);
 

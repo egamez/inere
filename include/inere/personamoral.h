@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012,  Lae
- *			Enrique Gamez Flores <egamez@edisson.com.mx>,
+ * Copyright (c) 2012-2014, L3a
+ *			    Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 extern "C" {
 #endif
 
-extern char* clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char *year, const char* month, const char *day, const int debug);
+extern char* clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char *tipo_de_sociedad, const char *year, const char* month, const char *day, const int verbose);
 
 #if defined(__cplusplus)
 }
