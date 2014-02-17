@@ -445,15 +445,16 @@ moral_regla12(char *palabra, const int verbose)
   const size_t len = strlen(palabra);
 
   if ( len == 1 ) {
-    if ( isalnum(*palabra) ) {
-      /*Este es un caractecter que no necesita ser interpretado por esta regla*/
+    if ( isalnum(*palabra) || strcmp(palabra, "&") == 0 ) {
+      /*Este es un caractecter que no necesita ser interpretado por esta regla
+       * ya que se trata de un número arábigo o el carácter ampersand
+       */
       return palabra;
     } else {
       char *nombre = NULL;
       if ( verbose ) printf("moral_regla12: Aplicando regla 12. Interpretando caracteres individuales...");
       if      ( *palabra == '@'  ) nombre = "ARROBA";
       else if ( *palabra == '\'' ) nombre = "APOSTROFE";
-      else if ( *palabra == '&'  ) nombre = "AMPERSAND";
       else if ( *palabra == '%'  ) nombre = "PORCIENTO";
       else if ( *palabra == '#'  ) nombre = "NUMERO";
       else if ( *palabra == '!'  ) nombre = "ADMIRACION";
