@@ -693,6 +693,10 @@ split(const char *name, char ***words, size_t *len, const int verbose)
 	 !strcasecmp(p, "LOS") ||
 	 !strcasecmp(p, "LAS") ||
 	 !strcasecmp(p, "DEL") ||
+	 !strcasecmp(p, "EN" ) ||
+	 !strcasecmp(p, "CON" ) ||
+	 !strcasecmp(p, "POR" ) ||
+	 !strcasecmp(p, "PARA" ) ||
 	 !strcasecmp(p, "Y") ) {
       if ( verbose ) {
 	printf("split: Aplicando Regla 9. Eliminando la palabra '%s'.\n", p);
