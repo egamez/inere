@@ -1,4 +1,4 @@
-/* config.h.in.  Generated from configure.ac by autoheader.  */
+/* include/inere/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
@@ -45,7 +45,7 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Se ha especificado el set de caracteres local */
+/* Character set to be used for character conversions to UTF-8l */
 #undef INERE_LOCAL_CHARSET
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
