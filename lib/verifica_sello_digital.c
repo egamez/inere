@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     Lae
+ * Copyright (c) 2013,2014 L3a,
+ * 			   Enrique Gamez Flores <egamez@edisson.com.mx>,
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "inere/verifica_sello_digital.h"
 
 #include <string.h>
@@ -72,6 +71,10 @@ convert_to_pem(const xmlChar *c, xmlChar *res, int verbose)
   return res;
 }
 
+/**
+ * Funcion para suprimir los mensajes de error generados por peticiones
+ * de compilacion de instrucciones para version 2.0 de xsl
+ */
 void
 local_error_function(void *ctx, const char* mess, ...)
 {
@@ -89,8 +92,21 @@ local_error_function(void *ctx, const char* mess, ...)
 
 /**
  * Extrae la cadena original del comprobante fiscal
+ *
+ * La funcion regresa:
+ *
+ *	0	En caso de generar la cadena original exitosamente,
+ *
+ * y en caso de error:
+ *
+ *	1	Cuando la stylsheet, proporcionada para generar la cadena
+ *		original no pudo ser compilada.
+ *	2	Cuando las transformaciones, definidas en la stylesheet
+ *		indicada no pudieron aplicarse al CFDi.
+ *	3	No fue posible escribir la cadena original a un buffer
+ *
  */
-void
+int
 cadena_original(const xmlChar *stylesheet, xmlDocPtr doc, xmlChar** cadena, int verbose)
 {
   xsltStylesheetPtr style = NULL;
@@ -105,20 +121,23 @@ cadena_original(const xmlChar *stylesheet, xmlDocPtr doc, xmlChar** cadena, int 
 
   style = xsltParseStylesheetFile(stylesheet);
   if ( style == NULL ) {
-    fprintf(stderr, "cadena_original: Stylesheet (%s) no analizada.\n", stylesheet);
+    /*fprintf(stderr, "cadena_original: Stylesheet (%s) no analizada.\n", stylesheet);*/
     xsltCleanupGlobals();
-    return;
+    return 1;
   }
+
   result = xsltApplyStylesheet(style, doc, NULL);
   if ( result == NULL ) {
-    fprintf(stderr, "cadena_original: Transformaciones de stylesheet (%s) no aplicadas.\n", stylesheet);
+    /*fprintf(stderr, "cadena_original: Transformaciones de stylesheet (%s) no aplicadas.\n", stylesheet);*/
     xsltFreeStylesheet(style);
     xsltCleanupGlobals();
-    return;
+    return 2;
   }
+
   out = xsltSaveResultToString(cadena, &cadena_len, result, style);
   if ( out == -1 ) {
-    fprintf(stderr, "cadena_original: Error al salvar la cadena original en el buffer.\n");
+    /*fprintf(stderr, "cadena_original: Error al salvar la cadena original en el buffer.\n");*/
+    return 3;
   }
 
   xsltFreeStylesheet(style);
