@@ -287,11 +287,11 @@ inere_extraefecha(PyObject *self, PyObject *args, PyObject *keywds)
 
   /* Ahora, nosotros deberiamos de definir algunas exceptions para los errores*/
   if ( result == -1 ) {
-    PyErr_SetString(InereClaveIncompleta, "La clave del R.F.C. suministrada no contiene los datos de la fecha a extraer.");
+    PyErr_SetString(InereClaveIncompleta, "La longitud de la clave del R.F.C. suministrada no contiene los datos de la fecha a extraer.");
     return NULL;
 
   } else if ( result == -2 ) {
-    PyErr_SetString(InereClaveIncompleta, "La clave del R.F.C. suministrada no contiene los datos de la fecha a extraer.");
+    PyErr_SetString(InereClaveIncompleta, "La clave del R.F.C. suministrada no contiene los digitos necesarios para extraer la fecha.");
     return NULL;
 
   } else if ( result == -3 ) {
@@ -308,10 +308,116 @@ inere_extraefecha(PyObject *self, PyObject *args, PyObject *keywds)
 
   }
 
-  return Py_BuildValue("{s:s,s:s,s:s}", "day", day,
-					"month", month,
-					"year", year);
+  return Py_BuildValue("{s:s,s:s,s:s}", "dia", day,
+					"mes", month,
+					"anio", year);
 }
+
+/**
+ * Function to complete the R.F.C. code when entering information as an
+ * capture line of the very same code, i.e. when registering a new customer
+ */
+static PyObject *
+inere_completa(PyObject *self, PyObject *args, PyObject *keywds)
+{
+  const char *nombre = NULL;
+  const char *paterno = NULL;
+  const char *materno = NULL;
+  const char *razonsocial = NULL;
+  const char *tiposociedad = NULL;
+  const char *preclave = NULL;
+  char rfc[18];
+  char dia[3];
+  char mes[3];
+  char anio[3];
+  int result = 0;
+  static char *kwlist[] = {"preclave",
+			   "nombre",
+			   "paterno",
+			   "materno",
+			   "razonsocial",
+			   "tiposociedad",
+			   NULL};
+
+  if ( !PyArg_ParseTupleAndKeywords(args, keywds, "s|sssss", kwlist,
+					&preclave, &nombre, &paterno, &materno,
+					&razonsocial, &tiposociedad) )
+    return NULL;
+
+  /* First check that you have enough parameters to perform the calculations */
+  if ( nombre == razonsocial ) {
+    /* This means that you have no entered one of the main sources to
+     * complete the R.F.C. code
+     */
+    PyErr_SetString(InereError, "Es necesario especificar el nombre (de la persona física) o la razón social (persona moral) para poder completar la clave del R.F.C.");
+    return NULL;
+
+  } else if ( razonsocial == NULL ) {
+    /* This is the case for a persona fisica. Check if we have, at least,
+     * the apellido paterno
+     */
+    if ( paterno == NULL ) {
+      PyErr_SetString(InereError, "Es necesario especificar los apellidos para que sea posible generar la clave del R.F.C.");
+      return NULL;
+
+    }
+
+  } else {
+    /* This is the case for a persona moral */
+    if ( nombre != NULL ) {
+      PyErr_SetString(InereError, "Ambos, razón social (persona moral) y nombre (persona física) fueron especificados, no será posible generar/completar la clave del R.F.C.");
+      return NULL;
+
+    }
+
+  }
+
+  /* Now, to complete the R.F.C. code, you need to extract from the 'preclave'
+   * variable the day, month and year parameters needed to build the code
+   */
+  result = extrae_fecha(preclave, dia, mes, anio, 0);
+  if ( result == -1 ) {
+    PyErr_SetString(InereClaveIncompleta, "La longitud de la clave del R.F.C. suministrada no contiene los datos de la fecha a extraer.");
+    return NULL;
+
+  } else if ( result == -2 ) {
+    PyErr_SetString(InereClaveIncompleta, "La clave del R.F.C. suministrada no contiene los digitos necesarios para extraer la fecha.");
+    return NULL;
+
+  } else if ( result == -3 ) {
+    PyErr_SetString(InereClaveIncompleta, "La clave del R.F.C. suministrada posiblemente contenga los datos de la fecha a extraer pero no contiene la cantidad de letras con las que la clave inicia, de modo que no es posible deternimar los datos de la fecha a extraer.");
+    return NULL;
+
+  } else if ( result == -4 ) {
+    PyErr_SetString(InereError, "Error improbable. No es posible emitir algun diagnostico.");
+    return NULL;
+
+  } else if ( result == -5 ) {
+    PyErr_SetString(InereError, "No fue posible extraer los datos correspondientes a la fecha.");
+    return NULL;
+
+  }
+
+  /* Now you have everything to complete the R.F.C. code */
+  if ( razonsocial == NULL ) {
+    /* Clave del R.F.C. para una persona fisica */
+    clave_rfc_persona_fisica(rfc, nombre, paterno, materno, anio, mes, dia, 0);
+  } else {
+    /* Clave del R.F.C. para una persona moral */
+    clave_rfc_persona_moral(rfc, razonsocial, tiposociedad, anio, mes, dia, 0);
+  }
+
+  if ( !strlen(rfc) ) {
+    /* An error has ocurred */
+    PyErr_SetString(InereError, "La clave del R.F.C. calculada resulto nula.");
+    return NULL;
+  }
+
+  return Py_BuildValue("s", rfc);
+}
+
+
+
 
 static PyMethodDef InereMethods[] = {
 	{"rfc", (PyCFunction)inere_rfc,
@@ -332,6 +438,9 @@ static PyMethodDef InereMethods[] = {
 	{"extraefecha", (PyCFunction)inere_extraefecha,
 	 METH_VARARGS | METH_KEYWORDS,
 	"Función para extraer los datos correspondientes a la fecha del contribuyente, que se encuentran en la clave del R.F.C."},
+	{"completa", (PyCFunction)inere_completa,
+	 METH_VARARGS | METH_KEYWORDS,
+	"Función para completar la clave del R.F.C. dados el nombre/razon social y la clave del R.F.C. sin su clave diferenciadora de homonimos y sin su digito verificador"},
 	{NULL, NULL, 0, NULL}
 };
 
