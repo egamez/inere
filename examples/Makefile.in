@@ -12,7 +12,7 @@ CCFLAGS		:= $(DBG) $(WARNINGS) $(XTRACCFLAGS) $(INCLUDES)
 .SUFFIXES:	.c .o
 .PHONY:		clean
 
-all: obten_rfc obten_homonimia obten_digito verifica_rfc moral
+all: obten_rfc obten_homonimia obten_digito verifica_rfc moral extrae
 
 obten_rfc: obten_rfc.o
 	$(CC) $(DBG) -o $@ obten_rfc.o $(LIBS)
@@ -29,8 +29,11 @@ verifica_rfc: verifica_rfc.o
 moral: moral.o
 	$(CC) $(DBG) -o $@ moral.o $(LIBS)
 
+extrae: extrae.o
+	$(CC) $(DBG) -o $@ extrae.o $(LIBS)
+
 clean:
-	rm -f obten_rfc obten_rfc.o obten_homonimia obten_homonimia.o obten_digito obten_digito.o verifica_rfc verifica_rfc.o moral moral.o
+	rm -f obten_rfc obten_rfc.o obten_homonimia obten_homonimia.o obten_digito obten_digito.o verifica_rfc verifica_rfc.o moral moral.o extrae extrae.o
 
 # Rules
 obten_rfc.o: obten_rfc.c
@@ -50,5 +53,9 @@ verifica_rfc.o: verifica_rfc.c
 	$(CC) $(CCFLAGS) -c $< -o $@
 
 moral.o: moral.c
+	@echo compiling $< ...
+	$(CC) $(CCFLAGS) -c $< -o $@
+
+extrae.o: extrae.c
 	@echo compiling $< ...
 	$(CC) $(CCFLAGS) -c $< -o $@
