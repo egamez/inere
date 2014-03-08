@@ -27,6 +27,9 @@
 #ifndef INERE_EXTRAEFECHA_INCLUDED_H
 #include "inere/extrae_fecha.h"
 #endif
+#ifndef INERE_UTIL_INCLUDED_H
+#include "inere/util.h"
+#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -74,25 +77,28 @@ extrae_fecha(const char *semiclave, char *day, char *month, char *year, int verb
   int letras = 0;
   int digitos = 0;
   int i = 0;
-  const size_t len = strlen(semiclave);
+  char *clave = NULL;
+  size_t len = 0;
 
-  memset(day,    0, 3);
-  memset(month,  0, 3);
-  memset(year,   0, 3);
-  memset(siglas, 0, 5);
+  /* Comienza por convertir los caracteres del alfabeto español que no
+   * son ASCII
+   */
+  clave = to_upper_case_and_convert((unsigned char*)semiclave);
+  len = strlen(clave);
 
   if ( len > 13 || len < 9 ) {
     /* No es posible realizar extraccion alguna */
     if ( verbose ) printf("%s:%d : Error -1. Longitud de la clave no suficiente para realizar la extracción (longitud = %d.)\n", __FILE__, __LINE__, len);
+    free(clave);
     return -1;
   }
 
   /* Haz un chequeo sobre el tipo de clave y su calidad */
-  while ( *semiclave ) {
-    if      ( isalpha(*semiclave) ) letras++;
-    else if ( *semiclave == '^'   ) letras++; /* Para la conversion en inere */
-    else if ( *semiclave == '&'   ) letras++;
-    else if ( isdigit(*semiclave) ) digitos++;
+  while ( *clave ) {
+    if      ( isalpha(*clave) ) letras++;
+    else if ( *clave == '^'   ) letras++; /* Para la conversion en inere */
+    else if ( *clave == '&'   ) letras++;
+    else if ( isdigit(*clave) ) digitos++;
 
     if ( letras > 4 ) {
       /* Esta no puede ser una clave del R.F.C. */
@@ -106,50 +112,61 @@ extrae_fecha(const char *semiclave, char *day, char *month, char *year, int verb
       break;
     }
 
-    semiclave++;
+    clave++;
     i++;
   }
 
   /* Rewind the string */
-  semiclave -= i;
+  clave -= i;
 
   /* Analiza ahora el tipo de clave del cual se quiere extraer las partes. */
   if ( digitos != 6 ) {
     /* No es posible hacer extraccion alguna, la clave no esta bien formada */
     if ( verbose ) printf("%s:%d : Error 2. No es suficiente la cantidad de digitos para la fecha (digitos = %d.)\n", __FILE__, __LINE__, digitos);
+    free(clave);
     return -2;
 
   } else if ( letras > 4 || letras < 3 ) {
     /* Esta es la misma situacion que arriba. */
     if ( verbose ) printf("%s:%d : Error 4. Cantidad de letras mayor a la esperada (letras = %d.)\n", __FILE__, __LINE__, letras);
+    free(clave);
     return -3;
 
   }
 
   /* Ahora, prepara la conversion */
+  memset(day,    0, 3);
+  memset(month,  0, 3);
+  memset(year,   0, 3);
+  memset(siglas, 0, 5);
+
   if ( letras == 4 ) {
     /* Este es el caso para una persona fisica */
     if ( verbose ) printf("%s:%d : Aplicando sscanf con el siguiente formato \"%%4s%%2s%%2s%%2s\" para la clave de una persona fisica.\n", __FILE__, __LINE__);
-    res = sscanf(semiclave, "%4s%2s%2s%2s", siglas, year, month, day);
+    res = sscanf(clave, "%4s%2s%2s%2s", siglas, year, month, day);
 
   } else if ( letras == 3 ) {
     /* Este es al caso de una persona moral */
     if ( verbose ) printf("%s:%d : Aplicando sscanf con el siguiente formato \"%%3s%%2s%%2s%%2s\" para la clave de una persona moral.\n", __FILE__, __LINE__);
-    res = sscanf(semiclave, "%3s%2s%2s%2s", siglas, year, month, day);
+    res = sscanf(clave, "%3s%2s%2s%2s", siglas, year, month, day);
 
   } else {
     /* No hay razon por la cual uno deba estar aqui! */
     if ( verbose ) printf("%s:%d : Error 4. Error inesperador (letras = %d, digitos = %d.)\n", __FILE__, __LINE__, letras, digitos);
+    free(clave);
     return -4;
   }
 
   /* Verifica que se hallan hecho las sustituciones correctas */
   if ( res != 4 ) {
     if ( verbose ) printf("%s:%d : Error 5. Cantidad de sustituciones mayor a la esperada (sustituciones = %d.)\n", __FILE__, __LINE__, res);
+    free(clave);
     return -5;
 
   }
 
   if ( verbose ) printf("%s:%d : Input [%s], letras de la clave [%s], año [%s], mes [%s], día [%s]\n", __FILE__, __LINE__, semiclave, siglas, year, month, day);
+  free(clave);
+
   return 0;
 }
