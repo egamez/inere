@@ -86,7 +86,7 @@ inere_rfc(PyObject *self, PyObject *args, PyObject *keywds)
 
   if ( !strlen(rfc) ) {
     /* An error has ocurred */
-    PyErr_SetString(InereError, "Clave del R.F.C. nula.");
+    PyErr_SetString(InereError, "La clave del R.F.C. calculada resulto nula.");
     return NULL;
   }
 
@@ -172,7 +172,7 @@ inere_rfcinfo(PyObject *self, PyObject *args, PyObject *keywds)
   len = strlen(rfc);
   if ( len == 0 ) {
     /* An error has ocurred */
-    PyErr_SetString(InereError, "Clave del R.F.C. nula.");
+    PyErr_SetString(InereError, "La clave del R.F.C. calculada resulto nula.");
     return NULL;
   }
 
@@ -199,9 +199,9 @@ inere_verificarfc(PyObject *self, PyObject *args, PyObject *keywds)
   if ( !PyArg_ParseTupleAndKeywords(args, keywds, "s#", kwdlist, &rfc, &size) )
     return NULL;
 
-  if ( size < 13 ) {
+  if ( size < 12) {
     /* For 'personas fisicas' the RFC must have at least 13 characters */ 
-    PyErr_SetString(InereError, "La clave del R.F.C. debe ser de al menos 13 carácteres (para personas físicas). Es imposible verificar la clave.");
+    PyErr_SetString(InereClaveIncompleta, "La clave del R.F.C. debe ser de al menos 12 carácteres (para personas morales). Será imposible verificar la clave suministrada.");
     return NULL;
   }
 
