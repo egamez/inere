@@ -7,8 +7,10 @@
 #include "inere/util.h"
 #include "inere/cantidades.h"
 #include "inere/verifica_sello_digital.h"
+#include "inere/extrae_fecha.h"
 
 static PyObject *InereError;
+static PyObject *InereClaveIncompleta;
 
 static PyObject *
 inere_rfc(PyObject *self, PyObject *args, PyObject *keywds)
@@ -25,9 +27,9 @@ inere_rfc(PyObject *self, PyObject *args, PyObject *keywds)
   char dia[3];
   char mes[3];
   char anio[5];
-  static char *kwlist[] = {"día",
+  static char *kwlist[] = {"dia",
 			   "mes",
-			   "año",
+			   "anio",
 			   "nombre",
 			   "paterno",
 			   "materno",
@@ -109,9 +111,9 @@ inere_rfcinfo(PyObject *self, PyObject *args, PyObject *keywds)
   char dia[3];
   char mes[3];
   char anio[5];
-  static char *kwlist[] = {"día",
+  static char *kwlist[] = {"dia",
 			   "mes",
-			   "año",
+			   "anio",
 			   "nombre",
 			   "paterno",
 			   "materno",
@@ -265,6 +267,51 @@ inere_verificasello(PyObject *self, PyObject *args, PyObject *keywds)
   return NULL;
 }
 
+static PyObject *
+inere_extraefecha(PyObject *self, PyObject *args, PyObject *keywds)
+{
+  int result = 0;
+  const char *semiclave = NULL;
+  int verbose = 0;
+  char day[3];
+  char month[3];
+  char year[3];
+  static char *kwdlist[] = {"clave", "verbose", NULL};
+
+  if ( !PyArg_ParseTupleAndKeywords(args, keywds, "s|i", kwdlist,
+					&semiclave, &verbose) )
+    return NULL;
+
+  /* Extrae los datos correspondientes a la fecha de la clave del R.F.C. */
+  result = extrae_fecha(semiclave, day, month, year, verbose);
+
+  /* Ahora, nosotros deberiamos de definir algunas exceptions para los errores*/
+  if ( result == -1 ) {
+    PyErr_SetString(InereClaveIncompleta, "La clave del R.F.C. suministrada no contiene los datos de la fecha a extraer.");
+    return NULL;
+
+  } else if ( result == -2 ) {
+    PyErr_SetString(InereClaveIncompleta, "La clave del R.F.C. suministrada no contiene los datos de la fecha a extraer.");
+    return NULL;
+
+  } else if ( result == -3 ) {
+    PyErr_SetString(InereClaveIncompleta, "La clave del R.F.C. suministrada posiblemente contenga los datos de la fecha a extraer pero no contiene la cantidad de letras con las que la clave inicia, de modo que no es posible deternimar los datos de la fecha a extraer.");
+    return NULL;
+
+  } else if ( result == -4 ) {
+    PyErr_SetString(InereError, "Error improbable. No es posible emitir algun diagnostico.");
+    return NULL;
+
+  } else if ( result == -5 ) {
+    PyErr_SetString(InereError, "No fue posible extraer los datos correspondientes a la fecha.");
+    return NULL;
+
+  }
+
+  return Py_BuildValue("{s:s,s:s,s:s}", "day", day,
+					"month", month,
+					"year", year);
+}
 
 static PyMethodDef InereMethods[] = {
 	{"rfc", (PyCFunction)inere_rfc,
@@ -282,6 +329,9 @@ static PyMethodDef InereMethods[] = {
 	{"verificasello", (PyCFunction)inere_verificasello,
 	 METH_VARARGS | METH_KEYWORDS,
 	 "Función para verificar la correctez del sello digital que ampara la ntegridad del CFD"},
+	{"extraefecha", (PyCFunction)inere_extraefecha,
+	 METH_VARARGS | METH_KEYWORDS,
+	"Función para extraer los datos correspondientes a la fecha del contribuyente, que se encuentran en la clave del R.F.C."},
 	{NULL, NULL, 0, NULL}
 };
 
@@ -302,9 +352,15 @@ PyInit_inere(void)
   m = PyModule_Create(&ineremodule);
   if ( m == NULL ) return NULL;
 
-  InereError = PyErr_NewException("inere.error", NULL, NULL);
+  /* A general exception */
+  InereError = PyErr_NewException("inere.Error", NULL, NULL);
   Py_INCREF(InereError);
-  PyModule_AddObject(m, "error", InereError);
+  PyModule_AddObject(m, "Error", InereError);
+
+  /* An exception when the given R.F.C. code is not enough complete */
+  InereClaveIncompleta = PyErr_NewException("inere.ClaveIncompleta", NULL, NULL);
+  Py_INCREF(InereClaveIncompleta);
+  PyModule_AddObject(m, "Error", InereClaveIncompleta);
 
   return m;
 }
@@ -317,10 +373,16 @@ initinere(void)
   m = Py_InitModule("inere", InereMethods);
   if ( m == NULL ) return;
 
-  InereError = PyErr_NewException("inere.error", NULL, NULL);
+  InereError = PyErr_NewException("inere.Error", NULL, NULL);
   if ( InereError == NULL ) return;
   Py_INCREF(InereError);
-  PyModule_AddObject(m, "error", InereError);
+  PyModule_AddObject(m, "Error", InereError);
+
+  /* An exception when the given R.F.C. code is not enough complete */
+  InereClaveIncompleta = PyErr_NewException("inere.ClaveIncompleta", NULL, NULL);
+  if ( InereClaveIncompleta == NULL ) return;
+  Py_INCREF(InereClaveIncompleta);
+  PyModule_AddObject(m, "Error", InereClaveIncompleta);
 
 }
 #endif
