@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     Lae
+ * Copyright (c) 2012-2014, L3a,
+ *			    Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,16 +65,26 @@
  *  - Cantidad: 123456789012
  *
  */
+#ifndef INERE_NUMERALES_INCLUDED_H
+#include "inere/numerales.h"
+#endif
+
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
 
-#ifndef INERE_NUMERALES_INCLUDED_H
-#include "inere/numerales.h"
-#endif
+/* Forward declaration */
+char *unidades(const unsigned int numero);
+char *decenas(const unsigned int numero);
+char *centenas(const unsigned int numero);
+char *diez_y_veinte(const unsigned int numero);
+char *cien(void);
+char *construye_clase(const unsigned int unidad, const unsigned int decena, const unsigned int centena, char* buffer, const int debug);
+char *class_name(unsigned int class_number);
 
-char*
+
+char *
 unidades(const unsigned int numero)
 {
   if ( numero == 0 ) return "cero";
@@ -90,7 +100,7 @@ unidades(const unsigned int numero)
   return NULL;
 }
 
-char*
+char *
 decenas(const unsigned int numero)
 {
   if ( numero == 3 ) return "treinta";
@@ -103,7 +113,7 @@ decenas(const unsigned int numero)
   return NULL;
 }
 
-char*
+char *
 centenas(const unsigned int numero)
 {
   if ( numero == 1 ) return "ciento";
@@ -118,7 +128,7 @@ centenas(const unsigned int numero)
   return NULL;
 }
 
-char*
+char *
 diez_y_veinte(const unsigned int numero)
 {
   if ( numero == 10 ) return "diez";
@@ -144,13 +154,13 @@ diez_y_veinte(const unsigned int numero)
   return NULL;
 }
 
-char*
+char *
 cien(void)
 {
   return "cien";
 }
 
-char*
+char *
 construye_clase(const unsigned int unidad, const unsigned int decena, const unsigned int centena, char* buffer, const int debug)
 {
   char* unidad_str = NULL;
@@ -213,7 +223,7 @@ construye_clase(const unsigned int unidad, const unsigned int decena, const unsi
  * Helper function to add the corresponding class and period name
  * for the numeral.
  */
-char*
+char *
 class_name(unsigned int class_number)
 {
   if ( class_number % 2 ) return " mil ";
