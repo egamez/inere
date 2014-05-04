@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>jQuery UI Autocomplete - Clave del R.F.C. - Persona física</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+  <script src="jquery.clave_rfc.js"></script>
+  <script>
+
+	$( document ).ready( function() {
+
+		$( "#clave" ).autocomplete({
+			minLength: 10,
+			source: function( request, response ) {
+				var input = $( "#clave" );
+				var day = input.clave_rfc( "extract2", "day", input.val() ),
+				    month = input.clave_rfc( "extract2", "month", input.val() ),
+				    year = input.clave_rfc( "extract2", "year", input.val() );
+				var result = [
+					input.clave_rfc( "fisica_clave",
+					     $( "#nombre" ).val(),
+					     $( "#paterno" ).val(),
+					     $( "#materno" ).val(),
+					     day,
+					     month,
+					     year ) ];
+				response ( result );
+			}
+		});
+
+	});
+
+  </script>
+</head>
+<body>
+ 
+<div class="ui-widget">
+  <table>
+    <tr>
+      <td align="right">
+	<label for="nombre">Nombre:</label>
+      </td>
+      <td>
+	<input id="nombre"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="right">
+	<label for="paterno">Apellido Paterno:</label>
+      </td>
+      <td>
+	<input id="paterno"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="right">
+	<label for="materno">Apellido Materno:</label>
+      </td>
+      <td>
+	<input id="materno"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="right">
+	<label for="clave">Clave del R.F.C.:</label>
+      </td>
+      <td>
+	<input id="clave" size="13"/>
+      </td>
+    </tr>
+  </table>
+</div>
+ 
+</body>
+</html>
