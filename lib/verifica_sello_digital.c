@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013,2014 L3a,
- * 			   Enrique Gamez Flores <egamez@edisson.com.mx>,
+ * 			   Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,16 @@
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
-xmlChar*
+/* Verifica sello digital */
+xmlChar *convert_to_pem(const xmlChar *c, xmlChar *res, int verbose);
+void local_error_function(void *ctx, const char* mess, ...);
+int cadena_original(const xmlChar *stylesheet, xmlDocPtr doc, xmlChar** cadena, int verbose);
+EVP_PKEY *extract_pkey(const xmlChar* certificado, BIO *bio_err, int verbose);
+xmlChar *decode_seal(const xmlChar* sello, int *len, BIO *bio_err, int verbose);
+int valida_sello(const xmlChar *cadena, const xmlChar *sello, const int sello_len, EVP_PKEY* pkey, const char *md_algo, BIO *bio_err, int verbose);
+
+
+xmlChar *
 convert_to_pem(const xmlChar *c, xmlChar *res, int verbose)
 {
   const xmlChar *begin = (const xmlChar *)"-----BEGIN CERTIFICATE-----\n";
@@ -148,6 +157,7 @@ cadena_original(const xmlChar *stylesheet, xmlDocPtr doc, xmlChar** cadena, int 
   }
 
   xsltCleanupGlobals();
+  return 0;
 }
 
 /**
@@ -157,7 +167,7 @@ cadena_original(const xmlChar *stylesheet, xmlDocPtr doc, xmlChar** cadena, int 
  * La función regresa un puntero de una estructura EVP_PKEY. La memoría
  * para alojar dicha estructura deberá ser liberada por el usuario.
  */
-EVP_PKEY*
+EVP_PKEY *
 extract_pkey(const xmlChar* certificado, BIO *bio_err, int verbose)
 {
   int result = 0;
@@ -227,7 +237,7 @@ extract_pkey(const xmlChar* certificado, BIO *bio_err, int verbose)
  * La memoría utilizada para alojar el sello digital, deberá ser liberada por
  * el usuario.
  */
-xmlChar*
+xmlChar *
 decode_seal(const xmlChar* sello, int *len, BIO *bio_err, int verbose)
 {
   const int length = xmlStrlen(sello);
