@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>jQuery UI Autocomplete - Clave del R.F.C. - Persona física</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+  <script src="jquery.clave_rfc.js"></script>
+  <script>
+
+	$( document ).ready( function() {
+
+		$( "#genera-rfc" ).click( function( e ) {
+			e.preventDefault();
+			var clave = $( "#clave" ).clave_rfc( "fisica_clave",
+					     	     $( "#nombre" ).val(),
+					     	     $( "#paterno" ).val(),
+					     	     $( "#materno" ).val(),
+					     	     $( "#day" ).val(),
+					     	     $( "#month" ).val(),
+					     	     $( "#year" ).val() );
+			$( "#clave" ).val( clave );
+		});
+
+	});
+
+  </script>
+</head>
+<body>
+ 
+<div class="ui-widget">
+  <table>
+    <tr>
+      <td align="right">
+	<label for="nombre">Nombre:</label>
+      </td>
+      <td>
+	<input id="nombre"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="right">
+	<label for="paterno">Apellido Paterno:</label>
+      </td>
+      <td>
+	<input id="paterno"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="right">
+	<label for="materno">Apellido Materno:</label>
+      </td>
+      <td>
+	<input id="materno"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="right">
+	<label for="day">Día:</label>
+      </td>
+      <td>
+	<input id="day" size="2"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="right">
+	<label for="month">Mes:</label>
+      </td>
+      <td>
+	<input id="month" size="2"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="right">
+	<label for="year">Año:</label>
+      </td>
+      <td>
+	<input id="year" size="4"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="right">
+	<button type="submit" id="genera-rfc">Clave del R.F.C.</button>
+      </td>
+      <td>
+	<input id="clave" size="13" disabled="yes"/>
+      </td>
+    </tr>
+  </table>
+</div>
+ 
+</body>
+</html>
