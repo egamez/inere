@@ -42,8 +42,17 @@
 #include <stdio.h>
 #include <ctype.h>
 
-
+/* Forward declarations */
 void split(const char *name, char ***words, size_t *len, const int verbose);
+char *moral_regla1(char* result, char *palabras[], const int verbose);
+char *moral_regla2(const char* year, const char* month, const char* day, char* result);
+char *moral_regla3(char *palabra, const int verbose);
+char *moral_regla6(char* result, char *palabras[], const int verbose);
+char *moral_regla7(char* result, const char *palabra, const int verbose);
+char *moral_regla8(char* result, const char *palabra, const int verbose);
+int moral_regla10(char *numero, char *result[], const int verbose);
+char *moral_regla12(char *palabra, const int verbose);
+char *remove_punctuation(char* word, int verbose);
 
 
 /**
@@ -84,7 +93,7 @@ void split(const char *name, char ***words, size_t *len, const int verbose);
  *	   Resultado de la expresión alfabética:		SIA
  *
  */
-char*
+char *
 moral_regla1(char* result, char *palabras[], const int verbose)
 {
   memset(result, 0, 4);
@@ -139,7 +148,7 @@ moral_regla1(char* result, char *palabras[], const int verbose)
  *	Artículos de Caza y Pesca, S. de R. L.		ACP-860215
  *
  */
-char*
+char *
 moral_regla2(const char* year, const char* month, const char* day, char* result)
 {
   int ano = 0;
@@ -174,7 +183,7 @@ moral_regla2(const char* year, const char* month, const char* day, char* result)
  *	Luis Molina Llorantes y Cía., S. de R.L.	LML-860911
  *
  */
-char*
+char *
 moral_regla3(char *palabra, const int verbose)
 {
   const size_t len = strlen(palabra);
@@ -241,7 +250,7 @@ moral_regla3(char *palabra, const int verbose)
  *	Distribuidora Ges, S.A.				DGE-850628
  *
  */
-char*
+char *
 moral_regla6(char* result, char *palabras[], const int verbose)
 {
   memset(result, 0, 4);
@@ -279,7 +288,7 @@ moral_regla6(char* result, char *palabras[], const int verbose)
  *	Electrólisis, S.A.				ELE-840821
  *
  */
-char*
+char *
 moral_regla7(char* result, const char *palabra, const int verbose)
 {
   const size_t len = strlen(palabra);
@@ -327,7 +336,7 @@ moral_regla7(char* result, const char *palabra, const int verbose)
  *	Z, S.A.						ZXX-860110
  *
  */
-char*
+char *
 moral_regla8(char* result, const char *palabra, const int verbose)
 {
   const size_t len = strlen(palabra);
@@ -439,7 +448,7 @@ moral_regla10(char *numero, char *result[], const int verbose)
  *	EL C@FE.NET					CFE-030210
  *
  */
-char*
+char *
 moral_regla12(char *palabra, const int verbose)
 {
   const size_t len = strlen(palabra);
@@ -612,7 +621,7 @@ clave_rfc_persona_moral(char* clave, const char *denominacion_social, const char
  * Auxiliar function to remove any '.' or ',' character.
  *
  */
-char*
+char *
 remove_punctuation(char* word, int verbose)
 {
   int i = 0;
