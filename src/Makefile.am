@@ -10,6 +10,6 @@ rfc_LDFLAGS = $(top_srcdir)/lib/libinere.la $(XML2_LIB) $(XSLT_LIB) $(OPENSSL_LI
 sello_SOURCES = sello.c
 sello_LDFLAGS = $(top_srcdir)/lib/libinere.la $(XML2_LIB) $(XSLT_LIB) $(OPENSSL_LIBS)
 
-CLEANFILES = *~
+INCLUDES = -I$(top_srcdir)/include $(XML2_INCLUDE)
 
-AM_CPPFLAGS = -D_GNU_SOURCE -pedantic -pedantic-errors -Wextra -Wall -W -fPIC -pipe -funsigned-char -ansi -pthread -I$(top_srcdir)/include $(XML2_INCLUDE)
+AM_CFLAGS = -Wall -Wextra -Winit-self -Wuninitialized -Wmissing-declarations -Winit-self -ansi -pedantic -pthread -pedantic-errors -D_GNU_SOURCE -funsigned-char
