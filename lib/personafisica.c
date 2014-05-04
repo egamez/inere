@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2014, L3a,
- *			    Enrique Gámez Flores <egamez@edisson.com.mx>,
+ *			    Enrique Gámez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,11 +52,6 @@
  *
  *
  */
-#include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdio.h>
-
 #ifndef INERE_PERSONAFISICA_INCLUDED_H
 #include "inere/personafisica.h"
 #endif
@@ -70,8 +65,22 @@
 #include "inere/util.h"
 #endif
 
-/* Forward declaration to reuse... */
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+/* Forward declaration */
+void fisica_regla1(const char *paterno, const char *materno, const char *nombre, char *result);
+char *regla2(const char* year, const char* month, const char* day, char* result);
+void fisica_regla3(const char *paterno, const char *materno, const char* nombre, char *result);
+void fisica_regla4(const char *paterno, const char *materno, const char *nombre, char *result);
+void fisica_regla5(const char *paterno, const char *materno, const char *nombre, char *result);
+int fisica_regla6(char* nombre, const int debug);
+void fisica_regla7(const char *apellido, const char *nombre, char *result);
 int fisica_regla8(char* palabra, int debug);
+int fisica_regla9(char *clave, int debug);
+
 
 /**
  * Regla 1a.
@@ -154,7 +163,7 @@ fisica_regla1(const char *paterno, const char *materno, const char *nombre, char
  *	Gabriel Courturier Moreno				COMG-600703
  * OK!
  */
-char*
+char *
 regla2(const char* year, const char* month, const char* day, char* result)
 {
   int ano = 0;
