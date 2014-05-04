@@ -115,6 +115,9 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+/* Forward declaration */
+int anexo3(const char caracter);
+
 int
 anexo3(const char caracter)
 {
