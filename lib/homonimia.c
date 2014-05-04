@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012,	Lae,
- *			Enrique Gámez Flores <egamez@edisson.com.mx>
+ * Copyright (c) 2012-2014, L3a,
+ *			    Enrique Gámez Flores <egamez@edisson.com.mx>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,14 +133,20 @@
  * es posible que la clave sea diferente a la que se obtiene con el actual
  * nombre.
  */
+#ifndef INERE_HOMONIMIA_INCLUDED_H
+#include "inere/homonimia.h"
+#endif
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
-#ifndef INERE_HOMONIMIA_INCLUDED_H
-#include "inere/homonimia.h"
-#endif
+/* Forward declarations */
+int anexo1(const char caracter);
+char anexo2(const unsigned int n);
+unsigned int decena(const unsigned int valor);
+
 
 /**
  * Anexo I
