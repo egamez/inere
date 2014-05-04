@@ -10,8 +10,10 @@ AC_CONFIG_MACRO_DIR([m4])
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_MAKE_SET
+AC_PROG_INSTALL
 
 # For libtool
+LT_INIT
 AC_PROG_LIBTOOL
 
 # For automake
@@ -26,33 +28,41 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_CHECK_FUNCS([strsep strcasecmp iconv])
 
-
 # Checks for extra libraries.
 
-# xml2
-AC_PATH_PROGS(XML2_CONFIG, xml2-config)
+# Check for libxml2
+XML2_CONFIG=
+AC_ARG_WITH([xml2config],
+	[AS_HELP_STRING([--with-xml2config@<:@=PATH@:>@],
+		[Especifica la ruta del ejecutable xml2-config @<:@default=/usr/local/bin@:>@])],
+	[
+		XML2_CONFIG=$withval/xml2-config
+	],
+	[
+		AC_PATH_PROGS(XML2_CONFIG, xml2-config)
+	])
 if test -z "$XML2_CONFIG" || test ! -r "$XML2_CONFIG"; then
-        AC_MSG_ERROR([
-XML2 required.
+	AC_MSG_ERROR([
+libXML2 (through xml2-config) required.
 ])
 fi
 
 with_xml2_include=`$XML2_CONFIG --prefix`
-AC_MSG_NOTICE([using XMl2 headers at $with_xml2_include])
+AC_MSG_NOTICE([using libxml2 headers at $with_xml2_include])
 with_xml2_lib=`$XML2_CONFIG --prefix`
-AC_MSG_NOTICE([using XML2 libraries at $with_xml2_lib])
-XML2_PREFIX=`$XML2_CONFIG --prefix`
-AC_SUBST(XML2_PREFIX)
+AC_MSG_NOTICE([using libxml2 libraries at $with_xml2_lib])
 
 XML2_LIB=`$XML2_CONFIG --libs`
 AC_SUBST(XML2_LIB)
 XML2_INCLUDE=`$XML2_CONFIG --cflags`
 AC_SUBST(XML2_INCLUDE)
+XML2_PREFIX=`$XML2_CONFIG --prefix`
+AC_SUBST(XML2_PREFIX)
 
 # xslt
 AC_PATH_PROG(XSLT_CONFIG, xslt-config)
 if test -z "$XSLT_CONFIG" || test ! -r "$XSLT_CONFIG"; then
-        AC_MSG_ERROR([
+	AC_MSG_ERROR([
 XSLT required.
 ])
 fi
