@@ -46,6 +46,10 @@
 
 #include <getopt.h>
 
+/* Forward declaration */
+void usage();
+
+
 /**
  * Función para mostrar las opciones de uso
  */
