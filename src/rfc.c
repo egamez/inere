@@ -46,33 +46,102 @@
 
 #include <getopt.h>
 
+/**
+ * Función para mostrar las opciones de uso
+ */
 void
 usage()
 {
-  printf("Programa para obtener, o verificar algunos parametros asociados con la clave\n");
-  printf("del R.F.C.\n\nSintáxis:\n\n");
-  printf(" -o/--homonimia\t\tObten la clave diferenciadora de homonimias. Se\n");
-  printf("\t\t\trequerira tanto el nombre como los apellidos.\n");
-  printf(" -g/--digito=RFC\tObten el digito verificador para este RFC abreviado. \n");
-  printf(" -r/--rfc\t\tObten la clave del Registro Federal de Contribuyentes.\n");
-  printf(" -s/--razon-social\tFija la razón social que se utilizara para el calculo de\n");
-  printf("\t\t\tla clave del R.F.C.\n");
-  printf(" -i/--tipo-de-sociedad\tFija el tipo de sociedad de la razón social para el\n");
-  printf("\t\t\tcalculo de la clave del R.F.C.\n");
-  printf(" -n/--nombre=NOMBRE\tFija el nombre que se utilizara para el calculo de la\n");
-  printf("\t\t\tclave del R.F.C.\n");
-  printf(" -p/--paterno=APELLIDO\tFija el apellido paterno (o el apellido unico en caso de\n");
-  printf("\t\t\tque el contribuyente tenga un unico apellido) en caso de\n");
-  printf("\t\t\tpersona fisica que se utilizaran para el calculo del RFC\n");
-  printf(" -t/--materno=APELLIDO\tFija el apellido materno, del contribuyente, necesario\n");
-  printf("\t\t\tpara obtener el RFC.\n");
-  printf(" -d/--dia=DIA\t\tFija el dia de nacimiento del contribuyente.\n");
-  printf(" -m/--mes=MES\t\tFija el numero de mes de nacimiento.\n");
-  printf(" -a/--ano=AÑO\t\tFija el año de nacimiento.\n");
-  printf(" -b/--verifica=RFC\tVerifica que la clave del RFC suministrada\n");
-  printf("\t\t\tcoincida con el digito tambien suministrado.\n");
-  printf(" -v/--verbose\t\tSet the verbose mode.\n");
-  printf(" -h/--help\t\tImprime este mensaje.\n");
+  printf("Uso: rfc [MODO] [OPCIONES]\n");
+  printf("\
+Programa para obtener, o verificar algunos parametros asociados con la clave\n\
+del R.F.C.\n\n");
+
+  printf("\
+Hay tres modos de operación del programa, y debe de elegirse al menos uno de\n\
+ellos:\n\n");
+
+  printf("\
+  -R, --rfc          Calcula la clave del R.F.C. (sera necesario proporcionar\n\
+                     los parametros para dicho calculo.)\n");
+  printf("\
+  -H, --homonimia    Obten la clave diferenciadora de homonimos.\n\
+  -D, --digito       Calcula el digito verificador de la clave (incompleta)\n\
+                     suministrada.\n");
+
+  printf("\nOpciones requeridas para el calculo de la clave del R.F.C.:\n\n");
+
+  printf("\
+  -d DIA, --dia=DIA  Define el día de nacimiento de la persona, o día de la\n\
+                     fecha de constitución.\n");
+  printf("\
+  -m MES, --mes=MES  Define el mes de nacimiento de la persona, o mes de la\n\
+                     fecha de constitución.\n");
+  printf("\
+  -a AÑO, --anio=AÑO Define el año de nacimiento de la persona, o año de la\n\
+                     fecha de constitución.\n");
+
+  printf("\ny para el caso de la clave del R.F.C. para una persona física:\n\n");
+
+  printf("\
+  -N NOMBRE, --nombre=NOMBRE\n\
+                     Define el nombre de la persona.\n");
+  printf("\
+  -P APELLIDO, --paterno=APELLIDO\n\
+                     Define el apellido paterno, o primer apellido de la persona\n");
+  printf("\
+  -M APELLIDO, --materno=APELLIDO\n\
+                     Define el apellido materno, o segundo apellido de la\n\
+                     persona en caso de que exista.\n");
+
+  printf("\npero para el caso de la clave para una persona moral:\n\n");
+
+  printf("\
+  -r NOMBRE, --razon-social=NOMBRE\n\
+                     Razón o denominación social.\n");
+  printf("\
+  -t TIPO, --tipo-de-sociedad=TIPO\n\
+                     Siglas que indican el tipo de sociedad (S.A. de C.V., etc.\n\n");
+
+
+  printf("Opciones requeridas para el calculo de la clave diferenciadora de homonimos:\n\n");
+
+  printf("\
+  -N NOMBRE, --nombre=NOMBRE\n\
+                     Define el nombre de la persona.\n");
+  printf("\
+  -P APELLIDO, --paterno=APELLIDO\n\
+                     Define el apellido paterno, o primer apellido de la persona\n");
+  printf("\
+  -M APELLIDO, --materno=APELLIDO\n\
+                     Define el apellido materno, o segundo apellido de la\n\
+                     persona en caso de que exista.\n");
+
+  printf("\npero para el caso de la clave para una persona moral:\n\n");
+
+  printf("\
+  -r NOMBRE, --razon-social=NOMBRE\n\
+                     Razón o denominación social.\n");
+  printf("\
+  -t TIPO, --tipo-de-sociedad=TIPO\n\
+                     Siglas que indican el tipo de sociedad (S.A. de C.V., etc.\n\n");
+
+  printf("\
+Para el modo de generar el digito de verificación de la clave:\n\n");
+
+  printf("\
+  -D RFC, --digito=RFC\n\
+                     Obten el digito verificador para este RFC abreviado.\n\n");
+
+  printf("Opciones adicionales:\n\n");
+  printf("\
+  -V RFC, --verifica=RFC\n\
+                     Verifica que la clave del R.F.C. suministrada coincida con\n\
+                     el digito tambien suministrado.\n");
+  printf("\
+  -v, --verbose      Imprime algunos mensajes extra durante la ejecución.\n\
+  -h, --help         Imprime este mensaje.\n");
+
   printf("\n\nBugs to: Enrique Gamez <egamez@edisson.com.mx>\n");
 }
 
@@ -85,48 +154,48 @@ main(int argc, char *argv[])
   int want_rfc = 0;
   int want_verbose = 0;
   int want_verify = 0;
-  char *razonsocial = NULL;
-  char *tiposociedad = NULL;
-  char *nombre = NULL;
-  char *paterno = NULL;
-  char *materno = NULL;
-  char *dia = NULL;
-  char *mes = NULL;
-  char *ano = NULL;
+  const char *razonsocial = NULL;
+  const char *tiposociedad = NULL;
+  const char *nombre = NULL;
+  const char *paterno = NULL;
+  const char *materno = NULL;
+  const char *dia = NULL;
+  const char *mes = NULL;
+  const char *ano = NULL;
+  const char *rfc_corto = NULL;
   char clave_diferenciadora[3];
-  char *rfc_corto = NULL;
   char digito = 0;
   char rfc[18];
 
   /* options descriptor */
   static struct option longopts[] = {
-      {"homonimia",	no_argument,		NULL,	'o'},
-      {"digito",	required_argument,	NULL,	'g'},
-      {"rfc",		no_argument,		NULL,	'r'},
-      {"razon-social",	required_argument,	NULL,	's'},
-      {"tipo-de-socieda",	required_argument,	NULL,	'i'},
-      {"nombre",	required_argument,	NULL,	'n'},
-      {"paterno",	required_argument,	NULL,	'p'},
-      {"materno",	required_argument,	NULL,	't'},
-      {"dia",		required_argument,	NULL,	'd'},
-      {"mes",		required_argument,	NULL,	'm'},
-      {"ano",		required_argument,	NULL,	'a'},
-      {"verifica",	required_argument,	NULL,	'b'},
-      {"verbose",	no_argument,		NULL,	'v'},
-      {"help",		no_argument,		NULL,	'h'},
-      {NULL,		0,			NULL,	0}
+      {"homonimia",		no_argument,		NULL,	'H'},
+      {"digito",		required_argument,	NULL,	'D'},
+      {"rfc",			no_argument,		NULL,	'R'},
+      {"razon-social",		required_argument,	NULL,	'r'},
+      {"tipo-de-socieda",	required_argument,	NULL,	't'},
+      {"nombre",		required_argument,	NULL,	'N'},
+      {"paterno",		required_argument,	NULL,	'P'},
+      {"materno",		required_argument,	NULL,	'M'},
+      {"dia",			required_argument,	NULL,	'd'},
+      {"mes",			required_argument,	NULL,	'm'},
+      {"anio",			required_argument,	NULL,	'a'},
+      {"verifica",		required_argument,	NULL,	'V'},
+      {"verbose",		no_argument,		NULL,	'v'},
+      {"help",			no_argument,		NULL,	'h'},
+      {NULL,			0,			NULL,	 0 }
     };
 
-  while ((ch=getopt_long(argc,argv,"og:rs:i:n:p:t:d:m:a:b:vh",longopts,NULL)) != -1 ) {
+  while ((ch=getopt_long(argc,argv,"HD:Rr:t:N:P:M:d:m:a:V:vh",longopts,NULL)) != -1 ) {
     switch(ch) {
-      case 'o':
+      case 'H':
 	/* Get the clave diferenciadora de homonimias */
 	want_homonimia = 1;
 	want_rfc = 0;
 	want_verificador = 0;
 	break;
 
-      case 'g':
+      case 'D':
 	/* Get the digito verificador */
 	want_verificador = 1;
 	want_homonimia = 0;
@@ -134,34 +203,34 @@ main(int argc, char *argv[])
 	rfc_corto = optarg;
 	break;
 
-      case 'r':
+      case 'R':
 	/* Obten la clave del RFC */
 	want_rfc = 1;
 	want_homonimia = 0;
 	want_verificador = 0;
 	break;
 
-      case 's':
+      case 'r':
 	/* La razón social fue fijada */
 	razonsocial = optarg;
 	break;
 
-      case 'i':
+      case 't':
 	/* Tipo de sociedad de la persona moral */
 	tiposociedad = optarg;
 	break;
 
-      case 'n':
+      case 'N':
 	/* Set the name to obtain the RFC */
 	nombre = optarg;
 	break;
 
-      case 'p':
+      case 'P':
 	/* Set the apellido paterno, needed to build up the RFC */
 	paterno = optarg;
 	break;
 
-      case 't':
+      case 'M':
 	/* Set the apellido materno, needed to build up the RFC */
 	materno = optarg;
 	break;
@@ -184,7 +253,7 @@ main(int argc, char *argv[])
 	ano = optarg;
 	break;
 
-      case 'b':
+      case 'V':
 	/* Want to verify the RFC */
 	want_verify = 1;
 	snprintf(rfc, strlen(optarg)+1, optarg);
@@ -206,8 +275,6 @@ main(int argc, char *argv[])
     }
 
   }
-  argc -= optind;
-  argv += optind;
 
   /* Verifica que alguno de los tres modos de funcionamiento hallan
    * sido seleccionados
@@ -233,12 +300,12 @@ main(int argc, char *argv[])
       printf("Es necesario proporcionar el mes de nacimiento o constitución de la empresa, a travez de la opción -m/--mes\n");
     }
     if ( ano == NULL ) {
-      printf("Es necesario proporcionar el año de nacimiento o constitución de la empresa, a travez de la opción -a/--ano\n");
+      printf("Es necesario proporcionar el año de nacimiento o constitución de la empresa, a travez de la opción -a/--anio\n");
     }
 
     if ( nombre == razonsocial ) {
       /* No fue proporcionada la base para el calculo de la clave */
-      printf("Es necesario proporcionar al nombre de la persona fisica (a travez de la opción -n/--nombre) o razón social (a travez de la opción -s/--razon-social)\n");
+      printf("Es necesario proporcionar al nombre de la persona fisica (a travez de la opción -N/--nombre) o razón social (a travez de la opción -r/--razon-social)\n");
       return 2;
     }
 
@@ -247,7 +314,7 @@ main(int argc, char *argv[])
        * Verifica que al menos un apellido halla sido proporcionado
        */
       if ( paterno == NULL ) {
-	printf("Es necesario proporcionar al menos un apellido a travez de la opción -p/--paterno\n");
+	printf("Es necesario proporcionar al menos un apellido a travez de la opción -P/--paterno\n");
 	return 3;
       }
 
@@ -294,7 +361,7 @@ main(int argc, char *argv[])
 
     if ( razonsocial == nombre ) {
       /* Ningun nombre fue especificado, no es posible calcular algo */
-      printf("Es necesario especificar el nombre (a travez de la opción -n/--nombre) o la razón social del contribuyente (opción -s/--razon-social)\n");
+      printf("Es necesario especificar el nombre (a travez de la opción -N/--nombre) o la razón social del contribuyente (opción -r/--razon-social)\n");
       return 4;
     }
 
@@ -303,7 +370,7 @@ main(int argc, char *argv[])
        * Verifica que al menos un apellido halla sido proporcionado
        */
       if ( paterno == NULL ) {
-	printf("Es necesario proporcionar al menos un apellido a travez de la opción -p/--paterno\n");
+	printf("Es necesario proporcionar al menos un apellido a travez de la opción -P/--paterno\n");
 	return 5;
       }
 
