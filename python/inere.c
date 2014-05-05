@@ -6,7 +6,7 @@
 #include "inere/verificador.h"
 #include "inere/util.h"
 #include "inere/cantidades.h"
-#include "inere/verifica_sello_digital.h"
+#include "inere/cfdi/verifica_sello_digital.h"
 #include "inere/extrae_fecha.h"
 
 static PyObject *InereError;
@@ -247,19 +247,19 @@ inere_verificasello(PyObject *self, PyObject *args, PyObject *keywds)
 {
   const char *cfd;
   const char *stylesheet;
-  int debug;
+  int verbose;
   int result = 0;
   static char *kwdlist[] = {"cfd",
 			   "stylesheet",
-			   "debug",
+			   "verbose",
 			   NULL};
 
   if ( !PyArg_ParseTupleAndKeywords(args, keywds, "ss|i", kwdlist,
-					&cfd, &stylesheet, &debug) )
+					&cfd, &stylesheet, &verbose) )
     return NULL;
 
   /* Verifica el sello */
-  result = verifica_sello_digital(cfd, (const unsigned char *)stylesheet, debug);
+  result = verifica_sello_digital(cfd, stylesheet, verbose);
 
   if ( result == 1 ) return Py_BuildValue("O", Py_True);
   else		     return Py_BuildValue("O", Py_False);

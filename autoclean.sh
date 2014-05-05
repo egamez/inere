@@ -27,5 +27,6 @@ rm -rf aclocal.m4 \
 	lib/Makefile.in \
 	lib/src/Makefile.in \
 	lib/cfdi/Makefile.in \
+	test/Makefile.in \
 	python/build/ \
 	src/Makefile.in

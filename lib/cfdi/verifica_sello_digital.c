@@ -27,11 +27,14 @@
 #ifndef EDISSON_VERIFICA_SELLO_DIGITAL
 #include "inere/cfdi/verifica_sello_digital.h"
 #endif
+#ifndef EDISSON_GENERA_CADENA_ORIGINAL_H
+#include "inere/cfdi/genera_cadena_original.h"
+#endif
+#ifndef BASE64_H
+#include "inere/base64.h"
+#endif
 
 #include <string.h>
-
-#include <libxslt/transform.h>
-#include <libxslt/xsltutils.h>
 
 #include <openssl/bio.h>
 #include <openssl/evp.h>
@@ -41,10 +44,7 @@
 
 /* Verifica sello digital */
 xmlChar *convert_to_pem(const xmlChar *c, xmlChar *res, int verbose);
-void local_error_function(void *ctx, const char* mess, ...);
-int cadena_original(const xmlChar *stylesheet, xmlDocPtr doc, xmlChar** cadena, int verbose);
 EVP_PKEY *extract_pkey(const xmlChar* certificado, BIO *bio_err, int verbose);
-xmlChar *decode_seal(const xmlChar* sello, int *len, BIO *bio_err, int verbose);
 int valida_sello(const xmlChar *cadena, const xmlChar *sello, const int sello_len, EVP_PKEY* pkey, const char *md_algo, BIO *bio_err, int verbose);
 
 
@@ -80,86 +80,6 @@ convert_to_pem(const xmlChar *c, xmlChar *res, int verbose)
     printf("convert_to_pem: Certificado de sello digital, contenido en el comprabante, en formato PEM:\n%s", res);
   }
   return res;
-}
-
-/**
- * Funcion para suprimir los mensajes de error generados por peticiones
- * de compilacion de instrucciones para version 2.0 de xsl
- */
-void
-local_error_function(void *ctx, const char* mess, ...)
-{
-   char *errMsg;
-   va_list args;
-   va_start(args, mess);
-   vasprintf(&errMsg, mess, args);
-   va_end(args);
-   if ( !strncmp("compilation error", errMsg, 17) &&
-	!strncmp("xsl:version: only 1.0 features are supported", errMsg, 44) ) {
-     fprintf(stderr, "%s", errMsg);
-   }
-   free(errMsg);
-}
-
-/**
- * Extrae la cadena original del comprobante fiscal
- *
- * La funcion regresa:
- *
- *	0	En caso de generar la cadena original exitosamente,
- *
- * y en caso de error:
- *
- *	1	Cuando la stylsheet, proporcionada para generar la cadena
- *		original no pudo ser compilada.
- *	2	Cuando las transformaciones, definidas en la stylesheet
- *		indicada no pudieron aplicarse al CFDi.
- *	3	No fue posible escribir la cadena original a un buffer
- *
- */
-int
-cadena_original(const xmlChar *stylesheet, xmlDocPtr doc, xmlChar** cadena, int verbose)
-{
-  xsltStylesheetPtr style = NULL;
-  xmlDocPtr result = NULL;
-  int cadena_len = 0;
-  int out = 0;
-
-  xmlSubstituteEntitiesDefault(1);
-  xmlLoadExtDtdDefaultValue = 1;
-
-  xsltSetGenericErrorFunc(stderr, local_error_function);
-
-  style = xsltParseStylesheetFile(stylesheet);
-  if ( style == NULL ) {
-    /*fprintf(stderr, "cadena_original: Stylesheet (%s) no analizada.\n", stylesheet);*/
-    xsltCleanupGlobals();
-    return 1;
-  }
-
-  result = xsltApplyStylesheet(style, doc, NULL);
-  if ( result == NULL ) {
-    /*fprintf(stderr, "cadena_original: Transformaciones de stylesheet (%s) no aplicadas.\n", stylesheet);*/
-    xsltFreeStylesheet(style);
-    xsltCleanupGlobals();
-    return 2;
-  }
-
-  out = xsltSaveResultToString(cadena, &cadena_len, result, style);
-  if ( out == -1 ) {
-    /*fprintf(stderr, "cadena_original: Error al salvar la cadena original en el buffer.\n");*/
-    return 3;
-  }
-
-  xsltFreeStylesheet(style);
-  xmlFreeDoc(result);
-
-  if ( verbose ) {
-    printf("cadena_original: Cadena original de la información del comprobante:\n%s\n", *cadena);
-  }
-
-  xsltCleanupGlobals();
-  return 0;
 }
 
 /**
@@ -233,62 +153,6 @@ extract_pkey(const xmlChar* certificado, BIO *bio_err, int verbose)
 }
 
 /**
- * Decodifica el sello digital. El sello digital se encuentra codificado
- * en base 64, dentro del comprobante fiscal digital.
- *
- * La memoría utilizada para alojar el sello digital, deberá ser liberada por
- * el usuario.
- */
-xmlChar *
-decode_seal(const xmlChar* sello, int *len, BIO *bio_err, int verbose)
-{
-  const int length = xmlStrlen(sello);
-
-  xmlChar *seal = NULL;
-
-  BIO *b64 = NULL;
-  BIO *in = NULL;
-
-  b64 = BIO_new(BIO_f_base64());
-  BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
-
-  in = BIO_new_mem_buf((char *)sello, length);
-  if ( in == NULL ) {
-    BIO_printf(bio_err, "decode_seal: No fue posible crear memoría BIO para alojar el sello digital del comprobante.\n");
-    ERR_print_errors(bio_err);
-    BIO_free(b64);
-    return NULL;
-  }
-
-  in = BIO_push(b64, in);
-  seal = xmlStrndup(sello, length);
-  memset(seal, 0, length);
-
-  *len = BIO_read(in, seal, length);
-  if ( *len == 0 ) {
-    BIO_printf(bio_err, "decode_seal: Data wasn't succesfully read into a BIO buffer.\n");
-    ERR_print_errors(bio_err);
-    BIO_free_all(in);
-    return NULL;
-  }
-
-  if ( verbose ) {
-    int i = 0;
-    printf("decode_seal: %d leídos.\n", *len);
-    printf("decode_seal: Sello digital:\n");
-    for (i = 0; i < *len; i++) {
-      printf("\\x%0x", *seal++);
-    }
-    seal -= i;
-    printf("\n");
-  }
-
-  BIO_free_all(in);
-
-  return seal;
-}
-
-/**
  * Verifica que el sello digital, contenido en el comprobante, corresponda
  * a la información del comprobante mismo.
  *
@@ -302,7 +166,7 @@ decode_seal(const xmlChar* sello, int *len, BIO *bio_err, int verbose)
 int
 valida_sello(const xmlChar *cadena, const xmlChar *sello, const int sello_len, EVP_PKEY* pkey, const char *md_algo, BIO *bio_err, int verbose)
 {
-  int result = 0;
+  int result = 1;
 
   EVP_MD_CTX ctx;
   const EVP_MD *md;
@@ -342,8 +206,36 @@ valida_sello(const xmlChar *cadena, const xmlChar *sello, const int sello_len, E
   return result;
 }
 
+/**
+ * Verifica el sello digital contenido en un CFDi
+ *
+ * El proceso de verificación del sello digital, contenido en un CFDi,
+ * consistira en:
+ *
+ *	- Recuperar el certificado de llave publica (contenido en el CFDi)
+ *	- Recuperar el sello digital (también contenido en el CFDi)
+ *	- Generar la cadena original a partir del propio CFDi
+ *	- Verifica que la firma.
+ *
+ * La función regresa:
+ *
+ *	0	En caso de que el sello corresponde fielmente con el CFDi
+ *	1	En caso de que el sello no coincida con la información del CFDi
+ *	2	Si no fue posible leer el CFDi
+ *	3	Si el CFDi no contiene información
+ *	4	Si el CFDi no contiene la versión
+ *	5	Si el CFDi no tiene el certificado (de llave pública)
+ *	6	Si el CFDi no contiene el sello digital
+ *	7	Si el certificado (de llave pública) contenido en el CFDi no
+ *		puede ser utilizable para la verificación
+ *	8	No fue posible decodificar (base64) el sello para realizar la
+ *		verificación
+ *	9	No fue posible obtener la cadena original correspondiente al
+ *		CFDi
+ *
+ */
 int
-verifica_sello_digital(const char *filename, const xmlChar *stylesheet, const int verbose)
+verifica_sello_digital(const char *filename, const char *stylesheet, const int verbose)
 {
   int result = 0;
   xmlNodePtr node = NULL;
@@ -352,9 +244,9 @@ verifica_sello_digital(const char *filename, const xmlChar *stylesheet, const in
   xmlChar *cadena[2048];
   xmlNodePtr cfd = NULL;
   xmlDocPtr doc = NULL;
-  xmlChar *seal = NULL;
+  char *seal = NULL;
   xmlChar *version = NULL;
-  int seal_len = 0;
+  size_t seal_len = 0;
   const char *md_algo;
 
   BIO *bio_err = NULL;
@@ -362,15 +254,19 @@ verifica_sello_digital(const char *filename, const xmlChar *stylesheet, const in
 
   doc = xmlReadFile(filename, "UTF-8", XML_PARSE_NOENT);
   if ( doc == NULL ) {
-    fprintf(stderr, "verifica_sello_digital: El comprobante no pudo ser analizado. No es posible realizar el test.\n");
-    return 6;
+    if ( verbose ) {
+      fprintf(stderr, "verifica_sello_digital: No fue posible leer el CFDi (%s). No es posible realizar el test.\n", filename);
+    }
+    return 2;
   }
 
   cfd = xmlDocGetRootElement(doc);
   if ( cfd == NULL ) {
-    fprintf(stderr, "verifica_sello_digital: Archivo (%s) sin contenido. No es posible realizar el test.\n", filename);
+    if ( verbose ) {
+      fprintf(stderr, "verifica_sello_digital: Archivo (%s) sin contenido. No es posible realizar el test.\n", filename);
+    }
     xmlFreeDoc(doc);
-    return 7;
+    return 3;
   }
 
   /* Extract the "certificado" */
@@ -382,19 +278,25 @@ verifica_sello_digital(const char *filename, const xmlChar *stylesheet, const in
 
 	version = xmlGetProp(node, (const xmlChar *)"version");
 	if ( version == NULL ) {
-	  fprintf(stderr, "verifica_sello_digital: No se encotró la versión del comprobante digital. Imposible realizar la verificación.\n");
-	  return 8;
+	  if ( verbose ) {
+	    fprintf(stderr, "verifica_sello_digital: No se encotró la versión del comprobante digital. Imposible realizar la verificación.\n");
+	  }
+	  return 4;
 	}
 
 	certificado = xmlGetProp(node, (const xmlChar *)"certificado");
 	if ( certificado == NULL ) {
-	  fprintf(stderr, "verifica_sello_digital: No se encontró el certificado de sello digital que ampara el CFD, o posiblemente este no sea un CFD. Imposible realizar la verificación.\n");
-	  return 1;
+	  if ( verbose ) {
+	    fprintf(stderr, "verifica_sello_digital: No se encontró el certificado de sello digital que ampara el CFD, o posiblemente este no sea un CFD. Imposible realizar la verificación.\n");
+	  }
+	  return 5;
 	}
 	sello = xmlGetProp(node, (const xmlChar *)"sello");
 	if ( sello == NULL ) {
-	  fprintf(stderr, "verifica_sello_digital: No se encontró el sello digital del comprobante fiscal. Imposible realizar la verificación.\n");
-	  return 2;
+	  if ( verbose ) {
+	    fprintf(stderr, "verifica_sello_digital: No se encontró el sello digital del comprobante fiscal. Imposible realizar la verificación.\n");
+	  }
+	  return 6;
 	}
 
 	break;
@@ -415,37 +317,50 @@ verifica_sello_digital(const char *filename, const xmlChar *stylesheet, const in
     printf("verifica_sello_digital: Sello digital en el comprobante:\n%s\nCertificado de sello digital en el comprobante:\n%s\n", sello, certificado);
   }
 
-  /* Extract from the certificate its public key */
+  /* Convierte el certificado de llave pública a un formato usable */
   pkey = extract_pkey(certificado, bio_err, verbose);
   if ( pkey == NULL ) {
-    fprintf(stderr, "No se pudo obtener la clave de llave publica, del certificado que ampara el comprobrante fiscal. No es posible realizar la verificación.\n");
+    if ( verbose ) {
+      fprintf(stderr, "No se pudo obtener la clave de llave publica, del certificado que ampara el comprobrante fiscal. No es posible realizar la verificación.\n");
+    }
     BIO_free_all(bio_err);
     xmlFreeDoc(doc);
-    return 3;
+    return 7;
   }
 
   /* Now decode the sello digital */
-  seal = decode_seal(sello, &seal_len, bio_err, verbose);
+  base64_decode_alloc((const char *)sello, xmlStrlen(sello), &seal, &seal_len);
   if ( seal == NULL ) {
-    fprintf(stderr, "No fue posible decodificar el sello digital del comprobante fiscal. No es posible realizar la verificación.\n");
+    if ( verbose ) {
+      fprintf(stderr, "No fue posible decodificar el sello digital del comprobante fiscal. No es posible realizar la verificación.\n");
+    }
     EVP_PKEY_free(pkey);
     BIO_free_all(bio_err);
     xmlFreeDoc(doc);
-    return 4;
+    return 8;
   }
 
   /* Build the cadena oridigal */
   cadena_original(stylesheet, doc, cadena, verbose);
   if ( *cadena == NULL ) {
-    fprintf(stderr, "No fue posible formar la cadena original del comprobante fiscal. No es posible realizar la verificación.\n");
+    if ( verbose ) {
+      fprintf(stderr, "No fue posible formar la cadena original del comprobante fiscal. No es posible realizar la verificación.\n");
+    }
     EVP_PKEY_free(pkey);
     BIO_free_all(bio_err);
     xmlFreeDoc(doc);
-    return 5;
+    return 9;
   }
 
   /* Now verify the signature. */
-  result = valida_sello(*cadena, seal, seal_len, pkey, md_algo, bio_err, verbose);
+  result = valida_sello(*cadena, (const xmlChar *)seal, seal_len, pkey, md_algo, bio_err, verbose);
+  /* Now convert the return result */
+  if ( result == 1 ) {
+    result = 0;
+  } else {
+    /* El sello digital contenido en el CFDi no coincide con la informacion */
+    result = 1;
+  }
 
   EVP_PKEY_free(pkey);
 

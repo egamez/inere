@@ -31,8 +31,7 @@
 extern "C" {
 #endif
 
-char *
-load_certificate(const char *filename, unsigned char **serial_number, const int verbose);
+char *load_certificate_alloc(const char *filename, unsigned char **serial_number, const int verbose);
 
 #ifdef __cplusplus
 }

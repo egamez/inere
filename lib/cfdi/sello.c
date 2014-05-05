@@ -44,11 +44,15 @@
 #include <openssl/err.h>
 
 /**
- * Obten el sello digital del comporbante.
+ * Esta función se encargará de producir, lo que para el SAT[1], es un sello
+ * digital. Este sello digital consiste en el firmado digital del hash de un
+ * string, que para los casos de un CFDi se trataría de la cadena original
+ *
  * El usuario es responsable de liberar la memoria del resultado (con free())
+ * [1]: http://www.sat.gob.mx
  */
 char *
-sello(const char *keyfile, const char *digest, const unsigned char *cadena, const int verbose)
+sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena, const int verbose)
 {
   int read = 0;
   int len = 0;

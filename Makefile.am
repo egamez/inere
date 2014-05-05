@@ -1,5 +1,5 @@
 #
-SUBDIRS = lib src
+SUBDIRS = lib src test
 EXTRA_DIST = autogen.sh \
 	autoclean.sh \
 	README.md \

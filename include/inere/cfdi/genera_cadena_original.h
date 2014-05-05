@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013, 2014, L3a,
- *			     Enrique Gamez Flores <egamez@edisson.com.mx>
+ * Copyright (c) 2014, L3a,
+ *		       Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,46 +24,20 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef EDISSON_VERIFICA_SELLO_DIGITAL
-#include "inere/cfdi/verifica_sello_digital.h"
+
+#ifndef EDISSON_GENERA_CADENA_ORIGINAL_H
+#define EDISSON_GENERA_CADENA_ORIGINAL_H
+
+#include <libxml/tree.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#include <stdlib.h>
-#include <stdio.h>
+extern int cadena_original(const char *stylesheet, xmlDocPtr doc, xmlChar** cadena, int verbose);
 
-/**
- * Programa para verificar el sello digital de(los) comprobante(s)
- * digital(es)
- */
-int
-main(int argc, char *argv[])
-{
-  int result = 0;
-  int debug = 0;
-  int i = 0;
-
-  if ( argc < 3 ) {
-    fprintf(stderr, "Uso:\n\n\t%s RUTA-DEL-ARCHIVO-DE-LA-CADENAORIGINAL CFDi(s)\n\n", argv[0]);
-    return 1;
-  }
-
-  for (i = 2; i < argc; i++) {
-
-    /* Verifica el "sello digital" */
-    result = verifica_sello_digital(argv[i], argv[1], debug);
-
-    if ( argc > 3 ) printf("%s: ", argv[i]);
-
-    if ( result == 0 )
-      printf("Ok.\n");
-
-    else if ( result == 1 ) 
-      printf("Sello digital en el documento no válido.\n");
-
-    else
-      printf("No fue posible realizar el test.\n");
-
-  }
-
-  return 0;
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* EDISSON_GENERA_CADENA_ORIGINAL_H */

@@ -1,0 +1,16 @@
+#
+bin_PROGRAMS = sello certificado
+
+sello_SOURCES = sello.c
+sello_LDFLAGS = $(top_srcdir)/lib/cfdi/libinerecfdi.la \
+		$(top_srcdir)/lib/src/libinere.la \
+		$(XML2_LIB) $(XSLT_LIB) $(OPENSSL_LIBS) -ldl
+
+certificado_SOURCES = certificado.c
+certificado_LDFLAGS = $(top_srcdir)/lib/cfdi/libinerecfdi.la \
+			$(top_srcdir)/lib/src/libinere.la \
+			$(XML2_LIB) $(XSLT_LIB) $(OPENSSL_LIBS) -ldl
+
+INCLUDES = -I$(top_srcdir)/include $(XML2_INCLUDE) $(CURL_INCLUDES) $(UUID_INCLUDES)
+
+AM_CFLAGS = -Wall -Wextra -Winit-self -Wuninitialized -Wmissing-declarations -Winit-self -ansi -pedantic -pthread -pedantic-errors -D_GNU_SOURCE -funsigned-char

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     Lae
+ * Copyright (c) 2013-2014, L3a,
+ *			    Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,13 +28,15 @@
 #ifndef EDISSON_VERIFICA_SELLO_DIGITAL
 #define EDISSON_VERIFICA_SELLO_DIGITAL
 
+/*
 #include <libxml/tree.h>
+*/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int verifica_sello_digital(const char* filename, const xmlChar *stylesheet, int debug);
+int verifica_sello_digital(const char* filename, const char *stylesheet, int verbose);
 
 #ifdef __cplusplus
 }

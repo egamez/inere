@@ -38,16 +38,26 @@
 #include <openssl/x509.h>
 
 /**
- * The user is responsable to free the result (with free())
+ * Esta funcion se encarga de leer el certificado de llave pública (en formato
+ * CER) para despues codificarlo en base64.
+ * La aplicación de esta función esta pensada para ser utilizada en la
+ * elaboración de un CFDi el cual requiere que se incluya este certificado,
+ * así como el número de serie del mismo
+ *
+ * Esta función regresa el certificado ya codificado en un string que deberá
+ * ser liberado por el usuario (con free()) y deposita en el puntero
+ * 'serial_number' el correspondiente número de serie (que también deberá
+ * ser liberado con free().)
+ *
  */
 char *
-load_certificate(const char *filename, unsigned char **serial_number, const int verbose)
+load_certificate_alloc(const char *filename, unsigned char **serial_number, const int verbose)
 {
   int len = 0;
   int read = 0;
   char *orig = NULL;
   char *cert = NULL;
-  const char *default_serial_number = "00001000000200258016";
+  const char *default_serial_number = "00000000000000000000";
   X509* x509 = NULL;
   FILE *file = NULL;
 

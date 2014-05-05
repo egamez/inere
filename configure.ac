@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.64])
-AC_INIT([inere], [0.2.0], [egamez@edisson.com.mx])
+AC_INIT([inere], [0.2.1], [egamez@edisson.com.mx])
 AC_CONFIG_SRCDIR([src/rfc.c])
 AC_CONFIG_HEADERS([include/inere/config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -209,5 +209,6 @@ AC_CONFIG_FILES([Makefile
                  lib/envia/Makefile
                  src/Makefile
 		 examples/Makefile
+                 test/Makefile
 		 python/setup.py])
 AC_OUTPUT

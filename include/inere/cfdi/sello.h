@@ -31,8 +31,7 @@
 extern "C" {
 #endif
 
-char *
-sello(const char *keyfile, const char *digest, const unsigned char *cadena, const int verbose);
+char *sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena, const int verbose);
 
 #ifdef __cplusplus
 }
