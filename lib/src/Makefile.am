@@ -2,8 +2,8 @@
 
 lib_LTLIBRARIES = libinere.la
 libinere_la_SOURCES = cantidades.c homonimia.c numerales.c personafisica.c \
-		      personamoral.c verificador.c util.c \
-		      extrae_fecha.c
+		      personamoral.c verificador.c util.c extrae_fecha.c \
+		      base64.c
 
 libinere_la_LDFLAGS = -version-info 1:2:0
 
@@ -14,7 +14,8 @@ nobase_dist_include_HEADERS = $(top_srcdir)/include/inere/cantidades.h \
 		$(top_srcdir)/include/inere/personamoral.h \
 		$(top_srcdir)/include/inere/verificador.h \
 		$(top_srcdir)/include/inere/util.h \
-		$(top_srcdir)/include/inere/extrae_fecha.h
+		$(top_srcdir)/include/inere/extrae_fecha.h \
+		$(top_srcdir)/include/inere/base64.h
 
 INCLUDES = -I$(top_srcdir)/include
 
