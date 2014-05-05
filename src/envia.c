@@ -17,7 +17,7 @@ print_help()
   printf("Envia un e-mail para la entrega de un CFDi y su posible representación impresa.\n\n");
 
   printf("Los parametros obligatorios son:\n\n");
-  printf("  -u, --username=USERNAME\tDeclara el nombre de usuario que tiene acceso\n\t\t\t\tal servidor de correo electrónico\n");
+  printf("  -u, --usuario=USERNAME\tDeclara el nombre de usuario que tiene acceso\n\t\t\t\tal servidor de correo electrónico\n");
   printf("  -p, --password=PASSWORD\tDeclara el password (del usuario) para acceder\n\t\t\t\tal servidor de correo electrónico\n");
   printf("  -s, --servidor=URL\t\tDeclara el URL del servidor de correo\n\t\t\t\telectrónico. Por ejemplo:\n\t\t\t\t\tsmtps://smtp.gmail.com/\n\t\t\t\t\tsmtps://smtp.mail.yahoo.com/\n\t\t\t\t\tsmtp://smtp-mail.outlook.com:587/\n");
 
@@ -33,7 +33,6 @@ print_help()
   printf("  -r, --remitente=BUZON\t\tFija el buzón de correo electrónico que sera\n\t\t\t\tutilizado para el campo de encabezado 'From'\n");
   printf("  -d, --destinatario=BUZON\tDeclara el buzón de correo electrónico del\n\t\t\t\tdestinatario, campo de encabezado 'To'\n");
   printf("  -c, --copia-fiel=BUZON\tCarbon copy\n");
-  printf("  -C, --nombre-copia=NOMBRE\tNombre ...\n");
   printf("  -F, --cfdi=ARCHIVO\t\tLa ruta del CFDi\n");
 
   printf("  -a, --asunto=ASUNTO\t\tEl asunto del mensaje ('Subject')\n");
@@ -41,15 +40,16 @@ print_help()
   printf("  -P, --cfdi-pdf=FILE\t\tLa ruta de la representación impresa del CFDI\n");
   printf("  -R, --nombre-remitente=NOMBRE\tFija el nombre a desplegar como remitente\n");
   printf("  -D, --nombre-destinatario=NOMBRE\n\t\t\t\tFija el nombre a desplegar del destinatario\n");
+  printf("  -C, --nombre-copia=NOMBRE\tNombre asociado al buzón Cc:\n");
   printf("  -e, --palabras-clave=PALABRAS\tPalabras clave para agregar en el campo de\n\t\t\t\tencabezado del mensaje. Las palabras clave\n\t\t\t\tdeberan ser separadas por comas.\n");
   printf("  -o, --organizacion=NOMBRE\tDeclara el nombre de la organización\n");
   printf("  -A, --importancia-alta\tDefine el campo de encabezado auxiliar\n\t\t\t\tImportance como High\n");
-  printf("  -N, --importancia-normal\tDefine el campo de encabezado auxiliar\n\t\t\t\tImportance como Normal\n");
+  printf("  -N, --importancia-media\tDefine el campo de encabezado auxiliar\n\t\t\t\tImportance como Normal\n");
   printf("  -B, --importancia-baja\tDefine el campo de encabezado auxiliar\n\t\t\t\tImportance como Low\n");
   printf("  -X, --caracter-personal\tDefine el campo de encabezado auxiliar\n\t\t\t\tSensitivity como Personal\n");
   printf("  -Y, --caracter-privado\tDefine el campo de encabezado auxiliar\n\t\t\t\tSensitivity como Private\n");
   printf("  -Z, --caracter-confidencial\tDefine el campo de encabezado auxiliar\n\t\t\t\tSensitivity como Company confidential\n");
-  printf("      --insecure\t\tNo verifiques el proceso de verificación de\n\t\t\t\tcerticados\n");
+  printf("  -k, --insecure\t\tNo verifiques el proceso de verificación de\n\t\t\t\tcerticados\n");
   printf("  -v, --verbose\t\t\tEnvia mensajes a stdout acerca de las acciones\n\t\t\t\trealizadas por el programa\n");
   printf("  -h, --help\t\t\tImprime este mensaje\n");
 
