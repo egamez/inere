@@ -1,7 +1,7 @@
-#include "inere/config.h"
-#include "inere/envia/curl_envia_email.h"
-#include "inere/base64.h"
-#include "inere/envia/non_ascii.h"
+#include "envia/config.h"
+#include "envia/curl_envia_email.h"
+#include "envia/base64.h"
+#include "envia/non_ascii.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -15,7 +15,7 @@
 #ifdef ENVIA_UTILIZA_UUID
 # include <uuid.h>
 #else
-# include "inere/envia/genera_cadena.h"
+# include "envia/genera_cadena.h"
 #endif
 
 typedef struct {
@@ -513,7 +513,7 @@ agrega_encabezado(char *mensaje, const char *display_name_from,
   free(uuid);
   strncat(mensaje, "@", 1);
   strncat(mensaje, ENVIA_HOSTNAME, strlen(ENVIA_HOSTNAME));
-  strncat(mensaje, "\r\n", 2);
+  strncat(mensaje, ">\r\n", 3);
 
   /* Ahora los campos de encabezado complementarios*/
 
