@@ -5,7 +5,7 @@ module1 = Extension('inere',
 				     ('MINOR_VERSION', '3')],
 		    include_dirs = ['../include', '/usr/local/include', '@XML2_PREFIX@/include/libxml2'],
 		    library_dirs = ['../lib/.libs', '@XML2_PREFIX@/lib', '/usr/local/lib'],
-		    libraries = ['inere', 'crypto', 'xslt', 'xml2'],
+		    libraries = ['inere', 'inerecfdi','crypto', 'xslt', 'xml2'],
 		    sources = ['inere.c'])
 
 setup (	name = 'inere',

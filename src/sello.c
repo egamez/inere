@@ -25,7 +25,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #ifndef EDISSON_VERIFICA_SELLO_DIGITAL
-#include "inere/verifica_sello_digital.h"
+#include "inere/cfdi/verifica_sello_digital.h"
 #endif
 
 #include <stdlib.h>

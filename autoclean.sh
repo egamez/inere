@@ -25,5 +25,7 @@ rm -rf aclocal.m4 \
 	examples/verifica_rfc.o \
 	include/inere/config.h.in~ \
 	lib/Makefile.in \
+	lib/src/Makefile.in \
+	lib/cfdi/Makefile.in \
 	python/build/ \
 	src/Makefile.in

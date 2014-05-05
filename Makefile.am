@@ -1,6 +1,8 @@
 #
 SUBDIRS = lib src
-EXTRA_DIST = autogen.sh README.md \
+EXTRA_DIST = autogen.sh \
+	autoclean.sh \
+	README.md \
 	examples/Makefile.in \
 	examples/obten_digito.c \
 	examples/obten_homonimia.c \
@@ -11,9 +13,10 @@ EXTRA_DIST = autogen.sh README.md \
 	python/inere.c \
 	python/setup.py.in \
 	js/README.md \
-	js/jquery.rfc_tester.js \
-	js/jquery.rfc_tester.min.js \
+	js/jquery.clave_rfc.js \
+	js/jquery.clave_rfc.min.js \
+	js/fisica.html \
+	js/moral.html \
 	js/rfc.html
 
-CLEANFILES = *~ core* *.core
 ACLOCAL_AMFLAGS = -I m4
