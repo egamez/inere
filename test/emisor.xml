@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Emisor rfc="GAFA7701266V2" nombre="Gámez Flores, Alma Delia">
+  <DomicilioFiscal calle="8 Poniente" noExterior="716" noInterior="A" colonia="Centro" localidad="H. Puebla de Zaragoza" referencia="Entre 7 Norte y 9 Norte" municipio="Puebla" estado="Puebla" pais="México" codigoPostal="72000"/>
+  <ExpedidoEn calle="8 Poniente" noExterior="716" noInterior="A" colonia="Centro" localidad="H. Puebla de Zaragoza" referencia="Entre 7 Norte y 9 Norte" municipio="Puebla" estado="Puebla" pais="México" codigoPostal="72000"/>
+  <RegimenFiscal Regimen="Régimen de las personas físicas con actividades empresariales y profesionales"/>
+</Emisor>
