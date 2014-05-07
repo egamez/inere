@@ -44,10 +44,10 @@
 static const xmlChar *version = (const xmlChar *)"3.2";
 static const xmlChar *cfdi_url = (const xmlChar *)"http://www.sat.gob.mx/cfd/3";
 static const xmlChar *xsi_url = (const xmlChar *)"http://www.w3.org/2001/XMLSchema-instance";
-static const char *archivo_certificado = "/home/egamez/.CFDi/.SAT/csd/gafa7701266v2_1202072108s.cer";
-static const char *keycert = "/home/egamez/.CFDi/.SAT/csd/gafa7701266v2_1202072108s-withoutpassword.key";
-static const char *archivo_emisor = "/home/egamez/git/repos/inere/test/emisor.xml";
-static const char *cadena_original_stylesheet = "/home/egamez/.CFDi/.SAT/utilerias/edssn_cadenaoriginal_3_2.xslt";
+static const char *archivo_certificado = "archivo.cer";
+static const char *keycert = "archivo.key";
+static const char *archivo_emisor = "emisor.xml";
+static const char *cadena_original_stylesheet = "cadenaoriginal_3_2.xslt";
 
 
 /* Forward declaration */
