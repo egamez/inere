@@ -25,7 +25,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #ifndef INERE_CFDI_LEE_CERTIFICADO_H_
-#include "inere/cfdi/certificado.h"
+#include "inere/cfdi/lee_certificado.h"
 #endif
 #ifndef BASE64_H
 #include "inere/base64.h"
