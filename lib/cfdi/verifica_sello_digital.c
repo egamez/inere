@@ -24,10 +24,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef EDISSON_VERIFICA_SELLO_DIGITAL
+#ifndef INERE_CFDI_VERIFICA_SELLO_DIGITAL_H_
 #include "inere/cfdi/verifica_sello_digital.h"
 #endif
-#ifndef EDISSON_GENERA_CADENA_ORIGINAL_H
+#ifndef INERE_CFDI_GENERA_CADENA_ORIGINAL_H_
 #include "inere/cfdi/genera_cadena_original.h"
 #endif
 #ifndef BASE64_H
@@ -341,7 +341,7 @@ verifica_sello_digital(const char *filename, const char *stylesheet, const int v
   }
 
   /* Build the cadena oridigal */
-  cadena_original(stylesheet, doc, cadena, verbose);
+  genera_cadena_original(stylesheet, doc, cadena, verbose);
   if ( *cadena == NULL ) {
     if ( verbose ) {
       fprintf(stderr, "No fue posible formar la cadena original del comprobante fiscal. No es posible realizar la verificación.\n");
