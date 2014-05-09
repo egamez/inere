@@ -1,7 +1,7 @@
 /**
  * Ejemplo para mostrar la generación de la cadena original de un CFDi
  */
-#ifndef EDISSON_GENERA_CADENA_ORIGINAL_H
+#ifndef INERE_CFDI_GENERA_CADENA_ORIGINAL_H_
 #include "inere/cfdi/genera_cadena_original.h"
 #endif
 #include <stdio.h>
@@ -31,7 +31,7 @@ main(int argc, char *argv[])
       continue;
     }
 
-    res = cadena_original(argv[1], cfdi, &cadena, verbose);
+    res = genera_cadena_original(argv[1], cfdi, &cadena, verbose);
     if ( res == 0 ) {
       /* Si fue posible extraer la cadena, imprime el resultado */
       printf("%s\n", cadena);

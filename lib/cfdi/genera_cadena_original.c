@@ -24,7 +24,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef EDISSON_GENERA_CADENA_ORIGINAL_H
+#ifndef INERE_CFDI_GENERA_CADENA_ORIGINAL_H_
 #include "inere/cfdi/genera_cadena_original.h"
 #endif
 
@@ -50,6 +50,7 @@ local_error_function(void *ctx, const char* mess, ...)
    va_start(args, mess);
    vasprintf(&errMsg, mess, args);
    va_end(args);
+
    if ( !strncmp("compilation error", errMsg, 17) &&
 	!strncmp("xsl:version: only 1.0 features are supported", errMsg, 44) ) {
      fprintf(stderr, "%s", errMsg);
@@ -74,7 +75,7 @@ local_error_function(void *ctx, const char* mess, ...)
  *
  */
 int
-cadena_original(const char *stylesheet, xmlDocPtr doc, xmlChar** cadena, int verbose)
+genera_cadena_original(const char *stylesheet, xmlDocPtr doc, xmlChar** cadena, int verbose)
 {
   xsltStylesheetPtr style = NULL;
   xmlDocPtr result = NULL;
@@ -121,5 +122,6 @@ cadena_original(const char *stylesheet, xmlDocPtr doc, xmlChar** cadena, int ver
   }
 
   xsltCleanupGlobals();
+
   return 0;
 }
