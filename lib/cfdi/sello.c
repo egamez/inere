@@ -27,9 +27,11 @@
 /**
  * Instrucciones para remover la contraseña del certificado de llave privada:
  *
+ *	$ openssl x509 -in certificado-de-llave-publica.cer -inform DER -out certificado-de-llave-publica.cer.pem
+$ openssl pkcs8 -inform DER -in certificado-de-llave-privada.key -passin pass:AQUI-VA-EL-PASSWORD -out certificado-de-llave-privada.key.pem
  *
  */
-#ifndef EDISSON_SELLO_H_INCLUDED
+#ifndef INERE_CFDI_SELLO_H_
 #include "inere/cfdi/sello.h"
 #endif
 #ifndef BASE64_H
@@ -51,7 +53,7 @@
  * El usuario es responsable de liberar la memoria del resultado (con free())
  * [1]: http://www.sat.gob.mx
  */
-char *
+unsigned char *
 sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena, const int verbose)
 {
   int read = 0;
@@ -177,5 +179,5 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
   /* Now prepare the data to be base64 encoded */
   base64_encode_alloc((const char *)signbuffer, signlen, &data);
 
-  return data;
+  return (unsigned char *)data;
 }
