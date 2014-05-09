@@ -158,6 +158,8 @@ name_addr_list_clear(name_addr_t *head)
 
   while ( node != NULL ) {
     tmp = node;
+    free(tmp->display_name);
+    free(tmp->angle_addr);
     node = node->next;
     free(tmp);
   }
@@ -982,9 +984,7 @@ curl_envia_email_enverdad(const char *username, const char *password,
     }
  
     /* Send the message */ 
-/*
     res = curl_easy_perform(curl);
-*/
 
     /* Check for errors */ 
     if(res != CURLE_OK)
