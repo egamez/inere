@@ -24,31 +24,31 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef INERE_CREA_CFDI_H
+#ifndef INERE_CFDI_CREA_CFDI_H_
 #include "inere/cfdi/crea_cfdi.h"
 #endif
-#ifndef EDISSON_CERTIFICADO_H_INCLUDED
-#include "inere/cfdi/certificado.h"
+#ifndef INERE_CFDI_LEE_CERTIFICADO_H_
+#include "inere/cfdi/lee_certificado.h"
 #endif
-#ifndef EDISSON_GENERA_CADENA_ORIGINAL_H
+#ifndef INERE_CFDI_GENERA_CADENA_ORIGINAL_H_
 #include "inere/cfdi/genera_cadena_original.h"
 #endif
-#ifndef EDISSON_SELLO_H_INCLUDED
+#ifndef INERE_CFDI_SELLO_H_
 #include "inere/cfdi/sello.h"
 #endif
 
 #include <time.h>
 #include <stdio.h>
+#include <monetary.h>
+#include <string.h>
 
 /* algunas constantes */
 static const xmlChar *version = (const xmlChar *)"3.2";
 static const xmlChar *cfdi_url = (const xmlChar *)"http://www.sat.gob.mx/cfd/3";
 static const xmlChar *xsi_url = (const xmlChar *)"http://www.w3.org/2001/XMLSchema-instance";
-static const char *archivo_certificado = "archivo.cer";
-static const char *keycert = "archivo.key";
-static const char *archivo_emisor = "emisor.xml";
-static const char *cadena_original_stylesheet = "cadenaoriginal_3_2.xslt";
+static const xmlChar *cfdi_schemaLocation = (const xmlChar *)"http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd";
 
+static const char *cadena_original_stylesheet = "cadenaoriginal_3_2.xslt";
 
 /* Forward declaration */
 xmlNodePtr crea_elemento_Emisor(const char *source,
@@ -80,6 +80,7 @@ xmlNodePtr crea_elemento_Comprobante(const xmlChar *serie,
 				     const xmlChar *LugarExpedicion,
 				     const xmlChar *NumCtaPago,
 				     const xmlNsPtr namespace,
+				     const char *archivo_certificado,
 				     const int verbose);
 xmlChar *obten_fecha_ISO8601_alloc(const int verbose);
 
@@ -112,8 +113,7 @@ obten_fecha_ISO8601_alloc(const int verbose)
 
 /**
  *
- * Si importe es NUL entonces esta función se encargará de calcular el
- * correspondiente importe
+ * Agrega a la lista otro concepto mas.
  */
 cfdi_items_list_t *
 append_concepto(cfdi_items_list_t *head,
@@ -154,12 +154,7 @@ append_concepto(cfdi_items_list_t *head,
   }
   xmlNewProp(tmp->xml_node, (const xmlChar *)"descripcion", descripcion);
   xmlNewProp(tmp->xml_node, (const xmlChar *)"valorUnitario", valorUnitario);
-  if ( importe != NULL ) {
-    xmlNewProp(tmp->xml_node, (const xmlChar *)"importe", importe);
-
-  } else {
-    /* Calcula el importe correspondiente */
-  }
+  xmlNewProp(tmp->xml_node, (const xmlChar *)"importe", importe);
 
   if ( head == NULL ) {
     /* Este es el primer componente de la lista */
@@ -459,10 +454,11 @@ crea_elemento_Comprobante(const xmlChar *serie,
 			  const xmlChar *LugarExpedicion,
 			  const xmlChar *NumCtaPago,
 			  const xmlNsPtr namespace,
+			  const char *archivo_certificado,
 			  const int verbose)
 {
   xmlNodePtr comprobante = NULL;
-  char *certificado = NULL;
+  unsigned char *certificado = NULL;
   xmlChar *noCertificado = NULL;
 
   /* Agrega cada una de los atributotos del elemento Comprobante.
@@ -515,7 +511,7 @@ crea_elemento_Comprobante(const xmlChar *serie,
    * no declares este namespace de la manera usual (via xmlNewNs)
    * mejor solo agregalo como un atributo cualquiera */
   xmlNewProp(comprobante, (const xmlChar *)"xmlns:xsi", xsi_url);
-  xmlNewProp(comprobante, (const xmlChar *)"xsi:schemaLocation", (const xmlChar *)"http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd");
+  xmlNewProp(comprobante, (const xmlChar *)"xsi:schemaLocation", cfdi_schemaLocation);
 
   /* Agrega los atributos */
   xmlNewProp(comprobante, (const xmlChar *)"version", version);
@@ -556,8 +552,8 @@ crea_elemento_Comprobante(const xmlChar *serie,
   /* Ahora deberemos de agregar los parametros como: certificado,
    * noCertificado, subTotal, descuento y total, los cuales deben de ser
    * inferidos */
-  certificado = load_certificate_alloc(archivo_certificado, &noCertificado, verbose);
-  xmlNewProp(comprobante, (const xmlChar *)"certificado", (const xmlChar *)certificado);
+  certificado = lee_certificado_alloc(archivo_certificado, &noCertificado, verbose);
+  xmlNewProp(comprobante, (const xmlChar *)"certificado", certificado);
   xmlNewProp(comprobante, (const xmlChar *)"noCertificado", noCertificado);
   free(noCertificado);
   free(certificado);
@@ -575,6 +571,9 @@ crea_cfdi(const xmlChar *subTotal,
 	  cfdi_items_list_t *productos,
 	  cfdi_items_list_t *retencion,
 	  cfdi_items_list_t *traslado,
+	  const char *archivo_del_emisor,
+	  const char *archivo_certificado,
+	  const char *archivo_llave_privada,
 	  const int verbose)
 {
   xmlNsPtr cfdi_ns = NULL;
@@ -591,8 +590,11 @@ crea_cfdi(const xmlChar *subTotal,
   xmlDocPtr doc = NULL;
   xmlChar *cadena = NULL;
   xmlChar *fecha = NULL;
-  char *sello = NULL;
+  unsigned char *sello = NULL;
   int res = 1;
+  double retenidos = 0;   /* Total de impuestos retenidos */
+  double trasladados = 0; /* Total de impuestos trasladados */
+  char cantidad_impuestos[15];
 
   if ( traslado == NULL && retencion == NULL ) {
     if ( verbose ) {
@@ -633,6 +635,7 @@ crea_cfdi(const xmlChar *subTotal,
 					  (const xmlChar *)"Puebla",
 					  (const xmlChar *)"----",
 					  cfdi_ns,
+					  archivo_certificado,
 					  verbose);
 
   if ( comprobante == NULL ) {
@@ -645,7 +648,7 @@ crea_cfdi(const xmlChar *subTotal,
   }
 
   /* Crea el nodo del emisor */
-  emisor = crea_elemento_Emisor(archivo_emisor, cfdi_ns, verbose);
+  emisor = crea_elemento_Emisor(archivo_del_emisor, cfdi_ns, verbose);
   if ( emisor == NULL ) {
     if ( verbose ) {
       fprintf(stderr, "%s:%d Error. No fue posible crear el elemento \"Emisor\",\n", __FILE__, __LINE__);
@@ -707,21 +710,34 @@ crea_cfdi(const xmlChar *subTotal,
     xmlNodePtr retenciones = xmlNewChild(impuestos, cfdi_ns, (const xmlChar *)"Retenciones", NULL);
     imps = retencion;
     while ( imps != NULL ) {
+      retenidos += atof((char *)xmlGetProp(imps->xml_node, (const xmlChar *)"importe"));
       xmlSetNs(imps->xml_node, cfdi_ns);
       xmlAddChild(retenciones, imps->xml_node);
       imps = imps->next;
     }
+  }
+  if ( retenidos > 0 ) {
+    memset(cantidad_impuestos, 0, 15);
+    strfmon(cantidad_impuestos, 15, "%!.2n", retenidos);
+    xmlNewProp(impuestos, (const xmlChar *)"totalImpuestosRetenidos", (const xmlChar *)cantidad_impuestos);
   }
 
   if ( traslado != NULL ) {
     xmlNodePtr traslados = xmlNewChild(impuestos, cfdi_ns, (const xmlChar *)"Traslados", NULL);
     imps = traslado;
     while ( imps != NULL ) {
+      trasladados += atof((char *)xmlGetProp(imps->xml_node, (const xmlChar *)"importe"));
       xmlSetNs(imps->xml_node, cfdi_ns);
       xmlAddChild(traslados, imps->xml_node);
       imps = imps->next;
     }
   }
+  if ( trasladados > 0 ) {
+    memset(cantidad_impuestos, 0, 15);
+    strfmon(cantidad_impuestos, 15, "%!.2n", trasladados);
+    xmlNewProp(impuestos, (const xmlChar *)"totalImpuestosTrasladados", (const xmlChar *)cantidad_impuestos);
+  }
+
 
   /* Al Complemento */
   complemento = xmlNewChild(comprobante, cfdi_ns, (const xmlChar *)"Complemento", NULL);
@@ -750,7 +766,7 @@ crea_cfdi(const xmlChar *subTotal,
 
   /* Ahora, con toda la informacion de arriba, deberá ser posible
    * obtener la cadena original y de esta ya se podrá generar el sello */
-  res = cadena_original(cadena_original_stylesheet,
+  res = genera_cadena_original(cadena_original_stylesheet,
 			doc,
 			&cadena,
 			verbose);
@@ -778,7 +794,7 @@ crea_cfdi(const xmlChar *subTotal,
   }
 
   /* Ahora obten el sello digital */
-  sello = sello_alloc(keycert, "sha1", cadena, verbose);
+  sello = sello_alloc(archivo_llave_privada, "sha1", cadena, verbose);
   xmlFree(cadena);
   if ( sello == NULL ) {
     if ( verbose ) {
@@ -793,7 +809,7 @@ crea_cfdi(const xmlChar *subTotal,
   }
 
   /* Ahora agrega el sello al comprobante */
-  xmlNewProp(comprobante, (const xmlChar *)"sello", (const xmlChar *)sello);
+  xmlNewProp(comprobante, (const xmlChar *)"sello", sello);
   free(sello);
 
   return doc;

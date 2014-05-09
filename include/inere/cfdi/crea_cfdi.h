@@ -24,8 +24,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef INERE_CREA_CFDI_H
-#define INERE_CREA_CFDI_H
+#ifndef INERE_CFDI_CREA_CFDI_H_
+#define INERE_CFDI_CREA_CFDI_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,6 +44,9 @@ extern xmlDocPtr crea_cfdi(const xmlChar *subTotal,
 			   cfdi_items_list_t* productos,
 			   cfdi_items_list_t *retencion,
 			   cfdi_items_list_t *traslado,
+			   const char *archivo_del_emisor,
+			   const char *archivo_certificado,
+			   const char *archivo_llave_privada,
 			   const int verbose);
 
 extern cfdi_items_list_t *append_concepto(cfdi_items_list_t *head,
@@ -68,4 +71,4 @@ extern void free_cfdi_items_list(cfdi_items_list_t* head);
 }
 #endif
 
-#endif /* INERE_CREA_CFDI_H */
+#endif /* INERE_CFDI_CREA_CFDI_H_ */

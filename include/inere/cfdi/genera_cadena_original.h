@@ -25,8 +25,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EDISSON_GENERA_CADENA_ORIGINAL_H
-#define EDISSON_GENERA_CADENA_ORIGINAL_H
+#ifndef INERE_CFDI_GENERA_CADENA_ORIGINAL_H_
+#define INERE_CFDI_GENERA_CADENA_ORIGINAL_H_
 
 #include <libxml/tree.h>
 
@@ -34,10 +34,10 @@
 extern "C" {
 #endif
 
-extern int cadena_original(const char *stylesheet, xmlDocPtr doc, xmlChar** cadena, int verbose);
+extern int genera_cadena_original(const char *stylesheet, xmlDocPtr doc, xmlChar** cadena, int verbose);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* EDISSON_GENERA_CADENA_ORIGINAL_H */
+#endif /* INERE_CFDI_GENERA_CADENA_ORIGINAL_H_ */

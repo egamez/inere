@@ -25,8 +25,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EDISSON_VERIFICA_SELLO_DIGITAL
-#define EDISSON_VERIFICA_SELLO_DIGITAL
+#ifndef INERE_CFDI_VERIFICA_SELLO_DIGITAL_H_
+#define INERE_CFDI_VERIFICA_SELLO_DIGITAL_H_
 
 /*
 #include <libxml/tree.h>
@@ -42,4 +42,4 @@ int verifica_sello_digital(const char* filename, const char *stylesheet, int ver
 }
 #endif
 
-#endif /* EDISSON_VERIFICA_SELLO_DIGITAL */
+#endif /* INERE_CFDI_VERIFICA_SELLO_DIGITAL_H_ */

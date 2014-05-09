@@ -24,17 +24,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef EDISSON_SELLO_H_INCLUDED
-#define EDISSON_SELLO_H_INCLUDED
+#ifndef INERE_CFDI_SELLO_H_
+#define INERE_CFDI_SELLO_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-char *sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena, const int verbose);
+unsigned char *sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena, const int verbose);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* EDISSON_SELLO_H_INCLUDED */
+#endif /* INERE_CFDI_SELLO_H_ */

@@ -24,17 +24,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef EDISSON_CERTIFICADO_H_INCLUDED
-#define EDISSON_CERTIFICADO_H_INCLUDED
+#ifndef INERE_CFDI_LEE_CERTIFICADO_H_
+#define INERE_CFDI_LEE_CERTIFICADO_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-char *load_certificate_alloc(const char *filename, unsigned char **serial_number, const int verbose);
+unsigned char *lee_certificado_alloc(const char *filename, unsigned char **serial_number, const int verbose);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* EDISSON_CERTIFICADO_H_INCLUDED */
+#endif /* INERE_CFDI_LEE_CERTIFICADO_H_ */
