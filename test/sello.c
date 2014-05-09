@@ -1,7 +1,7 @@
 /**
  * Simple test program to make a test of sello.c proram
  */
-#ifndef EDISSON_SELLO_H_INCLUDED
+#ifndef INERE_CFDI_SELLO_H_
 #include "inere/cfdi/sello.h"
 #endif
 
@@ -12,7 +12,7 @@
 int
 main(int argc, char* argv[])
 {
-  char* seal = NULL;
+  unsigned char* seal = NULL;
 
   if ( argc < 3 ) {
     fprintf(stderr, "Error. Sintax\n\t%s KEYCERT CADENA\n", argv[0]);

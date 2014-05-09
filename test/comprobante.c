@@ -1,4 +1,4 @@
-#ifndef INERE_CREA_CFDI_H
+#ifndef INERE_CFDI_CREA_CFDI_H_
 #include "inere/cfdi/crea_cfdi.h"
 #endif
 
@@ -11,6 +11,9 @@ main(void)
   cfdi_items_list_t *productos = NULL;
   cfdi_items_list_t *traslado = NULL;
   cfdi_items_list_t *retencion = NULL;
+  const char *archivo_certificado = "certificado.cer";
+  const char *archivo_llave_privada = "key.key";
+  const char *archivo_del_emisor = "emisor.xml";
 
   /* Agrega unos productos */
   productos = append_concepto(productos, (const xmlChar *)"11",
@@ -44,7 +47,11 @@ main(void)
 
 
   cfdi = crea_cfdi((const xmlChar *)"100.00", NULL, (const xmlChar *)"116.00",
-		   productos, retencion, traslado, verbose);
+		   productos, retencion, traslado,
+			archivo_del_emisor,
+			archivo_certificado,
+			archivo_llave_privada,
+			verbose);
   if ( cfdi == NULL ) {
     fprintf(stderr, "No fue posible crear el documento.\n");
     return 1;

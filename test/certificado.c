@@ -1,8 +1,8 @@
 /**
  * Small program to test the certificado.c functions
  */
-#ifndef EDISSON_CERTIFICADO_H_INCLUDED
-#include "inere/cfdi/certificado.h"
+#ifndef INERE_CFDI_LEE_CERTIFICADO_H_
+#include "inere/cfdi/lee_certificado.h"
 #endif
 
 #include <stdlib.h>
@@ -12,7 +12,7 @@
 int
 main(int argc, char* argv[])
 {
-  char *cert = NULL;
+  unsigned char *cert = NULL;
   unsigned char *serial = NULL;
 
   if ( argc < 2 ) {
@@ -20,7 +20,7 @@ main(int argc, char* argv[])
     return 1;
   }
 
-  cert = load_certificate_alloc(argv[1], &serial, 1);
+  cert = lee_certificado_alloc(argv[1], &serial, 1);
 
   if ( cert != NULL ) {
     printf("Certificado de llave publica:\n%s\n", cert);
