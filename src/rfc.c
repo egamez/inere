@@ -47,14 +47,14 @@
 #include <getopt.h>
 
 /* Forward declaration */
-void usage();
+void usage(void);
 
 
 /**
  * Función para mostrar las opciones de uso
  */
 void
-usage()
+usage(void)
 {
   printf("Uso: rfc [MODO] [OPCIONES]\n");
   printf("\

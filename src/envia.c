@@ -32,12 +32,12 @@
 #include <locale.h>
 #include <getopt.h>
 
-void print_help();
-
 static const unsigned int kmax_mailboxes = 10;
 
+void print_help(void);
+
 void
-print_help()
+print_help(void)
 {
   printf("\nUso: multiple [OPTIONS] [  TO  CFDi [  CFDi-PDF  BODY  ASUNTO  ] ]\n");
   printf("Envia un e-mail para la entrega de un CFDi y su posible representación impresa.\n\n");
