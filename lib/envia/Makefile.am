@@ -10,4 +10,4 @@ nobase_dist_include_HEADERS = $(top_srcdir)/include/inere/envia/non_ascii.h \
 
 INCLUDES = -I$(top_srcdir)/include $(CURL_INCLUDES) $(UUID_INCLUDES)
 
-AM_CFLAGS = -Wall -Wextra -Winit-self -Wuninitialized -Wmissing-declarations -Winit-self -ansi -pedantic -pthread -pedantic-errors -D_GNU_SOURCE -funsigned-char
+AM_CFLAGS = -Wall -Wextra -Wuninitialized -Wmissing-declarations -Winit-self -ansi -pedantic -pthread -pedantic-errors -D_GNU_SOURCE -funsigned-char

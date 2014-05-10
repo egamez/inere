@@ -19,4 +19,4 @@ envia_LDFLAGS = $(top_srcdir)/lib/envia/libinereenvia.la \
 
 INCLUDES = -I$(top_srcdir)/include $(XML2_INCLUDE) $(CURL_INCLUDES) $(UUID_INCLUDES)
 
-AM_CFLAGS = -Wall -Wextra -Winit-self -Wuninitialized -Wmissing-declarations -Winit-self -ansi -pedantic -pthread -pedantic-errors -D_GNU_SOURCE -funsigned-char
+AM_CFLAGS = -Wall -Wextra -Wuninitialized -Wmissing-declarations -Winit-self -ansi -pedantic -pthread -pedantic-errors -D_GNU_SOURCE -funsigned-char
