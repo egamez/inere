@@ -14,4 +14,4 @@ nobase_dist_include_HEADERS = $(top_srcdir)/include/inere/cfdi/verifica_sello_di
 
 INCLUDES = -I$(top_srcdir)/include $(XML2_INCLUDE) $(XSLT_INCLUDE)
 
-AM_CFLAGS = -Wall -Wextra -Wuninitialized -Wmissing-declarations -Winit-self -ansi -pedantic -pthread -pedantic-errors -D_GNU_SOURCE -funsigned-char
+AM_CFLAGS = -Wall -Wextra -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -Wuninitialized -Wmissing-declarations -Winit-self -ansi -pedantic -pthread -pedantic-errors -D_GNU_SOURCE -funsigned-char
