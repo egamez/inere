@@ -1,5 +1,5 @@
 #
-bin_PROGRAMS = sello certificado cadena comprobante
+bin_PROGRAMS = sello certificado cadena comprobante lee
 
 sello_SOURCES = sello.c
 sello_LDFLAGS = $(top_srcdir)/lib/cfdi/libinerecfdi.la \
@@ -18,6 +18,11 @@ cadena_LDFLAGS = $(top_srcdir)/lib/cfdi/libinerecfdi.la \
 
 comprobante_SOURCES = comprobante.c
 comprobante_LDFLAGS = $(top_srcdir)/lib/cfdi/libinerecfdi.la \
+		$(top_srcdir)/lib/src/libinere.la \
+		$(XML2_LIB) $(XSLT_LIB) $(OPENSSL_LIBS) -ldl
+
+lee_SOURCES = lee.c
+lee_LDFLAGS = $(top_srcdir)/lib/cfdi/libinerecfdi.la \
 		$(top_srcdir)/lib/src/libinere.la \
 		$(XML2_LIB) $(XSLT_LIB) $(OPENSSL_LIBS) -ldl
 
