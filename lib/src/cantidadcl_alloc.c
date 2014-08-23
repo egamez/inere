@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *		       Lae
+ * Copyright (c) 2012-2014, L3a,
+ *			    Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,21 +28,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifndef INERE_CANTIDADES_INCLUDED_H
-#include "inere/cantidades.h"
+#ifndef INERE_CANTIDADCL_ALLOC_H_
+#include "inere/cantidadcl_alloc.h"
 #endif
-#ifndef INERE_NUMERALES_INCLUDED_H
-#include "inere/numerales.h"
+#ifndef INERE_NUMERAL_ALLOC_H_
+#include "inere/numeral_alloc.h"
 #endif
 
 char*
-cantidad(char* nombre, const char* numero, const int debug)
+cantidadcl_alloc(const char* numero, const int debug)
 {
   char* cents = 0;
   char* integral = 0;
-  char buffer[MAXNUMERAL];
+  char *buffer = NULL;
+  size_t buffer_len = 0;
   int cents_len = 0;
   int must_freed = 0;
+  char *nombre = NULL;
 #if _MSC_VER
   char *next_token = 0;
 #endif
@@ -98,8 +100,7 @@ cantidad(char* nombre, const char* numero, const int debug)
   }
 
   /* Now build up the full quantity name */
-  memset(buffer, 0, MAXNUMERAL);
-  numeral(buffer, integral, debug);
+  buffer = numeral_alloc(integral, debug);
 
   free(integral);
   if ( must_freed ) free(cents);
@@ -107,12 +108,17 @@ cantidad(char* nombre, const char* numero, const int debug)
   /* Capitalize the first letter */
   *buffer -= 32;
 
+  /* Reserva la memoria para esta cantidad */
+  buffer_len = strlen(buffer);
+  nombre = (char *)calloc(buffer_len + 19, sizeof(char));
+
   /* And add the fractional part we need to add " pesos xx/100 M.N." */
 #if _MSC_VER
   _snprintf_s(nombre, strlen(buffer)+19, _TRUNCATE, "%s pesos %02d/100 M.N.", buffer, atoi(cents));
 #else
   snprintf(nombre, strlen(buffer)+19, "%s pesos %02d/100 M.N.", buffer, atoi(cents));
 #endif
+  free(buffer);
 
   return nombre;
 }

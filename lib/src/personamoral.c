@@ -27,8 +27,8 @@
 #ifndef INERE_PERSONAMORAL_INCLUDED_H
 #include "inere/personamoral.h"
 #endif
-#ifndef INERE_NUMERALES_INCLUDED_H
-#include "inere/numerales.h"
+#ifndef INERE_NUMERAL_ALLOC_H_
+#include "inere/numeral_alloc.h"
 #endif
 #ifndef INERE_HOMONIMIA_INCLUDED_H
 #include "inere/homonimia.h"
@@ -397,9 +397,12 @@ moral_regla10(char *numero, char *result[], const int verbose)
   /* Check if this 'numero' is really a numnber. Check the firs char only */
   if ( isdigit(*numero) ) {
 
+/*
     buffer = (char *)calloc(MAXNUMERAL, sizeof(char));
     memset(buffer, 0, MAXNUMERAL);
     numeral(buffer, numero, verbose);
+*/
+    buffer = numeral_alloc(numero, verbose);
 
     /* Now, copy at most three words onto 'result' */
     for ( (token = strsep(&buffer, " "));

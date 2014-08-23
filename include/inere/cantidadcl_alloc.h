@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     Lae
+ * Copyright (c) 2012-2014, L3a,
+ *			    Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,21 +24,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef INERE_CANTIDADES_INCLUDED_H
-#define INERE_CANTIDADES_INCLUDED_H
-
-#ifndef INERE_NUMERALES_INCLUDED_H
-#include "inere/numerales.h"
-#endif
+#ifndef INERE_CANTIDADCL_ALLOC_H_
+#define INERE_CANTIDADCL_ALLOC_H_
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-extern char* cantidad(char* nombre, const char* numero, const int debug);
+extern char* cantidadcl_alloc(const char* numero, const int debug);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* INERE_CANTIDADES_INCLUDED_H */
+#endif /* INERE_CANTIDADCL_ALLOC_H_ */

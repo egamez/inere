@@ -5,7 +5,7 @@
 #include "inere/personamoral.h"
 #include "inere/verificador.h"
 #include "inere/util.h"
-#include "inere/cantidades.h"
+#include "inere/cantidadcl_alloc.h"
 #include "inere/cfdi/verifica_sello_digital.h"
 #include "inere/extrae_fecha.h"
 
@@ -223,7 +223,7 @@ inere_cantidadconletras(PyObject *self, PyObject *args, PyObject *keywds)
   double number;
   int rounded = 0; /*By default do not round the number to the nearest integer*/
   char q[16];
-  char nombre[MAXNUMERAL];
+  char *nombre = NULL;
   static char *kwdlist[] = {"cantidad", "round", NULL};
 
   if ( !PyArg_ParseTupleAndKeywords(args, keywds, "d|p", kwdlist,
@@ -235,11 +235,10 @@ inere_cantidadconletras(PyObject *self, PyObject *args, PyObject *keywds)
   }
 
   snprintf(q, 16, "%.2f", number);
-  memset(nombre, 0, MAXNUMERAL);
-  cantidad(nombre, q, 0);
+  nombre = cantidadcl_alloc(q, 0);
+  Py_INCREF(nombre);
 
   return Py_BuildValue("s", nombre);
-
 }
 
 static PyObject *
