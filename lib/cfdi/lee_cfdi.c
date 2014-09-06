@@ -28,10 +28,12 @@
 #include "inere/cfdi/lee_cfdi.h"
 #endif
 
+#include <string.h>
+#include <unistd.h>
+
 #include <libxml/tree.h>
 
-
-/* Forward declaration */
+/* Forward declarations */
 int lee_conceptos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
 int lee_impuestos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
 int lee_timbre_fiscal(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
@@ -47,11 +49,26 @@ lee_cfdi(const char *filename, const int verbose)
   xmlNodePtr cur = NULL;
   Comprobante_t *cfdi = NULL;
 
-  /* Ahora lee el archivo */
-  doc = xmlParseFile(filename);
+  /* Hay dos posibilidades:
+   *
+   *	- Una es que hallas pasado el nombre del archivo que contiene el
+   *	  el CFDi, la otra es
+   *	- Que hallas pasado el CFDi mismo en un string
+   */
+  if ( access(filename, R_OK) == 0 ) {
+    /* El argumento pasado corresponde a la ruta del archivo que contiene
+     * el CFDi */
+    /* Ahora lee el archivo */
+    doc = xmlParseFile(filename);
+
+  } else {
+    /* El string dado contiene el CFDi mismo */
+    doc = xmlReadMemory(filename, strlen(filename), "http://www.sat.gob.mx/cfd/3", "UTF-8", XML_PARSE_RECOVER);
+ 
+  }
   if ( doc == NULL ) {
     if ( verbose ) {
-      fprintf(stderr, "%s:%d Error. No fue posible leer el archivo %s\n", __FILE__, __LINE__, filename);
+      fprintf(stderr, "%s:%d Error. No fue posible leer el archivo o documento: %s\n", __FILE__, __LINE__, filename);
     }
     return NULL;
   }
