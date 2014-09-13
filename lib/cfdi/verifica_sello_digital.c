@@ -35,6 +35,7 @@
 #endif
 
 #include <string.h>
+#include <unistd.h>
 
 #include <openssl/bio.h>
 #include <openssl/evp.h>
@@ -252,7 +253,21 @@ verifica_sello_digital(const char *filename, const char *stylesheet, const int v
   BIO *bio_err = NULL;
   EVP_PKEY *pkey = NULL;
 
-  doc = xmlReadFile(filename, "UTF-8", XML_PARSE_NOENT);
+  /* Hay dos posibilidades:
+   *
+   *    - Una es que hallas pasado el nombre del archivo que contiene el
+   *      el CFDi, la otra es
+   *    - Que hallas pasado el CFDi mismo en un string
+   */
+  if ( access(filename, R_OK) == 0 ) {
+    /* El argumento dado corresponde a la ruta del archivo que contiene el
+     * CFDI*/
+    doc = xmlReadFile(filename, "UTF-8", XML_PARSE_NOENT);
+  } else {
+    /* El string dado contiene el CFDi mismo */
+    doc = xmlReadMemory(filename, strlen(filename), "http://www.sat.gob.mx/cfd/3", "UTF-8", XML_PARSE_RECOVER);
+  }
+
   if ( doc == NULL ) {
     if ( verbose ) {
       fprintf(stderr, "verifica_sello_digital: No fue posible leer el CFDi (%s). No es posible realizar el test.\n", filename);
