@@ -36,6 +36,7 @@
 /* Forward declarations */
 int lee_conceptos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
 int lee_impuestos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
+int lee_complementos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
 int lee_timbre_fiscal(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
 int lee_datos_receptor(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
 int lee_datos_emisor(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
@@ -140,8 +141,9 @@ lee_cfdi(const char *filename, const int verbose)
       }
 
       if ( xmlStrEqual(cur->name, (const xmlChar *)"Complemento") ) {
-	/* Ahora lee los datos correspondientes al Timbre Fiscal */
-	lee_timbre_fiscal(cur, cfdi, verbose);
+	/* Ahora lee los datos correspondientes los complementos del CFDi */
+	/*lee_timbre_fiscal(cur, cfdi, verbose);*/
+	lee_complementos(cur, cfdi, verbose);
       }
 
     }
@@ -407,27 +409,76 @@ termina_cfdi(Comprobante_t *cfdi)
  *
  */
 int
+lee_complementos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
+{
+  int res = 0;
+  xmlNodePtr cur = NULL;
+
+  if ( xmlStrEqual(node->name, (const xmlChar *)"Complemento") == 0 ) {
+    if ( verbose ) {
+      fprintf(stderr, "%s:%d Error. El nodo suministrado no es el correcto para leer los datos del Complemento del CFDi, el nodo proporcionado es \"%s\".\n", __FILE__, __LINE__, cur->name);
+    }
+    return 1;
+  }
+
+  if ( verbose ) {
+    fprintf(stderr, "%s:%d Info. Leyendo el nodo \"%s\".\n", __FILE__, __LINE__, node->name);
+  }
+
+  /* Ahora has un loop para identificar el complemento correspondiente
+   * al Timbre Fiscal Digital */
+  cur = node->children;
+  while ( cur != NULL ) {
+
+    if ( cur->type == XML_ELEMENT_NODE ) {
+
+      if ( xmlStrEqual(cur->name, (const xmlChar *)"TimbreFiscalDigital") ) {
+	/* Lee los datos del timbre fiscal */
+	if ( verbose ) {
+	  fprintf(stderr, "%s:%d Info. El nodo \"%s\" se encontro dentro del nodo \"Complemento\", se procedara a leerlo.\n", __FILE__, __LINE__, cur->name);
+	}
+	res = lee_timbre_fiscal(cur, cfdi, verbose);
+	if ( res != 0 ) {
+	    fprintf(stderr, "%s:%d Error. El nodo \"%s\" no pudo leerse adecuadamente.\n", __FILE__, __LINE__, cur->name);
+	  if ( cfdi->TimbreFiscalDigital != NULL ) {
+	    free(cfdi->TimbreFiscalDigital);
+	    cfdi->TimbreFiscalDigital = NULL;
+	  }
+	  res = 10 + res;
+	}
+
+      } else {
+	printf("No hay implementacion para leer el nodo \"%s\".\n", cur->name);
+      }
+
+    }
+
+    cur = cur->next;
+  }
+  return res;
+
+}
+
+/**
+ *
+ */
+int
 lee_timbre_fiscal(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
 {
   xmlNodePtr cur = NULL;
   TimbreFiscalDigital_t *Timbre = NULL;
 
-  if ( xmlStrEqual(node->name, (const xmlChar *)"Complemento") == 0 ) {
-    if ( verbose ) {
-      fprintf(stderr, "%s:%d Error. El nodo suministrado no es el correcto para leer los datos del Timbre Fiscal Digital, el nodo proporcionado es \"%s\".\n", __FILE__, __LINE__, cur->name);
-    }
-    cfdi->TimbreFiscalDigital = NULL;
-    return 1;
+  if ( verbose ) {
+    fprintf(stderr, "%s:%d Info. Leyendo el nodo \"%s\".\n", __FILE__, __LINE__, node->name);
   }
 
-  /* Ahora, para leer el timbre fiscal es necesario leer el nodo hijo del actual */
-  cur = node->children;
+  cur = node;
   if ( cur == NULL ) {
     if ( verbose ) {
       fprintf(stderr, "%s:%d Error. El presente nodo no contiene información del Timbre Fiscal Digital.\n", __FILE__, __LINE__);
+      cfdi->TimbreFiscalDigital = NULL;
+      return 1;
     }
-    cfdi->TimbreFiscalDigital = NULL;
-    return 2;
   }
 
   if ( xmlStrEqual(cur->name, (const xmlChar *)"TimbreFiscalDigital") == 0 ) {
