@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.64])
-AC_INIT([inere], [0.3.0], [egamez@edisson.com.mx])
+AC_INIT([inere], [0.3.1], [egamez@edisson.com.mx])
 AC_CONFIG_SRCDIR([src/rfc.c])
 AC_CONFIG_HEADERS([include/inere/config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -201,6 +201,8 @@ else
 fi
 AC_DEFINE_UNQUOTED([INERE_LOCAL_CHARSET], ["$DEFAULT_CHARSET"], [Character set to be used for character conversions to UTF-8l])
 
+
+AC_CONFIG_FILES([inere-config], [chmod +x inere-config])
 
 AC_CONFIG_FILES([Makefile
                  lib/Makefile
