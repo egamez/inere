@@ -125,6 +125,14 @@ typedef struct _TimbreFiscalDigital {
   unsigned char *selloSAT;
 } TimbreFiscalDigital_t;
 
+typedef struct _Complemento {
+  TimbreFiscalDigital_t *TimbreFiscalDigital;
+} Complemento_t;
+
+typedef struct _Addenda {
+  unsigned char *addenda;
+} Addenda_t;
+
 typedef struct _Comprobante {
   unsigned char *version;
   unsigned char *serie;
@@ -153,7 +161,8 @@ typedef struct _Comprobante {
   Receptor_t *Receptor;
   Concepto_list_t *Conceptos;
   Impuestos_t *Impuestos;
-  TimbreFiscalDigital_t *TimbreFiscalDigital;
+  Complemento_t *Complemento;
+  Addenda_t *Addenda;
 } Comprobante_t;
 
 

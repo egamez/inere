@@ -142,9 +142,10 @@ lee_cfdi(const char *filename, const int verbose)
 
       if ( xmlStrEqual(cur->name, (const xmlChar *)"Complemento") ) {
 	/* Ahora lee los datos correspondientes los complementos del CFDi */
-	/*lee_timbre_fiscal(cur, cfdi, verbose);*/
 	lee_complementos(cur, cfdi, verbose);
       }
+
+      /* Este es el sitio para leer la addenda */
 
     }
     cur = cur->next;
@@ -167,15 +168,21 @@ termina_cfdi(Comprobante_t *cfdi)
   InformacionAduanera_list_t *info_a_tmp = NULL;
 
   /* Los datos del timbre */
-  if ( cfdi->TimbreFiscalDigital != NULL ) {
-    xmlFree(cfdi->TimbreFiscalDigital->selloSAT);
-    xmlFree(cfdi->TimbreFiscalDigital->selloCFD);
-    xmlFree(cfdi->TimbreFiscalDigital->FechaTimbrado);
-    xmlFree(cfdi->TimbreFiscalDigital->noCertificadoSAT);
-    xmlFree(cfdi->TimbreFiscalDigital->UUID);
-    xmlFree(cfdi->TimbreFiscalDigital->version);
-    free(cfdi->TimbreFiscalDigital);
-    cfdi->TimbreFiscalDigital = NULL;
+  if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
+    xmlFree(cfdi->Complemento->TimbreFiscalDigital->selloSAT);
+    xmlFree(cfdi->Complemento->TimbreFiscalDigital->selloCFD);
+    xmlFree(cfdi->Complemento->TimbreFiscalDigital->FechaTimbrado);
+    xmlFree(cfdi->Complemento->TimbreFiscalDigital->noCertificadoSAT);
+    xmlFree(cfdi->Complemento->TimbreFiscalDigital->UUID);
+    xmlFree(cfdi->Complemento->TimbreFiscalDigital->version);
+    free(cfdi->Complemento->TimbreFiscalDigital);
+    cfdi->Complemento->TimbreFiscalDigital = NULL;
+  }
+
+  /* El complemento */
+  if ( cfdi->Complemento != NULL ) {
+    free(cfdi->Complemento);
+    cfdi->Complemento = NULL;
   }
 
   /* Los impuestos */
@@ -412,18 +419,23 @@ int
 lee_complementos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
 {
   int res = 0;
+  Complemento_t *complemento = NULL;
   xmlNodePtr cur = NULL;
 
   if ( xmlStrEqual(node->name, (const xmlChar *)"Complemento") == 0 ) {
     if ( verbose ) {
       fprintf(stderr, "%s:%d Error. El nodo suministrado no es el correcto para leer los datos del Complemento del CFDi, el nodo proporcionado es \"%s\".\n", __FILE__, __LINE__, cur->name);
     }
+    cfdi->Complemento = NULL;
     return 1;
   }
 
   if ( verbose ) {
     fprintf(stderr, "%s:%d Info. Leyendo el nodo \"%s\".\n", __FILE__, __LINE__, node->name);
   }
+
+  complemento = (Complemento_t *)malloc(sizeof(Complemento_t));
+  cfdi->Complemento = complemento;
 
   /* Ahora has un loop para identificar el complemento correspondiente
    * al Timbre Fiscal Digital */
@@ -440,9 +452,9 @@ lee_complementos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
 	res = lee_timbre_fiscal(cur, cfdi, verbose);
 	if ( res != 0 ) {
 	    fprintf(stderr, "%s:%d Error. El nodo \"%s\" no pudo leerse adecuadamente.\n", __FILE__, __LINE__, cur->name);
-	  if ( cfdi->TimbreFiscalDigital != NULL ) {
-	    free(cfdi->TimbreFiscalDigital);
-	    cfdi->TimbreFiscalDigital = NULL;
+	  if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
+	    free(cfdi->Complemento->TimbreFiscalDigital);
+	    cfdi->Complemento->TimbreFiscalDigital = NULL;
 	  }
 	  res = 10 + res;
 	}
@@ -476,7 +488,7 @@ lee_timbre_fiscal(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
   if ( cur == NULL ) {
     if ( verbose ) {
       fprintf(stderr, "%s:%d Error. El presente nodo no contiene información del Timbre Fiscal Digital.\n", __FILE__, __LINE__);
-      cfdi->TimbreFiscalDigital = NULL;
+      cfdi->Complemento->TimbreFiscalDigital = NULL;
       return 1;
     }
   }
@@ -485,7 +497,7 @@ lee_timbre_fiscal(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
     if ( verbose ) {
       fprintf(stderr, "%s:%d Error. No sera posible leer la información del Timbre Fiscal Digital ya que el nodo suministrado es: \"%s\".\n", __FILE__, __LINE__, cur->name);
     }
-    cfdi->TimbreFiscalDigital = NULL;
+    cfdi->Complemento->TimbreFiscalDigital = NULL;
     return 2;
   }
 
@@ -498,7 +510,7 @@ lee_timbre_fiscal(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
   Timbre->selloSAT         = xmlGetProp(cur, (const xmlChar *)"selloSAT");
 
   /* Ahora asigna el timbre al CFDi */
-  cfdi->TimbreFiscalDigital = Timbre;
+  cfdi->Complemento->TimbreFiscalDigital = Timbre;
 
   return 0;
 }
