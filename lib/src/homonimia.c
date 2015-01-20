@@ -303,7 +303,7 @@ homonimia(char* clave, const char* nombre, const char* apellidos, const int debu
   /* Now convert all the characters to the numeric values defined in the
      Anexo 1 */
   while ( *copy ) {
-    if ( isalnum(*copy) || *copy == '&' || isspace(*copy) ) {
+    if ( isalnum(*copy) || *copy == '&' || *copy == '^' || isspace(*copy) ) {
       /* Primer suma */
       valor = anexo1(*copy);
       if ( debug ) {
