@@ -740,7 +740,7 @@ clave_rfc_persona_fisica(char* clave, const char *nombre, const char *paterno, c
   upaterno = to_upper_case_and_convert((unsigned char*)paterno);
   if ( materno != NULL ) {
     /* Existe la posibilidad de que 'materno' este vacio */
-    if ( strlen(materno) {
+    if ( strlen(materno) ) {
       umaterno = to_upper_case_and_convert((unsigned char*)materno);
     }
   }
