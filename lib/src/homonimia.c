@@ -261,7 +261,8 @@ anexo2(const unsigned int n)
 unsigned int
 decena(const unsigned int valor)
 {
-  if	  ( valor >= 30 ) return 3;
+  if	  ( valor >= 40 ) return 4;
+  else if ( valor >= 30 ) return 3;
   else if ( valor >= 20 ) return 2;
   else if ( valor >= 10 ) return 1;
   else			  return 0;
