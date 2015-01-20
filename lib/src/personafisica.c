@@ -738,7 +738,12 @@ clave_rfc_persona_fisica(char* clave, const char *nombre, const char *paterno, c
 
   unombre = to_upper_case_and_convert((unsigned char*)nombre);
   upaterno = to_upper_case_and_convert((unsigned char*)paterno);
-  if ( materno != NULL ) umaterno = to_upper_case_and_convert((unsigned char*)materno);
+  if ( materno != NULL ) {
+    /* Existe la posibilidad de que 'materno' este vacio */
+    if ( strlen(materno) {
+      umaterno = to_upper_case_and_convert((unsigned char*)materno);
+    }
+  }
 
   memset(tmp_clave, 0, 14);
   fisica_clave_abreviada(tmp_clave, unombre, upaterno, umaterno, year, month, day, debug);
