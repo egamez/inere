@@ -288,7 +288,8 @@ var inere = {
 	 * @private Private function
 	 */
 	decena: function( value ) {
-		if	( value >= 30 ) return 3;
+		if	( value >= 40 ) return 4;
+		else if	( value >= 30 ) return 3;
 		else if ( value >= 20 ) return 2;
 		else if ( value >= 10 ) return 1;
 		else			return 0;
