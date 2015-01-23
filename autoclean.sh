@@ -31,3 +31,11 @@ rm -rf aclocal.m4 \
 	test/Makefile.in \
 	python/build/ \
 	src/Makefile.in
+
+# envia
+cd envia
+./autoclean.sh
+
+# cfdi
+cd ../cfdi
+./autoclean.sh

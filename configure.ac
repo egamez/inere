@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.64])
-AC_INIT([inere], [0.3.2], [egamez@edisson.com.mx])
+AC_INIT([inere], [0.4.0], [egamez@edisson.com.mx])
 AC_CONFIG_SRCDIR([src/rfc.c])
 AC_CONFIG_HEADERS([include/inere/config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -32,164 +32,45 @@ AC_CHECK_FUNCS([localtime_r memset setlocale strdup strrchr strsep strcasecmp ic
 
 # Checks for extra libraries.
 
-# Fija el host y domain name
-ENVIA_FULLHOSTNAME=`hostname -f`
-if test -z "$ENVIA_FULLHOSTNAME" ; then
-	# Define un nombre para este nodo
-	ENVIA_FULLHOSTNAME="localhost.localdomain"
-fi
-AC_DEFINE_UNQUOTED([ENVIA_HOSTNAME], ["$ENVIA_FULLHOSTNAME"], [Define el nombre de este nodo. Este nombre se utilizara para formar el identificador del mensaje.])
 
-# Check for libxml2
-XML2_CONFIG=
-AC_ARG_WITH([xml2config],
-	[AS_HELP_STRING([--with-xml2config@<:@=PATH@:>@],
-		[Especifica la ruta del ejecutable xml2-config @<:@default=/usr/local/bin@:>@])],
+# Options to build the other subpackages
+ENVIA_ENABLED=no
+AC_ARG_ENABLE([envia],
+	[AS_HELP_STRING([--enable-envia],
+		[Compila el subpaquete envia])],
 	[
-		XML2_CONFIG=$withval/xml2-config
+		case "${enableval}" in
+			yes)	ENVIA_ENABLED=true
+				AC_CONFIG_SUBDIRS([envia])
+				;;
+			no)	ENVIA_ENABLED=false ;;
+			*)	AC_MSG_ERROR([bad value ${enableval} for --enable-envia]) ;;
+		esac
 	],
 	[
-		AC_PATH_PROGS(XML2_CONFIG, xml2-config)
+		ENVIA_ENABLED=false
 	])
-if test -z "$XML2_CONFIG" || test ! -r "$XML2_CONFIG"; then
-	AC_MSG_ERROR([
-libXML2 (through xml2-config) required.
-])
-fi
-
-with_xml2_include=`$XML2_CONFIG --prefix`
-AC_MSG_NOTICE([using libxml2 headers at $with_xml2_include])
-with_xml2_lib=`$XML2_CONFIG --prefix`
-AC_MSG_NOTICE([using libxml2 libraries at $with_xml2_lib])
-
-XML2_LIB=`$XML2_CONFIG --libs`
-AC_SUBST(XML2_LIB)
-XML2_INCLUDE=`$XML2_CONFIG --cflags`
-AC_SUBST(XML2_INCLUDE)
-XML2_PREFIX=`$XML2_CONFIG --prefix`
-AC_SUBST(XML2_PREFIX)
-
-# xslt
-AC_PATH_PROG(XSLT_CONFIG, xslt-config)
-if test -z "$XSLT_CONFIG" || test ! -r "$XSLT_CONFIG"; then
-	AC_MSG_ERROR([
-XSLT required.
-])
-fi
-
-with_xslt_include=`$XSLT_CONFIG --prefix`
-AC_MSG_NOTICE([using XSLT headers at $with_xslt_include])
-with_xslt_lib=`$XSLT_CONFIG --prefix`
-AC_MSG_NOTICE([using XSLT libraries at $with_xslt_lib])
-
-XSLT_LIB=`$XSLT_CONFIG --libs`
-AC_SUBST(XSLT_LIB)
-XSLT_INCLUDE=`$XSLT_CONFIG --cflags`
-AC_SUBST(XSLT_INCLUDE)
-
-# Checks for libraries.
-# cURL
-# cURL libraries
-AC_PATH_PROG(CURL_CONFIG, curl-config)
-if test -z "$CURL_CONFIG" || test ! -r "$CURL_CONFIG"; then
-	AC_MSG_ERROR([
-cURL required.
-])
-fi
-CURL_LIBS=`$CURL_CONFIG --libs`
-AC_SUBST(CURL_LIBS)
-CURL_INCLUDES=`$CURL_CONFIG --cflags`
-AC_SUBST(CURL_INCLUDES)
+AM_CONDITIONAL([ENVIA_ENABLED], [ test x$ENVIA_ENABLED = xtrue ])
 
 
-# Check if we want to use UUID for message identificators
-UUID_CONFIG=
-UUID_INCLUDES=
-UUID_LIBS=
-AC_ARG_WITH([uuid],
-	[AS_HELP_STRING([--with-uuid@<:@=PATH@:>@],
-		[Utiliza UUID como identificadores para los mensajes, especificando la ruta del script uuid-config @<:@default=/usr/bin@:>@])],
-        
+CFDI_ENABLED=no
+AC_ARG_ENABLE([cfdi],
+	[AS_HELP_STRING([--enable-cfdi],
+		[Compila el subpaquete cfdi])],
 	[
-		if test "x$withval" = "xyes" ; then
-			UUID_CONFIG=/usr/bin/uuid-config
-		else
-			UUID_CONFIG=$withval/uuid-config
-		fi
+		case "${enableval}" in
+			yes)	CFDI_ENABLED=true
+				AC_CONFIG_SUBDIRS([cfdi])
+				;;
+			no)	CFDI_ENABLED=false ;;
+			*)	AC_MSG_ERROR([valor inapropiado ${enableval} para --enable-cfdi]) ;;
+		esac
 	],
 	[
+		CFDI_ENABLED=false
 	])
-if test -n "$UUID_CONFIG" && test -x "$UUID_CONFIG" ; then
-	UUID_INCLUDES=`$UUID_CONFIG --cflags`
-	UUID_LIBS="`$UUID_CONFIG --ldflags` -lm `$UUID_CONFIG --libs`"
-	AC_DEFINE([ENVIA_UTILIZA_UUID], [1], [Se utilizaran UUID para el identif
-icador del mensaje y los delimitadores de las partes del mensaje])
+AM_CONDITIONAL([CFDI_ENABLED], [ test x$CFDI_ENABLED = xtrue ])
 
-elif test -n "$UUID_CONFIG" && test ! -x "$UUID_CONFIG" ; then
-        
-	AC_MSG_ERROR([
-No se encontró el programa $UUID_CONFIG automatico de configuración de la API para generar los UUID que se utilizarían como identificadores del mensaje.
-])
-
-fi
-
-# Se podrá definir por separado el directorio de los headers
-AC_ARG_WITH([uuid-include-dir],
-	[AS_HELP_STRING([--with-uuid-include-dir@<:@=PATH@:>@],
-		[Define la ruta del directorio en donde se encuentran los headers de la API de UUID para construir los identenficadores de mensaje])],
-	[
-		UUID_INCLUDES=$withval
-		AC_DEFINE([ENVIA_UTILIZA_UUID], [1], [Se utilizaran UUID para el identificador del mensaje y los delimitadores de las partes del mensaje])
-	]
-	[
-	])
-
-# Se podrá definir por separado el directorio de las librerias
-AC_ARG_WITH([uuid-lib-dir],
-	[AS_HELP_STRING([--with-uuid-lib-dir@<:@=PATH@:>@],
-		[Define la ruta del directorio en donde se encuentran la libreria de la API de UUID para construir los identenficadores de mensaje])],
-	[
-		UUID_LIBS="-L$withval"
-		AC_DEFINE([ENVIA_UTILIZA_UUID], [1], [Se utilizaran UUID para el identificador del mensaje y los delimitadores de las partes del mensaje])
-	]
-	[
-	])
-
-# Se podrá definir por separado el nombre de la libreria
-AC_ARG_WITH([uuid-lib-name],
-	[AS_HELP_STRING([--with-uuid-lib-name@<:@=NOMBRE@:>@],
-		[Define el nombre (abreviado) de la libreria de implementación de la API de UUID a utilizarse ('ossp-uuid' o 'uuid')])],
-	[
-		UUID_LIBS="$UUID_LIBS -l$withval"
-	]
-	[
-	])
-AC_SUBST(UUID_INCLUDES)
-AC_SUBST(UUID_LIBS)
-
-
-# OpenSSL
-OPENSSL_INC_DIR=
-AC_ARG_WITH([openssl],
-	[AS_HELP_STRING([--with-openssl@<:@=PATH@:>@],
-		[Especifica la ruta de instalacion de la libreria OpenSSL @<:@default=/usr@:>@])],
-	[
-		LIBS="-L$withval/lib ${LIBS}"
-		LDFLAGS="${LDFLAGS} -L$withval/lib"
-		CFLAGS="${CFLAGS} -I$withval/include"
-		OPENSSL_INC_DIR="$withval/include"
-	],
-	[
-		LIBS="-L/usr/lib ${LIBS}"
-		LDFLAGS="${LDFLAGS} -L/usr/lib"
-		CFLAGS="${CFLAGS} -I/usr/include"
-		OPENSSL_INC_DIR="/usr/include"
-	])
-AC_SUBST(OPENSSL_INC_DIR)
-AC_CHECK_HEADERS([openssl/evp.h])
-OPENSSL_LIBS=
-AC_CHECK_LIB(crypto, X509_get_pubkey, OPENSSL_LIBS="-lcrypto")
-AC_SUBST(OPENSSL_LIBS)
 
 # Now capture the input charset
 DEFAULT_CHARSET="UTF-8"
@@ -206,11 +87,7 @@ AC_CONFIG_FILES([inere-config], [chmod +x inere-config])
 
 AC_CONFIG_FILES([Makefile
                  lib/Makefile
-                 lib/src/Makefile
-                 lib/cfdi/Makefile
-                 lib/envia/Makefile
                  src/Makefile
 		 examples/Makefile
-                 test/Makefile
 		 python/setup.py])
 AC_OUTPUT

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2014, L3a,
- *			Enrique Gámez <egamez@edisson.com.mx>
+ * Copyright (c) 2014-2015, L3a,
+ *			    Enrique Gámez <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,8 +24,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef INERE_EXTRAEFECHA_INCLUDED_H
-#define INERE_EXTRAEFECHA_INCLUDED_H
+#ifndef INERE_EXTRAEFECHA_H_
+#define INERE_EXTRAEFECHA_H_
 
 #if defined(__cplusplus)
 extern "C" {
@@ -37,4 +37,4 @@ int extrae_fecha(const char *semiclave, char *day, char *month, char *year, int 
 }
 #endif
 
-#endif /* INERE_EXTRAEFECHA_INCLUDED_H */
+#endif /* INERE_EXTRAEFECHA_H_ */

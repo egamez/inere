@@ -1,0 +1,17 @@
+from distutils.core import setup, Extension
+
+module1 = Extension('inerecfdi',
+		    define_macros = [('MAJOR_VERSION', '0'),
+				     ('MINOR_VERSION', '3')],
+		    include_dirs = ['../include', '/usr/local/include', '@XML2_PREFIX@/include/libxml2'],
+		    library_dirs = ['../lib/src/.libs', '../lib/cfdi/.libs', '@XML2_PREFIX@/lib', '/usr/local/lib'],
+		    libraries = ['inerecfdi', 'crypto', 'xslt', 'xml2'],
+		    sources = ['inerecfdi.c'])
+
+setup (	name = 'inerecfdi',
+	version = '@PACKAGE_VERSION@',
+	description = 'Utilidades para CFDIs.',
+	author = 'Enrique Gamez Flores',
+	author_email = 'egamez@edisson.com.mx',
+	url = 'http://edisson.com.mx',
+	ext_modules = [module1])

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, L3a,
+ * Copyright (c) 2012-2015, L3a,
  *			    Enrique Gámez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
@@ -24,19 +24,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef INERE_PERSONAFISICA_INCLUDED_H
+#ifndef INERE_PERSONAFISICA_H_
 #include "inere/personafisica.h"
 #endif
-#ifndef INERE_PERSONAMORAL_INCLUDED_H
+#ifndef INERE_PERSONAMORAL_H_
 #include "inere/personamoral.h"
 #endif
-#ifndef INERE_HOMONIMIA_INCLUDED_H
+#ifndef INERE_HOMONIMIA_H_
 #include "inere/homonimia.h"
 #endif
-#ifndef INERE_VERIFICADOR_INCLUDED_H
+#ifndef INERE_VERIFICADOR_H_
 #include "inere/verificador.h"
 #endif
-#ifndef INERE_UTIL_INCLUDED_H
+#ifndef INERE_UTIL_H_
 #include "inere/util.h"
 #endif
 

@@ -1,13 +1,5 @@
 /* include/inere/config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Define el nombre de este nodo. Este nombre se utilizara para formar el
-   identificador del mensaje. */
-#undef ENVIA_HOSTNAME
-
-/* Se utilizaran UUID para el identificador del mensaje y los delimitadores de
-   las partes del mensaje */
-#undef ENVIA_UTILIZA_UUID
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
@@ -31,9 +23,6 @@
 
 /* Define to 1 if you have the `memset' function. */
 #undef HAVE_MEMSET
-
-/* Define to 1 if you have the <openssl/evp.h> header file. */
-#undef HAVE_OPENSSL_EVP_H
 
 /* Define to 1 if you have the `setlocale' function. */
 #undef HAVE_SETLOCALE

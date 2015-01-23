@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, L3a
+ * Copyright (c) 2012-2015, L3a,
  *			    Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
@@ -24,8 +24,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef INERE_PERSONAMORAL_INCLUDED_H
-#define INERE_PERSONAMORAL_INCLUDED_H
+#ifndef INERE_PERSONAMORAL_H_
+#define INERE_PERSONAMORAL_H_
 
 #if defined(__cplusplus)
 extern "C" {
@@ -37,4 +37,4 @@ extern char* clave_rfc_persona_moral(char* clave, const char *denominacion_socia
 }
 #endif
 
-#endif /* INERE_PERSONAMORAL_INCLUDED_H */
+#endif /* INERE_PERSONAMORAL_H_ */

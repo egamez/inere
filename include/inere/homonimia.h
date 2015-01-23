@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>,
- *                     Lae
+ * Copyright (c) 2012-2015, L3a,
+ *                          Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,8 +24,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef INERE_HOMONIMIA_INCLUDED_H
-#define INERE_HOMONIMIA_INCLUDED_H
+#ifndef INERE_HOMONIMIA_H_
+#define INERE_HOMONIMIA_H_
 
 #if defined(__cplusplus)
 extern "C" {
@@ -37,4 +37,4 @@ extern char* homonimia(char* clave, const char* nombre, const char* apellidos, i
 }
 #endif
 
-#endif /* INERE_HOMONIMIA_INCLUDED_H */
+#endif /* INERE_HOMONIMIA_H_ */

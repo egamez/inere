@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, L3a,
+ * Copyright (c) 2012-2015, L3a,
  *			    Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
@@ -24,8 +24,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef INERE_VERIFICADOR_INCLUDED_H
-#define INERE_VERIFICADOR_INCLUDED_H
+#ifndef INERE_VERIFICADOR_H_
+#define INERE_VERIFICADOR_H_
 
 #if defined(__cplusplus)
 extern "C" {
@@ -39,4 +39,4 @@ extern unsigned char verifica_rfc(const char* rfc, const int debug);
 }
 #endif
 
-#endif /* INERE_VERIFICADOR_INCLUDED_H */
+#endif /* INERE_VERIFICADOR_H_ */

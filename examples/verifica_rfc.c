@@ -1,7 +1,7 @@
 /**
  * obten_digito.c
  *
- * Copyright (c) 2012-2014, L3a,
+ * Copyright (c) 2012-2015, L3a,
  *			    Enrique Gámez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *

@@ -1,5 +1,13 @@
 #
-SUBDIRS = lib src test
+SUBDIRS = lib src
+
+if ENVIA_ENABLED
+  SUBDIRS += envia
+endif
+if CFDI_ENABLED
+  SUBDIRS += cfdi
+endif
+
 EXTRA_DIST = autogen.sh \
 	autoclean.sh \
 	README.md \

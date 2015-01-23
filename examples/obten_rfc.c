@@ -1,8 +1,8 @@
 /**
  * obten_rfc.c
  *
- * Copyright (c) 2012, Enrique Gamez Flores <egamez@edisson.com.mx>, and
- *                     Lae
+ * Copyright (c) 2012-2015, L3a,
+ *                          Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
