@@ -27,11 +27,42 @@
 #ifndef INERE_CFDI_CREA_CFDI_H_
 #define INERE_CFDI_CREA_CFDI_H_
 
+#ifndef INERE_CFDI_COMPROBANTE_H_
+#include "inere/cfdi/comprobante.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <libxml/tree.h>
+
+extern Comprobante_t *crea_comprobante(unsigned char *version);
+extern int asigna_serie(Comprobante_t *cfdi, unsigned char *serie);
+extern int asigna_folio(Comprobante_t *cfdi, unsigned char *folio);
+extern int asigna_fecha(Comprobante_t *cfdi, unsigned char *fecha);
+extern int asigna_sello(Comprobante_t *cfdi, unsigned char *sello);
+extern int asigna_formaDePago(Comprobante_t *cfdi, unsigned char *formaDePago);
+extern int asigna_noCertificado(Comprobante_t *cfdi, unsigned char *noCertificado);
+extern int asigna_certificado(Comprobante_t *cfdi, unsigned char *certificado);
+extern int asigna_condicionesDePago(Comprobante_t *cfdi, unsigned char *condicionesDePago);
+extern int asigna_subTotal(Comprobante_t *cfdi, unsigned char *subTotal);
+extern int asigna_descuento(Comprobante_t *cfdi, unsigned char *descuento);
+extern int asigna_motivoDescuento(Comprobante_t *cfdi, unsigned char *motivoDescuento);
+extern int asigna_TipoCambio(Comprobante_t *cfdi, unsigned char *TipoCambio);
+extern int asigna_Moneda(Comprobante_t *cfdi, unsigned char *Moneda);
+extern int asigna_total(Comprobante_t *cfdi, unsigned char *total);
+extern int asigna_tipoDeComprobante(Comprobante_t *cfdi, unsigned char *tipoDeComprobante);
+extern int asigna_metodoDePago(Comprobante_t *cfdi, unsigned char *metodoDePago);
+extern int asigna_LugarExpedicion(Comprobante_t *cfdi, unsigned char *LugarExpedicion);
+extern int asigna_NumCtaPago(Comprobante_t *cfdi, unsigned char *NumCtaPago);
+extern int asigna_FolioFiscalOrig(Comprobante_t *cfdi, unsigned char *FolioFiscalOrig);
+extern int asigna_SerieFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *SerieFolioFiscalOrig);
+extern int asigna_FechaFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *FechaFolioFiscalOrig);
+extern int asigna_MontoFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *MontoFolioFiscalOrig);
+
+extern int agrega_concepto(Comprobante_t *cfdi, unsigned char *cantidad, unsigned char *noIdentificacion, unsigned char *unidad, unsigned char *descripcion, unsigned char *valorUnitario, unsigned char *importe);
+extern xmlChar *genera_comprobante_alloc(Comprobante_t *cfdi);
 
 typedef struct cfdi_items_list {
   xmlNodePtr xml_node;

@@ -112,6 +112,752 @@ obten_fecha_ISO8601_alloc(const int verbose)
 }
 
 /**
+ * Esta funcion creara la estructura basica Comprobante_t
+ *
+ */
+Comprobante_t *
+crea_comprobante(unsigned char *version)
+{
+  Comprobante_t *cfdi = NULL;
+
+  /* Verifica que la version dada corresponda a la versión soportada */
+  if ( strcmp((char *)version, "3.2") == 0 ) {
+    cfdi = (Comprobante_t *)malloc(sizeof(Comprobante_t));
+    if ( cfdi == NULL ) {
+      fprintf(stderr, "%s:%d Error al momento de reservar memoria para el comprobante\n", __FILE__, __LINE__);
+    } else {
+      cfdi->version = version;
+    }
+
+  } else {
+    fprintf(stderr, "%s:%d Error. Versión \"%s\" de CFDI no soportada.\n", __FILE__, __LINE__, version);
+  }
+
+  return cfdi;
+}
+
+/**
+ *
+ */
+int
+asigna_serie(Comprobante_t *cfdi, unsigned char *serie)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( serie == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else if ( strlen((char *)serie) > 25 ) {
+    ret = 3;
+    fprintf(stderr, "%s:%d Error. Se ha excedido la longitud máxima para asignar la serie del comprobante.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->serie = serie;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_folio(Comprobante_t *cfdi, unsigned char *folio)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( folio == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else if ( strlen((char *)folio) > 20 ) {
+    ret = 3;
+    fprintf(stderr, "%s:%d Error. Se ha excedido la longitud máxima para asignar el folio del comprobante.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->folio = folio;
+  }
+  return ret;
+}
+
+
+/**
+ * If 'fecha' is NUL, the program will call 
+ */
+int
+asigna_fecha(Comprobante_t *cfdi, unsigned char *fecha)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( strlen((char *)fecha) > 19 ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Se ha excedido la longitud máxima para asignar la fecha del comprobante.\n", __FILE__, __LINE__);
+  } else if ( fecha == NULL ) {
+    /* Asigna una fecha por default */
+    cfdi->fecha = obten_fecha_ISO8601_alloc(0);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->fecha = fecha;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_sello(Comprobante_t *cfdi, unsigned char *sello)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( sello == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->sello = sello;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_formaDePago(Comprobante_t *cfdi, unsigned char *formaDePago)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( formaDePago == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->formaDePago = formaDePago;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_noCertificado(Comprobante_t *cfdi, unsigned char *noCertificado)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( noCertificado == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else if ( strlen((char *)noCertificado) > 20 ) {
+    ret = 3;
+    fprintf(stderr, "%s:%d Error. Se ha excedido la longitud máxima para expresar el número de serie del certificado de sello digital que ampara al comprobante.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->noCertificado = noCertificado;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_certificado(Comprobante_t *cfdi, unsigned char *certificado)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( certificado == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->certificado = certificado;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_condicionesDePago(Comprobante_t *cfdi, unsigned char *condicionesDePago)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( condicionesDePago == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->condicionesDePago = condicionesDePago;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_subTotal(Comprobante_t *cfdi, unsigned char *subTotal)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( subTotal == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->subTotal = subTotal;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_descuento(Comprobante_t *cfdi, unsigned char *descuento)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( descuento == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->descuento = descuento;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_motivoDescuento(Comprobante_t *cfdi, unsigned char *motivoDescuento)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( motivoDescuento == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->motivoDescuento = motivoDescuento;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_TipoCambio(Comprobante_t *cfdi, unsigned char *TipoCambio)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( TipoCambio == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->TipoCambio = TipoCambio;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_Moneda(Comprobante_t *cfdi, unsigned char *Moneda)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( Moneda == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->Moneda = Moneda;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_total(Comprobante_t *cfdi, unsigned char *total)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( total == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->total = total;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_tipoDeComprobante(Comprobante_t *cfdi, unsigned char *tipoDeComprobante)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( tipoDeComprobante == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->tipoDeComprobante = tipoDeComprobante;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_metodoDePago(Comprobante_t *cfdi, unsigned char *metodoDePago)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( metodoDePago == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->metodoDePago = metodoDePago;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_LugarExpedicion(Comprobante_t *cfdi, unsigned char *LugarExpedicion)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( LugarExpedicion == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->LugarExpedicion = LugarExpedicion;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_NumCtaPago(Comprobante_t *cfdi, unsigned char *NumCtaPago)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( NumCtaPago == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->NumCtaPago = NumCtaPago;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_FolioFiscalOrig(Comprobante_t *cfdi, unsigned char *FolioFiscalOrig)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( FolioFiscalOrig == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->FolioFiscalOrig = FolioFiscalOrig;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_SerieFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *SerieFolioFiscalOrig)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( SerieFolioFiscalOrig == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->SerieFolioFiscalOrig = SerieFolioFiscalOrig;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_FechaFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *FechaFolioFiscalOrig)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( FechaFolioFiscalOrig == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->FechaFolioFiscalOrig = FechaFolioFiscalOrig;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+asigna_MontoFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *MontoFolioFiscalOrig)
+{
+  int ret = 0;
+  if ( cfdi == NULL ) {
+    ret = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else if ( MontoFolioFiscalOrig == NULL ) {
+    ret = 2;
+    fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
+  } else {
+    /* Copia el puntero al argumento */
+    cfdi->MontoFolioFiscalOrig = MontoFolioFiscalOrig;
+  }
+  return ret;
+}
+
+
+/**
+ *
+ */
+int
+agrega_concepto(Comprobante_t *cfdi, unsigned char *cantidad, unsigned char *noIdentificacion, unsigned char *unidad, unsigned char *descripcion, unsigned char *valorUnitario, unsigned char *importe)
+{
+  int res = 0;
+  Concepto_list_t *concepto = NULL;
+  Concepto_list_t *current = NULL;
+  Concepto_list_t *tmp = NULL;
+  CuentaPredial_t *predial = NULL;
+  InformacionAduanera_list_t *info_a = NULL;
+  InformacionAduanera_list_t *info_a_tmp = NULL;
+  InformacionAduanera_list_t *info_a_current = NULL;
+  Parte_list_t *parte = NULL;
+
+  if ( cfdi == NULL ) {
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+    return 1;
+  }
+
+  tmp = (Concepto_list_t *)malloc(sizeof(Concepto_list_t));
+  if ( tmp == NULL ) {
+      fprintf(stderr, "%s:%d Error al momento de reservar memoria para el concepto\n", __FILE__, __LINE__);
+    return 2;
+  }
+
+  if ( cantidad == NULL ) {
+    free(tmp);
+    fprintf(stderr, "%s:%d Error. Es requisito indispensable expresar la cantidad para este concepto.\n", __FILE__, __LINE__);
+    return 3;
+  } else {
+    tmp->cantidad = cantidad;
+  }
+
+  /* Este campo es opcional */
+  tmp->noIdentificacion = noIdentificacion;
+
+  if ( unidad == NULL ) {
+    free(tmp);
+    fprintf(stderr, "%s:%d Error. Es requisito indispensable expresar la unidad referente a este concepto.\n", __FILE__, __LINE__);
+    return 4;
+  } else {
+    tmp->unidad = unidad;
+  }
+
+  if ( descripcion == NULL ) {
+    free(tmp);
+    fprintf(stderr, "%s:%d Error. Es requisito indispensable expresar la descripcion de este concepto.\n", __FILE__, __LINE__);
+    return 5;
+  } else {
+    tmp->descripcion = descripcion;
+  }
+
+  if ( valorUnitario == NULL ) {
+    free(tmp);
+    fprintf(stderr, "%s:%d Error. Es requisito indispensable expresar el valor unitario de este concepto.\n", __FILE__, __LINE__);
+    return 6;
+  } else {
+    tmp->valorUnitario = valorUnitario;
+  }
+
+  if ( importe == NULL ) {
+    free(tmp);
+    fprintf(stderr, "%s:%d Error. Es requisito indispensable expresar el importe para este concepto.\n", __FILE__, __LINE__);
+    return 3;
+  } else {
+    tmp->importe = importe;
+  }
+
+  /* El sentinel */
+  tmp->next = NULL;
+
+  /* Ahora debemos de salvar este concepto a la lista de conceptos del CFDI */
+  if ( cfdi->Conceptos == NULL ) {
+    /* Esta es la primera entrada */
+    cfdi->Conceptos = tmp;
+    cfdi->Conceptos->size = 1;
+
+  } else {
+    /* Agrega una entrada */
+    current = cfdi->Conceptos;
+    while ( current->next != NULL ) {
+      current = current->next;
+    }
+
+    current->next = tmp;
+    current->size++;
+  }
+
+  return res;
+}
+
+
+/**
+ * Genera comprobante y regresa el cfdi
+ */
+xmlChar *
+genera_comprobante_alloc(Comprobante_t *cfdi)
+{
+  xmlDocPtr doc = NULL;
+  xmlNodePtr Comprobante = NULL;
+  xmlNodePtr Conceptos = NULL;
+  xmlNodePtr Concepto = NULL;
+  xmlNsPtr cfdi_ns = NULL;
+  Concepto_list_t *conceptos = NULL;
+  xmlChar *comprobante = NULL;
+  int len = 0;
+
+  doc = xmlNewDoc((const xmlChar *)"1.0");
+  if ( doc == NULL ) {
+    fprintf(stderr, "%s:%d Error. No fue posible crear la estructura del documento.\n", __FILE__, __LINE__);
+    return NULL;
+  }
+
+  /* Crea el namespace raiz */
+  cfdi_ns = xmlNewNs(Comprobante, cfdi_url, (const xmlChar *)"cfdi");
+  if ( cfdi_ns == NULL ) {
+    fprintf(stderr, "%s:%d Error. No fue posible crear el namespace primario.\
+n", __FILE__, __LINE__);
+    xmlFreeDoc(doc);
+    return NULL;
+  }
+
+  /* Crea el elemento raiz */
+  Comprobante = xmlNewNode(cfdi_ns, (const xmlChar *)"Comprobante");
+  if ( Comprobante == NULL ) {
+    fprintf(stderr, "%s:%d Error. No fue posible crear el nodo raiz, correspondiente al comprobante.\
+n", __FILE__, __LINE__);
+    xmlFreeDoc(doc);
+    return NULL;
+  }
+
+  /* Crea el namespace xsi. pero para que el CFDi se vea bonito
+   * no declares este namespace de la manera usual (via xmlNewNs)
+   * mejor solo agregalo como un atributo cualquiera */
+  xmlNewProp(Comprobante, (const xmlChar *)"xmlns:xsi", xsi_url);
+  xmlNewProp(Comprobante, (const xmlChar *)"xsi:schemaLocation", cfdi_schemaLocation);
+
+  /* Ahora comienza a escribir la información de nuestra estructura,
+   * comienza por los atributos obligatorios
+   */
+  xmlNewProp(Comprobante, (const xmlChar *)"version", cfdi->version);
+  xmlNewProp(Comprobante, (const xmlChar *)"fecha", cfdi->fecha);
+  xmlNewProp(Comprobante, (const xmlChar *)"sello", cfdi->sello);
+  xmlNewProp(Comprobante, (const xmlChar *)"formaDePago", cfdi->formaDePago);
+  xmlNewProp(Comprobante, (const xmlChar *)"noCertificado", cfdi->noCertificado);
+  xmlNewProp(Comprobante, (const xmlChar *)"certificado", cfdi->certificado);
+  xmlNewProp(Comprobante, (const xmlChar *)"subTotal", cfdi->subTotal);
+  xmlNewProp(Comprobante, (const xmlChar *)"total", cfdi->total);
+  xmlNewProp(Comprobante, (const xmlChar *)"tipoDeComprobante", cfdi->tipoDeComprobante);
+  xmlNewProp(Comprobante, (const xmlChar *)"metodoDePago", cfdi->metodoDePago);
+  xmlNewProp(Comprobante, (const xmlChar *)"LugarExpedicion", cfdi->LugarExpedicion);
+
+  /* Ahora los atributos opcionales */
+  if ( cfdi->serie != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"serie", cfdi->serie);
+  }
+
+  if ( cfdi->folio != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"folio", cfdi->folio);
+  }
+
+  if ( cfdi->condicionesDePago != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"condicionesDePago", cfdi->condicionesDePago);
+  }
+
+  if ( cfdi->descuento != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"descuento", cfdi->descuento);
+  }
+
+  if ( cfdi->motivoDescuento != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"motivoDescuento", cfdi->motivoDescuento);
+  }
+
+  if ( cfdi->TipoCambio != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"TipoCambio", cfdi->TipoCambio);
+  }
+
+  if ( cfdi->Moneda != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"Moneda", cfdi->Moneda);
+  }
+
+  if ( cfdi->LugarExpedicion != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"LugarExpedicion", cfdi->LugarExpedicion);
+  }
+
+  if ( cfdi->NumCtaPago != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"NumCtaPago", cfdi->NumCtaPago);
+  }
+
+  if ( cfdi->FolioFiscalOrig != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"FolioFiscalOrig", cfdi->FolioFiscalOrig);
+  }
+
+  if ( cfdi->SerieFolioFiscalOrig != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"SerieFolioFiscalOrig", cfdi->SerieFolioFiscalOrig);
+  }
+
+  if ( cfdi->FechaFolioFiscalOrig != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"FechaFolioFiscalOrig", cfdi->FechaFolioFiscalOrig);
+  }
+
+  if ( cfdi->MontoFolioFiscalOrig != NULL ) {
+    xmlNewProp(Comprobante, (const xmlChar *)"MontoFolioFiscalOrig", cfdi->MontoFolioFiscalOrig);
+  }
+
+  /* Ahora los datos del emisor */
+
+  /* Ahora los datos del receptor */
+
+  /* Ahora los conceptos */
+  Conceptos = xmlNewChild(Comprobante, cfdi_ns, (const xmlChar *)"Conceptos", NULL);
+  conceptos = cfdi->Conceptos;
+  while ( conceptos != NULL ) {
+    Concepto = xmlNewChild(Conceptos, cfdi_ns, (const xmlChar *)"Concepto", NULL);
+    xmlNewProp(Concepto, (const xmlChar *)"cantidad",      conceptos->cantidad);
+    xmlNewProp(Concepto, (const xmlChar *)"unidad",        conceptos->unidad);
+    xmlNewProp(Concepto, (const xmlChar *)"descripcion",   conceptos->descripcion);
+    xmlNewProp(Concepto, (const xmlChar *)"valorUnitario", conceptos->valorUnitario);
+    xmlNewProp(Concepto, (const xmlChar *)"importe",       conceptos->importe);
+    if ( conceptos->noIdentificacion != NULL ) {
+      xmlNewProp(Concepto, (const xmlChar *)"noIdentificacion", conceptos->noIdentificacion);
+    }
+    conceptos = conceptos->next;
+  }
+
+  /* Agrega los impuestos */
+
+  /* Agrega el complemento */
+
+  /* Agrega la addenda */
+
+  /* Define el nodo comprobante como el nodo raiz */
+  xmlDocSetRootElement(doc, Comprobante);
+
+  /* Escribe el CFDI a un buffer */
+  xmlDocDumpMemoryEnc(doc, &comprobante, &len, "UTF-8");
+  if ( len == 0 ) {
+    /* An error did ocurr */
+  }
+
+  xmlFreeDoc(doc);
+
+  return comprobante;
+}
+
+/**
  *
  * Agrega a la lista otro concepto mas.
  */

@@ -12,6 +12,7 @@ nobase_dist_include_HEADERS = $(top_srcdir)/include/inere/cfdi/verifica_sello_di
 			$(top_srcdir)/include/inere/cfdi/genera_cadena_original.h \
 			$(top_srcdir)/include/inere/cfdi/sello.h \
 			$(top_srcdir)/include/inere/cfdi/crea_cfdi.h \
+			$(top_srcdir)/include/inere/cfdi/comprobante.h \
 			$(top_srcdir)/include/inere/cfdi/lee_cfdi.h \
 			$(top_srcdir)/include/inere/cfdi/base64.h
 
