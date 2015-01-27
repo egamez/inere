@@ -658,6 +658,10 @@ agrega_Emisor(Comprobante_t *cfdi, unsigned char *rfc, unsigned char *RegimenFis
       res = 2;
       fprintf(stderr, "%s:%d Error. Es necesario indicar la clave del R.F.C. del emisor.\n", __FILE__, __LINE__);
 
+    } else if ( RegimenFiscal == NULL ) {
+      res = 3;
+      fprintf(stderr, "%s:%d Error. Es necesario indicar el Regimen Fiscal en que tributa el emisor.\n", __FILE__, __LINE__);
+
     } else {
 
       cfdi->Emisor = (Emisor_t *)malloc(sizeof(Emisor_t));
@@ -911,6 +915,7 @@ agrega_Receptor_Domicilio(Comprobante_t *cfdi,
       cfdi->Receptor->Domicilio->referencia   = referencia;
       cfdi->Receptor->Domicilio->municipio    = municipio;
       cfdi->Receptor->Domicilio->estado       = estado;
+      cfdi->Receptor->Domicilio->pais         = pais;
       cfdi->Receptor->Domicilio->codigoPostal = codigoPostal;
     }
 
@@ -931,14 +936,15 @@ agrega_Concepto(Comprobante_t *cfdi,
 		unsigned char *importe)
 {
   int res = 0;
-  Concepto_list_t *concepto = NULL;
   Concepto_list_t *current = NULL;
   Concepto_list_t *tmp = NULL;
+/*
   CuentaPredial_t *predial = NULL;
   InformacionAduanera_list_t *info_a = NULL;
   InformacionAduanera_list_t *info_a_tmp = NULL;
   InformacionAduanera_list_t *info_a_current = NULL;
   Parte_list_t *parte = NULL;
+*/
 
   if ( cfdi == NULL ) {
     fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
@@ -1019,24 +1025,179 @@ agrega_Concepto(Comprobante_t *cfdi,
 
 
 /**
+ *
+ */
+int
+agrega_Impuesto_Retencion(Comprobante_t *cfdi,
+			  unsigned char *impuesto,
+			  unsigned char *importe)
+{
+  Retencion_list_t *retencion = NULL;
+  Retencion_list_t *current = NULL;
+  Retencion_list_t *tmp = NULL;
+  int res = 0;
+
+  if ( cfdi == NULL ) {
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+    return 1;
+  }
+
+  if ( impuesto == NULL ) {
+    fprintf(stderr, "%s:%d Error. Impuesto nulo.\n", __FILE__, __LINE__);
+    return 2;
+  } else if ( strlen((char *)impuesto) == 0 ) {
+    fprintf(stderr, "%s:%d Error. No hay descripcion del impuesto.\n", __FILE__, __LINE__);
+    return 3;
+  } else if ( importe == NULL ) {
+    fprintf(stderr, "%s:%d Error. Importe nulo.\n", __FILE__, __LINE__);
+    return 4;
+  } else if ( strlen((char *)importe) == 0 ) {
+    fprintf(stderr, "%s:%d Error. No hay valor para el importe.\n", __FILE__, __LINE__);
+    return 5;
+  }
+
+  tmp = (Retencion_list_t *)malloc(sizeof(Retencion_list_t));
+  if ( tmp == NULL ) {
+    fprintf(stderr, "%s:%d Error al momento de reservar memoria para esta retencion de impuestos.\n", __FILE__, __LINE__);
+    return 6;
+  }
+
+  tmp->impuesto = impuesto;
+  tmp->importe  = importe; 
+  tmp->next     = NULL;
+
+  if ( cfdi->Impuestos == NULL ) {
+    cfdi->Impuestos = (Impuestos_t *)malloc(sizeof(Impuestos_t));
+    cfdi->Impuestos->Retenciones = NULL;
+    cfdi->Impuestos->Traslados   = NULL;
+  }
+
+  if ( cfdi->Impuestos->Retenciones == NULL ) {
+    /* Esta es la primera entrada */
+    cfdi->Impuestos->Retenciones = tmp;
+    cfdi->Impuestos->Retenciones->size = 1;
+
+  } else {
+    /* Agrega una entrada */
+    current = cfdi->Impuestos->Retenciones;
+    while ( current->next != NULL ) {
+      current = current->next;
+    }
+
+    current->next = tmp;
+    current->size++;
+  }
+
+  return res;
+}
+
+
+/**
+ *
+ */
+int
+agrega_Impuesto_Traslado(Comprobante_t *cfdi,
+			 unsigned char *impuesto,
+			 unsigned char *tasa,
+			 unsigned char *importe)
+{
+  Traslado_list_t *current = NULL;
+  Traslado_list_t *tmp = NULL;
+  int res = 0;
+
+  if ( cfdi == NULL ) {
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+    return 1;
+  }
+
+  if ( impuesto == NULL ) {
+    fprintf(stderr, "%s:%d Error. Impuesto nulo.\n", __FILE__, __LINE__);
+    return 2;
+  } else if ( strlen((char *)impuesto) == 0 ) {
+    fprintf(stderr, "%s:%d Error. No hay descripcion del impuesto.\n", __FILE__, __LINE__);
+    return 3;
+  } else if ( importe == NULL ) {
+    fprintf(stderr, "%s:%d Error. Importe nulo.\n", __FILE__, __LINE__);
+    return 4;
+  } else if ( strlen((char *)importe) == 0 ) {
+    fprintf(stderr, "%s:%d Error. No hay valor para el importe.\n", __FILE__, __LINE__);
+    return 5;
+  } else if ( tasa == NULL ) {
+    fprintf(stderr, "%s:%d Error. Tasa nulo.\n", __FILE__, __LINE__);
+    return 6;
+  } else if ( strlen((char *)tasa) == 0 ) {
+    fprintf(stderr, "%s:%d Error. No hay valor para la tasa del impuesto trasladado.\n", __FILE__, __LINE__);
+    return 7;
+  } else if ( strcasecmp((char *)impuesto, "IVA") &&
+	      strcasecmp((char *)impuesto, "IEPS") ) {
+    fprintf(stderr, "%s:%d Error. El tipo de impuesto no es ni IVA ni IEPS, por tanto no será válido el comprobante, el tipo de impuesto a trasladador dado es: '%s'\n", __FILE__, __LINE__, impuesto);
+    return 7;
+  }
+
+  tmp = (Traslado_list_t *)malloc(sizeof(Traslado_list_t));
+  if ( tmp == NULL ) {
+    fprintf(stderr, "%s:%d Error al momento de reservar memoria para este traslado de impuestos.\n", __FILE__, __LINE__);
+    return 9;
+  }
+
+  tmp->impuesto = impuesto;
+  tmp->tasa     = tasa;
+  tmp->importe  = importe; 
+  tmp->next     = NULL;
+
+  if ( cfdi->Impuestos == NULL ) {
+    cfdi->Impuestos = (Impuestos_t *)malloc(sizeof(Impuestos_t));
+    cfdi->Impuestos->Retenciones = NULL;
+    cfdi->Impuestos->Traslados   = NULL;
+  }
+
+  if ( cfdi->Impuestos->Traslados == NULL ) {
+    /* Esta es la primera entrada */
+    cfdi->Impuestos->Traslados = tmp;
+    cfdi->Impuestos->Traslados->size = 1;
+
+  } else {
+    /* Agrega una entrada */
+    current = cfdi->Impuestos->Traslados;
+    while ( current->next != NULL ) {
+      current = current->next;
+    }
+
+    current->next = tmp;
+    current->size++;
+  }
+
+  return res;
+}
+
+
+/**
  * Genera comprobante y regresa el cfdi
  */
 xmlChar *
 genera_comprobante_alloc(Comprobante_t *cfdi)
 {
-  xmlDocPtr doc = NULL;
-  xmlNodePtr Comprobante = NULL;
-  xmlNodePtr Emisor = NULL;
-  xmlNodePtr DomicilioFiscal = NULL;
-  xmlNodePtr ExpedidoEn = NULL;
-  xmlNodePtr Receptor = NULL;
-  xmlNodePtr Domicilio = NULL;
-  xmlNodePtr Conceptos = NULL;
-  xmlNodePtr Concepto = NULL;
-  xmlNsPtr cfdi_ns = NULL;
-  Concepto_list_t *conceptos = NULL;
-  xmlChar *comprobante = NULL;
-  int len = 0;
+  xmlDocPtr doc                 = NULL;
+  xmlNsPtr cfdi_ns              = NULL;
+  xmlNodePtr Comprobante        = NULL;
+  xmlNodePtr Emisor             = NULL;
+  xmlNodePtr RegimenFiscal      = NULL;
+  xmlNodePtr DomicilioFiscal    = NULL;
+  xmlNodePtr ExpedidoEn         = NULL;
+  xmlNodePtr Receptor           = NULL;
+  xmlNodePtr Domicilio          = NULL;
+  xmlNodePtr Conceptos          = NULL;
+  xmlNodePtr Concepto           = NULL;
+  xmlNodePtr Impuestos          = NULL;
+  xmlNodePtr Retenciones        = NULL;
+  xmlNodePtr Retencion          = NULL;
+  xmlNodePtr Traslados          = NULL;
+  xmlNodePtr Traslado           = NULL;
+  Concepto_list_t *conceptos    = NULL;
+  Retencion_list_t *retenciones = NULL;
+  Traslado_list_t *traslados    = NULL;
+  xmlChar *comprobante          = NULL;
+  int len                       = 0;
 
   doc = xmlNewDoc((const xmlChar *)"1.0");
   if ( doc == NULL ) {
@@ -1218,6 +1379,10 @@ n", __FILE__, __LINE__);
 
   }
 
+  /* Y finalmente el regimen fiscal */
+  RegimenFiscal = xmlNewChild(Emisor, cfdi_ns, (const xmlChar *)"RegimenFiscal", NULL);
+  xmlNewProp(RegimenFiscal, (const xmlChar *)"Regimen", cfdi->Emisor->RegimenFiscal);
+
 
   /* Ahora los datos del receptor */
   Receptor = xmlNewChild(Comprobante, cfdi_ns, (const xmlChar *)"Receptor", NULL);
@@ -1290,7 +1455,39 @@ n", __FILE__, __LINE__);
     conceptos = conceptos->next;
   }
 
-  /* Agrega los impuestos */
+
+  /* Agrega los impuestos
+   * y obten un total de los impuestos
+   */
+  if ( cfdi->Impuestos != NULL ) {
+
+    Impuestos = xmlNewChild(Comprobante, cfdi_ns, (const xmlChar *)"Impuestos", NULL);
+    if ( cfdi->Impuestos->Retenciones != NULL ) {
+      Retenciones = xmlNewChild(Impuestos, cfdi_ns, (const xmlChar *)"Retenciones", NULL);
+      retenciones = cfdi->Impuestos->Retenciones;
+      while ( retenciones != NULL ) {
+	Retencion = xmlNewChild(Retenciones, cfdi_ns, (const xmlChar *)"Retencion", NULL);
+	xmlNewProp(Retencion, (const xmlChar *)"impuesto", retenciones->impuesto);
+	xmlNewProp(Retencion, (const xmlChar *)"importe",  retenciones->importe);
+	retenciones = retenciones->next;
+      }
+    }
+
+    if ( cfdi->Impuestos->Traslados != NULL ) {
+      Traslados = xmlNewChild(Impuestos, cfdi_ns, (const xmlChar *)"Traslados", NULL);
+      traslados = cfdi->Impuestos->Traslados;
+      while ( traslados != NULL ) {
+	Traslado = xmlNewChild(Traslados, cfdi_ns, (const xmlChar *)"Traslado", NULL);
+	xmlNewProp(Traslado, (const xmlChar *)"impuesto", traslados->impuesto);
+	xmlNewProp(Traslado, (const xmlChar *)"tasa",     traslados->tasa);
+	xmlNewProp(Traslado, (const xmlChar *)"importe",  traslados->importe);
+	traslados = traslados->next;
+      }
+
+    }
+
+  }
+
 
   /* Agrega el complemento */
 

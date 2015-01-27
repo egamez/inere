@@ -71,6 +71,13 @@ main(void)
   agrega_Concepto(factura, (unsigned char *)"11", noIdentificacion, unidad, descripcion, valorUnitario, importe);
   agrega_Concepto(factura, (unsigned char *)"10", noIdentificacion, unidad, descripcion, valorUnitario, importe);
 
+  agrega_Impuesto_Retencion(factura, (unsigned char *)"IVA", (unsigned char *)"16.00");
+  agrega_Impuesto_Retencion(factura, (unsigned char *)"ISR", (unsigned char *)"160.00");
+
+  agrega_Impuesto_Traslado(factura, (unsigned char *)"IVA", (unsigned char *)"16.00", (unsigned char *)"1016.00");
+  agrega_Impuesto_Traslado(factura, (unsigned char *)"IEPS", (unsigned char *)"33.00", (unsigned char *)"10160.00");
+
+
   data = genera_comprobante_alloc(factura);
 
   printf("Comprobante:\n\n%s\n", data);
