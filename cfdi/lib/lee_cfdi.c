@@ -34,12 +34,24 @@
 #include <libxml/tree.h>
 
 /* Forward declarations */
-int lee_conceptos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
-int lee_impuestos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
-int lee_complementos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
-int lee_timbre_fiscal(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
-int lee_datos_receptor(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
-int lee_datos_emisor(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose);
+int lee_conceptos(const xmlNodePtr node,
+		  Comprobante_t *cfdi,
+		  const int verbose);
+int lee_impuestos(const xmlNodePtr node,
+		  Comprobante_t *cfdi,
+		  const int verbose);
+int lee_complementos(const xmlNodePtr node,
+		     Comprobante_t *cfdi,
+		     const int verbose);
+int lee_timbre_fiscal(const xmlNodePtr node,
+		      Comprobante_t *cfdi,
+		      const int verbose);
+int lee_datos_receptor(const xmlNodePtr node,
+		       Comprobante_t *cfdi,
+		       const int verbose);
+int lee_datos_emisor(const xmlNodePtr node,
+		     Comprobante_t *cfdi,
+		     const int verbose);
 
 
 Comprobante_t *
@@ -166,6 +178,8 @@ termina_cfdi(Comprobante_t *cfdi)
   Concepto_list_t *prods_tmp = NULL;
   InformacionAduanera_list_t *info_a = NULL;
   InformacionAduanera_list_t *info_a_tmp = NULL;
+  RegimenFiscal_list_t *regimen1 = NULL;
+  RegimenFiscal_list_t *regimen2 = NULL;
 
   /* Los datos del timbre */
   if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
@@ -223,7 +237,7 @@ termina_cfdi(Comprobante_t *cfdi)
   while ( prods != NULL ) {
     prods_tmp = prods;
     if ( prods_tmp->Parte != NULL ) {
-      printf("Se requiere codigo para limpiar Concepto->Parte");
+      printf("Se requiere escribir de implementacion para limpiar Concepto->Parte");
     }
     if ( prods_tmp->CuentaPredial != NULL ) {
       xmlFree(prods_tmp->CuentaPredial->numero);
@@ -297,6 +311,16 @@ termina_cfdi(Comprobante_t *cfdi)
 
   /* Ahora el emisor */
   if ( cfdi->Emisor->DomicilioFiscal != NULL ) {
+
+    regimen1 = cfdi->Emisor->RegimenFiscal;
+    while ( regimen1 != NULL ) {
+      regimen2 = regimen1;
+      xmlFree(regimen2->Regimen);
+      free(regimen2);
+      regimen1 = regimen1->next;
+    }
+    free(cfdi->Emisor->RegimenFiscal);
+
     if ( cfdi->Emisor->DomicilioFiscal->codigoPostal != NULL ) {
       xmlFree(cfdi->Emisor->DomicilioFiscal->codigoPostal);
     }
@@ -780,12 +804,17 @@ lee_conceptos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
  *
  */
 int
-lee_datos_emisor(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
+lee_datos_emisor(const xmlNodePtr node,
+		 Comprobante_t *cfdi,
+		 const int verbose)
 {
   xmlNodePtr cur = NULL;
   Emisor_t *emisor = NULL;
   Domicilio_t *fiscal = NULL;
   Domicilio_t *expedido = NULL;
+  RegimenFiscal_list_t *regimen = NULL;
+  RegimenFiscal_list_t *current = NULL;
+  RegimenFiscal_list_t *tmp = NULL;
 
   /* Verifica que en realidad este nodo corresponda al emisor */
   if ( xmlStrEqual(node->name, (const xmlChar *)"Emisor") == 0 ) {
@@ -845,9 +874,31 @@ lee_datos_emisor(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
 	expedido->codigoPostal = xmlGetProp(cur, (const xmlChar *)"codigoPostal");
 
       } else if ( xmlStrEqual(cur->name, (const xmlChar *)"RegimenFiscal") ) {
-	emisor->RegimenFiscal = xmlGetProp(cur, (const xmlChar *)"Regimen");
+
+	tmp = (RegimenFiscal_list_t *)malloc(sizeof(RegimenFiscal_list_t));
+	tmp->Regimen = xmlGetProp(cur, (const xmlChar *)"Regimen");
 	if ( verbose ) {
-	  printf("%s:%d Info. Nodo actual: %s, valor = %s\n", __FILE__, __LINE__, cur->name, emisor->RegimenFiscal);
+	  printf("%s:%d Info. Nodo actual: %s, valor = %s\n", __FILE__, __LINE__, cur->name, tmp->Regimen);
+	}
+
+	if ( regimen == NULL ) {
+	  /* Esta es la primera entrada para el regimen fiscal */
+	  regimen = tmp;
+	  regimen->next = NULL;
+	  current = regimen;
+	  regimen->size = 1;
+
+	} else {
+	  /* Agrega otra entrada a la lista */
+	  while ( current->next != NULL ) {
+	    current = current->next;
+	  }
+
+	  /* Agrega esta entrada al final de la lista */
+	  tmp->next = NULL;
+	  current->next = tmp;
+	  regimen->size++;
+
 	}
 
       }
@@ -866,7 +917,9 @@ lee_datos_emisor(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
  *
  */
 int
-lee_datos_receptor(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
+lee_datos_receptor(const xmlNodePtr node,
+		   Comprobante_t *cfdi,
+		   const int verbose)
 {
   xmlNodePtr cur = NULL;
   Receptor_t *receptor = NULL;

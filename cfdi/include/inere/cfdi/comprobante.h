@@ -44,12 +44,18 @@ typedef struct _Domicilio {
   unsigned char *codigoPostal;
 } Domicilio_t;
 
+typedef struct _RegimenFiscal_list {
+  unsigned char              *Regimen;
+  unsigned int                size;
+  struct _RegimenFiscal_list *next;
+} RegimenFiscal_list_t;
+
 typedef struct _Emisor {
-  unsigned char *rfc;
-  unsigned char *nombre;
-  Domicilio_t   *DomicilioFiscal;
-  Domicilio_t   *ExpedidoEn;
-  unsigned char *RegimenFiscal;
+  unsigned char        *rfc;
+  unsigned char        *nombre;
+  Domicilio_t          *DomicilioFiscal;
+  Domicilio_t          *ExpedidoEn;
+  RegimenFiscal_list_t *RegimenFiscal;
 } Emisor_t;
 
 typedef struct _Receptor {

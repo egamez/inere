@@ -28,7 +28,7 @@ main(void)
   asigna_LugarExpedicion(factura, (unsigned char *)"Mi casa");
 
   /* Agrega los datos del emisor */
-  agrega_Emisor(factura, (unsigned char *)"GAFA7701266V2", (unsigned char *)"Regimen de las personas con actividades profesionales", (unsigned char *)"Alma Delia Gámez Flores");
+  agrega_Emisor(factura, (unsigned char *)"GAFA7701266V2", (unsigned char *)"Alma Delia Gámez Flores");
   agrega_Emisor_DomicilioFiscal(factura,
 				(unsigned char *)"8 Poniente",
 				(unsigned char *)"716",
@@ -53,6 +53,9 @@ main(void)
 				(unsigned char *)"Entre 7 Norte y 9 Norte",
 				(unsigned char *)"72000");
 
+  agrega_Emisor_RegimenFiscal(factura, (unsigned char *)"Regimen de las personas fisicas con actividades profesionales");
+  agrega_Emisor_RegimenFiscal(factura, (unsigned char *)"Regimen de las personas fisicas con actividades empresariales");
+ 
   /* Ahora los datos del receptor */
   agrega_Receptor(factura, (unsigned char *)"GAFA7701266V2", (unsigned char *)"Alma Delia Gámez Flores");
   agrega_Receptor_Domicilio(factura,

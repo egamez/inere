@@ -92,9 +92,10 @@ extern int agrega_Concepto(Comprobante_t *cfdi,
 			   unsigned char *valorUnitario,
 			   unsigned char *importe);
 extern xmlChar *genera_comprobante_alloc(Comprobante_t *cfdi);
+extern int agrega_Emisor_RegimenFiscal(Comprobante_t *cfdi,
+				       unsigned char *Regimen);
 extern int agrega_Emisor(Comprobante_t *cfdi,
 			 unsigned char *rfc,
-			 unsigned char *RegimenFiscal,
 			 unsigned char *nombre);
 extern int agrega_Emisor_DomicilioFiscal(Comprobante_t *cfdi,
 					 unsigned char *calle,

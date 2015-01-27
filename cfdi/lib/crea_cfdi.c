@@ -147,6 +147,8 @@ termina_comprobante(Comprobante_t *cfdi)
   Retencion_list_t *ret2 = NULL;
   Traslado_list_t *tras1 = NULL;
   Traslado_list_t *tras2 = NULL;
+  RegimenFiscal_list_t *reg1 = NULL;
+  RegimenFiscal_list_t *reg2 = NULL;
   int res = 0;
 
   if ( cfdi->Addenda != NULL ) {
@@ -175,7 +177,7 @@ termina_comprobante(Comprobante_t *cfdi)
   while ( prods1 != NULL ) {
     prods2 = prods1;
     free(prods2);
-    prods1 = prods2->next;
+    prods1 = prods1->next;
   }
   free(cfdi->Conceptos);
 
@@ -183,6 +185,13 @@ termina_comprobante(Comprobante_t *cfdi)
     free(cfdi->Receptor->Domicilio);
   }
   free(cfdi->Receptor);
+
+  reg1 = cfdi->Emisor->RegimenFiscal;
+  while ( reg1 != NULL ) {
+    reg2 = reg1;
+    free(reg2);
+    reg1 = reg1->next;
+  }
 
   if ( cfdi->Emisor->ExpedidoEn != NULL ) {
     free(cfdi->Emisor->ExpedidoEn);
@@ -676,7 +685,7 @@ asigna_MontoFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *MontoFolioFiscal
  *
  */
 int
-agrega_Emisor(Comprobante_t *cfdi, unsigned char *rfc, unsigned char *RegimenFiscal, unsigned char *nombre)
+agrega_Emisor(Comprobante_t *cfdi, unsigned char *rfc, unsigned char *nombre)
 {
   int res = 0;
 
@@ -689,18 +698,66 @@ agrega_Emisor(Comprobante_t *cfdi, unsigned char *rfc, unsigned char *RegimenFis
       res = 2;
       fprintf(stderr, "%s:%d Error. Es necesario indicar la clave del R.F.C. del emisor.\n", __FILE__, __LINE__);
 
-    } else if ( RegimenFiscal == NULL ) {
-      res = 3;
-      fprintf(stderr, "%s:%d Error. Es necesario indicar el Regimen Fiscal en que tributa el emisor.\n", __FILE__, __LINE__);
-
     } else {
 
       cfdi->Emisor = (Emisor_t *)malloc(sizeof(Emisor_t));
       cfdi->Emisor->rfc             = rfc;
-      cfdi->Emisor->RegimenFiscal   = RegimenFiscal;
       cfdi->Emisor->nombre          = nombre;
+      cfdi->Emisor->RegimenFiscal   = NULL;
       cfdi->Emisor->DomicilioFiscal = NULL;
       cfdi->Emisor->ExpedidoEn      = NULL;
+
+    }
+
+  }
+
+  return res;
+}
+
+
+/**
+ *
+ */
+int
+agrega_Emisor_RegimenFiscal(Comprobante_t *cfdi, unsigned char *Regimen)
+{
+  RegimenFiscal_list_t *current = NULL;
+  RegimenFiscal_list_t *tmp = NULL;
+  int res = 0;
+
+  if ( cfdi == NULL ) {
+    res = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else {
+
+    if ( cfdi->Emisor == NULL ) {
+      res = 2;
+      fprintf(stderr, "%s:%d Error. Es necesario definir primero la identificacion del Emisor.\n", __FILE__, __LINE__);
+
+    } else {
+
+      tmp = (RegimenFiscal_list_t *)malloc(sizeof(RegimenFiscal_list_t));
+      tmp->Regimen = Regimen;
+      tmp->next = NULL;
+
+      /* Verifica que la lista de los regimenes ya halla sido creado */
+      if ( cfdi->Emisor->RegimenFiscal == NULL ) {
+
+	/* Esta es la primera entrada */
+	cfdi->Emisor->RegimenFiscal = tmp;
+	cfdi->Emisor->RegimenFiscal->size = 1;
+
+      } else {
+
+	/* Agrega una entrada */
+	current = cfdi->Emisor->RegimenFiscal;
+	while ( current->next != NULL ) {
+	  current = current->next;
+	}
+	current->next = tmp;
+	current->size++;
+
+      }
 
     }
 
@@ -1226,6 +1283,7 @@ genera_comprobante_alloc(Comprobante_t *cfdi)
   Concepto_list_t *conceptos    = NULL;
   Retencion_list_t *retenciones = NULL;
   Traslado_list_t *traslados    = NULL;
+  RegimenFiscal_list_t *regimen = NULL;
   xmlChar *comprobante          = NULL;
   int len                       = 0;
 
@@ -1410,8 +1468,12 @@ n", __FILE__, __LINE__);
   }
 
   /* Y finalmente el regimen fiscal */
-  RegimenFiscal = xmlNewChild(Emisor, cfdi_ns, (const xmlChar *)"RegimenFiscal", NULL);
-  xmlNewProp(RegimenFiscal, (const xmlChar *)"Regimen", cfdi->Emisor->RegimenFiscal);
+  regimen = cfdi->Emisor->RegimenFiscal;
+  while ( regimen != NULL ) {
+    RegimenFiscal = xmlNewChild(Emisor, cfdi_ns, (const xmlChar *)"RegimenFiscal", NULL);
+    xmlNewProp(RegimenFiscal, (const xmlChar *)"Regimen", regimen->Regimen);
+    regimen = regimen->next;
+  }
 
 
   /* Ahora los datos del receptor */
