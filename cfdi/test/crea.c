@@ -83,5 +83,7 @@ main(void)
   printf("Comprobante:\n\n%s\n", data);
   xmlFree(data);
 
+  termina_comprobante(factura);
+
   return 0;
 }
