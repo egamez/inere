@@ -27,7 +27,49 @@ main(void)
   asigna_metodoDePago(factura, (unsigned char *)"efectivo");
   asigna_LugarExpedicion(factura, (unsigned char *)"Mi casa");
 
-  agrega_concepto(factura, cantidad, noIdentificacion, unidad, descripcion, valorUnitario, importe);
+  /* Agrega los datos del emisor */
+  agrega_Emisor(factura, (unsigned char *)"GAFA7701266V2", (unsigned char *)"Regimen de las personas con actividades profesionales", (unsigned char *)"Alma Delia Gámez Flores");
+  agrega_Emisor_DomicilioFiscal(factura,
+				(unsigned char *)"8 Poniente",
+				(unsigned char *)"716",
+				(unsigned char *)"A",
+				(unsigned char *)"Centro",
+				(unsigned char *)"H. Puebla de Zaragoza",
+				(unsigned char *)"Puebla",
+				(unsigned char *)"Puebla",
+				(unsigned char *)"México",
+				(unsigned char *)"Entre 7 Norte y 9 Norte",
+				(unsigned char *)"72000");
+
+  agrega_Emisor_ExpedidoEn(factura,
+				(unsigned char *)"8 Poniente",
+				(unsigned char *)"716",
+				(unsigned char *)"A",
+				(unsigned char *)"Centro",
+				(unsigned char *)"H. Puebla de Zaragoza",
+				(unsigned char *)"Puebla",
+				(unsigned char *)"Puebla",
+				(unsigned char *)"México",
+				(unsigned char *)"Entre 7 Norte y 9 Norte",
+				(unsigned char *)"72000");
+
+  /* Ahora los datos del receptor */
+  agrega_Receptor(factura, (unsigned char *)"GAFA7701266V2", (unsigned char *)"Alma Delia Gámez Flores");
+  agrega_Receptor_Domicilio(factura,
+				(unsigned char *)"8 Poniente",
+				(unsigned char *)"716",
+				(unsigned char *)"A",
+				(unsigned char *)"Centro",
+				(unsigned char *)"H. Puebla de Zaragoza",
+				(unsigned char *)"Puebla",
+				(unsigned char *)"Puebla",
+				(unsigned char *)"México",
+				(unsigned char *)"Entre 7 Norte y 9 Norte",
+				(unsigned char *)"72000");
+
+  agrega_Concepto(factura, cantidad, noIdentificacion, unidad, descripcion, valorUnitario, importe);
+  agrega_Concepto(factura, (unsigned char *)"11", noIdentificacion, unidad, descripcion, valorUnitario, importe);
+  agrega_Concepto(factura, (unsigned char *)"10", noIdentificacion, unidad, descripcion, valorUnitario, importe);
 
   data = genera_comprobante_alloc(factura);
 

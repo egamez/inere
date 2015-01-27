@@ -61,8 +61,44 @@ extern int asigna_SerieFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *Serie
 extern int asigna_FechaFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *FechaFolioFiscalOrig);
 extern int asigna_MontoFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *MontoFolioFiscalOrig);
 
-extern int agrega_concepto(Comprobante_t *cfdi, unsigned char *cantidad, unsigned char *noIdentificacion, unsigned char *unidad, unsigned char *descripcion, unsigned char *valorUnitario, unsigned char *importe);
+extern int agrega_Concepto(Comprobante_t *cfdi, unsigned char *cantidad, unsigned char *noIdentificacion, unsigned char *unidad, unsigned char *descripcion, unsigned char *valorUnitario, unsigned char *importe);
 extern xmlChar *genera_comprobante_alloc(Comprobante_t *cfdi);
+extern int agrega_Emisor(Comprobante_t *cfdi, unsigned char *rfc, unsigned char *RegimenFiscal, unsigned char *nombre);
+extern int agrega_Emisor_DomicilioFiscal(Comprobante_t *cfdi,
+					 unsigned char *calle,
+					 unsigned char *noExterior,
+					 unsigned char *noInterior,
+					 unsigned char *colonia,
+					 unsigned char *localidad,
+					 unsigned char *municipio,
+					 unsigned char *estado,
+					 unsigned char *pais,
+					 unsigned char *referencia,
+					 unsigned char *codigoPostal);
+extern int agrega_Emisor_ExpedidoEn(Comprobante_t *cfdi,
+				    unsigned char *calle,
+				    unsigned char *noExterior,
+				    unsigned char *noInterior,
+				    unsigned char *colonia,
+				    unsigned char *localidad,
+				    unsigned char *municipio,
+				    unsigned char *estado,
+				    unsigned char *pais,
+				    unsigned char *referencia,
+				    unsigned char *codigoPostal);
+extern int agrega_Receptor(Comprobante_t *cfdi, unsigned char *rfc, unsigned char *nombre);
+extern int agrega_Receptor_Domicilio(Comprobante_t *cfdi,
+				     unsigned char *calle,
+				     unsigned char *noExterior,
+				     unsigned char *noInterior,
+				     unsigned char *colonia,
+				     unsigned char *localidad,
+				     unsigned char *municipio,
+				     unsigned char *estado,
+				     unsigned char *pais,
+				     unsigned char *referencia,
+				     unsigned char *codigoPostal);
+
 
 typedef struct cfdi_items_list {
   xmlNodePtr xml_node;

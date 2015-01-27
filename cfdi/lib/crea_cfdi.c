@@ -126,7 +126,39 @@ crea_comprobante(unsigned char *version)
     if ( cfdi == NULL ) {
       fprintf(stderr, "%s:%d Error al momento de reservar memoria para el comprobante\n", __FILE__, __LINE__);
     } else {
+
       cfdi->version = version;
+
+      /* Ahora inicializa todas los demas componentes */
+      cfdi->serie                = NULL;
+      cfdi->folio                = NULL;
+      cfdi->fecha                = NULL;
+      cfdi->sello                = NULL;
+      cfdi->formaDePago          = NULL;
+      cfdi->noCertificado        = NULL;
+      cfdi->certificado          = NULL;
+      cfdi->condicionesDePago    = NULL;
+      cfdi->subTotal             = NULL;
+      cfdi->descuento            = NULL;
+      cfdi->motivoDescuento      = NULL;
+      cfdi->TipoCambio           = NULL;
+      cfdi->Moneda               = NULL;
+      cfdi->total                = NULL;
+      cfdi->tipoDeComprobante    = NULL;
+      cfdi->metodoDePago         = NULL;
+      cfdi->LugarExpedicion      = NULL;
+      cfdi->NumCtaPago           = NULL;
+      cfdi->FolioFiscalOrig      = NULL;
+      cfdi->SerieFolioFiscalOrig = NULL;
+      cfdi->FechaFolioFiscalOrig = NULL;
+      cfdi->MontoFolioFiscalOrig = NULL;
+      cfdi->Emisor               = NULL;
+      cfdi->Receptor             = NULL;
+      cfdi->Conceptos            = NULL;
+      cfdi->Impuestos            = NULL;
+      cfdi->Complemento          = NULL;
+      cfdi->Addenda              = NULL;
+
     }
 
   } else {
@@ -609,12 +641,294 @@ asigna_MontoFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *MontoFolioFiscal
   return ret;
 }
 
+/**
+ *
+ */
+int
+agrega_Emisor(Comprobante_t *cfdi, unsigned char *rfc, unsigned char *RegimenFiscal, unsigned char *nombre)
+{
+  int res = 0;
+
+  if ( cfdi == NULL ) {
+    res = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else {
+
+    if ( rfc == NULL ) {
+      res = 2;
+      fprintf(stderr, "%s:%d Error. Es necesario indicar la clave del R.F.C. del emisor.\n", __FILE__, __LINE__);
+
+    } else {
+
+      cfdi->Emisor = (Emisor_t *)malloc(sizeof(Emisor_t));
+      cfdi->Emisor->rfc             = rfc;
+      cfdi->Emisor->RegimenFiscal   = RegimenFiscal;
+      cfdi->Emisor->nombre          = nombre;
+      cfdi->Emisor->DomicilioFiscal = NULL;
+      cfdi->Emisor->ExpedidoEn      = NULL;
+
+    }
+
+  }
+
+  return res;
+}
 
 /**
  *
  */
 int
-agrega_concepto(Comprobante_t *cfdi, unsigned char *cantidad, unsigned char *noIdentificacion, unsigned char *unidad, unsigned char *descripcion, unsigned char *valorUnitario, unsigned char *importe)
+agrega_Emisor_DomicilioFiscal(Comprobante_t *cfdi,
+			      unsigned char *calle,
+			      unsigned char *noExterior,
+			      unsigned char *noInterior,
+			      unsigned char *colonia,
+			      unsigned char *localidad,
+			      unsigned char *municipio,
+			      unsigned char *estado,
+			      unsigned char *pais,
+			      unsigned char *referencia,
+			      unsigned char *codigoPostal)
+{
+  int res = 0;
+
+  if ( cfdi == NULL ) {
+    res = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else {
+
+    if ( cfdi->Emisor == NULL ) {
+      fprintf(stderr, "%s:%d Error. Es necesario primero definir al emisor.\n", __FILE__, __LINE__);
+      return 10;
+    }
+
+    cfdi->Emisor->DomicilioFiscal = (Domicilio_t *)malloc(sizeof(Domicilio_t));
+    cfdi->Emisor->DomicilioFiscal->calle        = NULL;
+    cfdi->Emisor->DomicilioFiscal->noExterior   = NULL;
+    cfdi->Emisor->DomicilioFiscal->noInterior   = NULL;
+    cfdi->Emisor->DomicilioFiscal->colonia      = NULL;
+    cfdi->Emisor->DomicilioFiscal->localidad    = NULL;
+    cfdi->Emisor->DomicilioFiscal->referencia   = NULL;
+    cfdi->Emisor->DomicilioFiscal->municipio    = NULL;
+    cfdi->Emisor->DomicilioFiscal->estado       = NULL;
+    cfdi->Emisor->DomicilioFiscal->pais         = NULL;
+    cfdi->Emisor->DomicilioFiscal->codigoPostal = NULL;
+
+
+    /* Primero los parametros obligatorios */
+    if ( calle == NULL ) {
+      res = 2;
+      fprintf(stderr, "%s:%d Error. El atributo 'calle' es de caracter obligatorio para el domicilio fiscal del emisor.\n", __FILE__, __LINE__);
+    } else {
+      cfdi->Emisor->DomicilioFiscal->calle = calle;
+    }
+
+    if ( municipio == NULL ) {
+      res = 3;
+      fprintf(stderr, "%s:%d Error. El atributo 'municipio' es de caracter obligatorio para el domicilio fiscal del emisor.\n", __FILE__, __LINE__);
+    } else {
+      cfdi->Emisor->DomicilioFiscal->municipio = municipio;
+    }
+
+    if ( estado == NULL ) {
+      res = 4;
+      fprintf(stderr, "%s:%d Error. El atributo 'estado' es de caracter obligatorio para el domicilio fiscal del emisor.\n", __FILE__, __LINE__);
+    } else {
+      cfdi->Emisor->DomicilioFiscal->estado = estado;
+    }
+
+    if ( pais == NULL ) {
+      res = 5;
+      fprintf(stderr, "%s:%d Error. El atributo 'pais' es de caracter obligatorio para el domicilio fiscal del emisor.\n", __FILE__, __LINE__);
+    } else {
+      cfdi->Emisor->DomicilioFiscal->pais = pais;
+    }
+
+    if ( codigoPostal == NULL ) {
+      res = 6;
+      fprintf(stderr, "%s:%d Error. El atributo 'codigoPostal' es de caracter obligatorio para el domicilio fiscal del emisor.\n", __FILE__, __LINE__);
+    } else {
+      cfdi->Emisor->DomicilioFiscal->codigoPostal = codigoPostal;
+    }
+
+    /* Y ahora los parametros opcionales */
+    cfdi->Emisor->DomicilioFiscal->noExterior = noExterior;
+    cfdi->Emisor->DomicilioFiscal->noInterior = noInterior;
+    cfdi->Emisor->DomicilioFiscal->colonia    = colonia;
+    cfdi->Emisor->DomicilioFiscal->localidad  = localidad;
+    cfdi->Emisor->DomicilioFiscal->referencia = referencia;
+
+  }
+  return res;
+}
+
+/**
+ *
+ */
+int
+agrega_Emisor_ExpedidoEn(Comprobante_t *cfdi,
+			 unsigned char *calle,
+			 unsigned char *noExterior,
+			 unsigned char *noInterior,
+			 unsigned char *colonia,
+			 unsigned char *localidad,
+			 unsigned char *municipio,
+			 unsigned char *estado,
+			 unsigned char *pais,
+			 unsigned char *referencia,
+			 unsigned char *codigoPostal)
+{
+  int res = 0;
+
+  if ( cfdi == NULL ) {
+    res = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else {
+
+    if ( cfdi->Emisor == NULL ) {
+      fprintf(stderr, "%s:%d Error. Es necesario definir primero al emisor.\n", __FILE__, __LINE__);
+      return 10;
+    }
+
+    cfdi->Emisor->ExpedidoEn = (Domicilio_t *)malloc(sizeof(Domicilio_t));
+    cfdi->Emisor->ExpedidoEn->calle        = NULL;
+    cfdi->Emisor->ExpedidoEn->noExterior   = NULL;
+    cfdi->Emisor->ExpedidoEn->noInterior   = NULL;
+    cfdi->Emisor->ExpedidoEn->colonia      = NULL;
+    cfdi->Emisor->ExpedidoEn->localidad    = NULL;
+    cfdi->Emisor->ExpedidoEn->referencia   = NULL;
+    cfdi->Emisor->ExpedidoEn->municipio    = NULL;
+    cfdi->Emisor->ExpedidoEn->estado       = NULL;
+    cfdi->Emisor->ExpedidoEn->pais         = NULL;
+    cfdi->Emisor->ExpedidoEn->codigoPostal = NULL;
+
+
+    /* Los parametros obligatorios */
+    if ( pais == NULL ) {
+      res = 2;
+      fprintf(stderr, "%s:%d Error. El atributo 'pais' es de caracter obligatorio para expresar en donde fue expedido el CFDI.\n", __FILE__, __LINE__);
+    } else {
+      cfdi->Emisor->ExpedidoEn->pais = pais;
+    }
+
+    /* Ahora los parametros opcionales */
+    cfdi->Emisor->ExpedidoEn->calle        = calle;
+    cfdi->Emisor->ExpedidoEn->noExterior   = noExterior;
+    cfdi->Emisor->ExpedidoEn->noInterior   = noInterior;
+    cfdi->Emisor->ExpedidoEn->colonia      = colonia;
+    cfdi->Emisor->ExpedidoEn->localidad    = localidad;
+    cfdi->Emisor->ExpedidoEn->referencia   = referencia;
+    cfdi->Emisor->ExpedidoEn->municipio    = municipio;
+    cfdi->Emisor->ExpedidoEn->estado       = estado;
+    cfdi->Emisor->ExpedidoEn->codigoPostal = codigoPostal;
+
+  }
+  return res;
+}
+
+/**
+ *
+ */
+int
+agrega_Receptor(Comprobante_t *cfdi,
+		unsigned char *rfc,
+		unsigned char *nombre)
+{
+  int res = 0;
+
+  if ( cfdi == NULL ) {
+    res = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else {
+
+    if ( rfc == NULL ) {
+      res = 2;
+      fprintf(stderr, "%s:%d Error. Es necesario indicar la clave del R.F.C. del receptor del cfdi.\n", __FILE__, __LINE__);
+
+    } else {
+
+      cfdi->Receptor = (Receptor_t *)malloc(sizeof(Receptor_t));
+      cfdi->Receptor->rfc       = rfc;
+      cfdi->Receptor->nombre    = nombre;
+      cfdi->Receptor->Domicilio = NULL;
+    }
+
+  }
+  return res;
+}
+
+/**
+ *
+ */
+int
+agrega_Receptor_Domicilio(Comprobante_t *cfdi,
+			  unsigned char *calle,
+			  unsigned char *noExterior,
+			  unsigned char *noInterior,
+			  unsigned char *colonia,
+			  unsigned char *localidad,
+			  unsigned char *municipio,
+			  unsigned char *estado,
+			  unsigned char *pais,
+			  unsigned char *referencia,
+			  unsigned char *codigoPostal)
+{
+  int res = 0;
+
+  if ( cfdi == NULL ) {
+    res = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else {
+
+    if ( cfdi->Receptor == NULL ) {
+      fprintf(stderr, "%s:%d Error. Es necesario definir primero al receptor.\n", __FILE__, __LINE__);
+      return 10;
+    }
+
+    cfdi->Receptor->Domicilio = (Domicilio_t *)malloc(sizeof(Domicilio_t));
+    cfdi->Receptor->Domicilio->calle        = NULL;
+    cfdi->Receptor->Domicilio->noExterior   = NULL;
+    cfdi->Receptor->Domicilio->noInterior   = NULL;
+    cfdi->Receptor->Domicilio->colonia      = NULL;
+    cfdi->Receptor->Domicilio->localidad    = NULL;
+    cfdi->Receptor->Domicilio->referencia   = NULL;
+    cfdi->Receptor->Domicilio->municipio    = NULL;
+    cfdi->Receptor->Domicilio->estado       = NULL;
+    cfdi->Receptor->Domicilio->pais         = NULL;
+    cfdi->Receptor->Domicilio->codigoPostal = NULL;
+
+
+    if ( pais == NULL ) {
+      res = 2;
+      fprintf(stderr, "%s:%d Error. Es necesario expresar el atributo 'pais' para el domicilio del emisor.\n", __FILE__, __LINE__);
+    } else {
+
+      cfdi->Receptor->Domicilio->calle        = calle;
+      cfdi->Receptor->Domicilio->noExterior   = noExterior;
+      cfdi->Receptor->Domicilio->noInterior   = noInterior;
+      cfdi->Receptor->Domicilio->colonia      = colonia;
+      cfdi->Receptor->Domicilio->localidad    = localidad;
+      cfdi->Receptor->Domicilio->referencia   = referencia;
+      cfdi->Receptor->Domicilio->municipio    = municipio;
+      cfdi->Receptor->Domicilio->estado       = estado;
+      cfdi->Receptor->Domicilio->codigoPostal = codigoPostal;
+    }
+
+  }
+  return res;
+}
+
+/**
+ *
+ */
+int
+agrega_Concepto(Comprobante_t *cfdi,
+		unsigned char *cantidad,
+		unsigned char *noIdentificacion,
+		unsigned char *unidad,
+		unsigned char *descripcion,
+		unsigned char *valorUnitario,
+		unsigned char *importe)
 {
   int res = 0;
   Concepto_list_t *concepto = NULL;
@@ -712,6 +1026,11 @@ genera_comprobante_alloc(Comprobante_t *cfdi)
 {
   xmlDocPtr doc = NULL;
   xmlNodePtr Comprobante = NULL;
+  xmlNodePtr Emisor = NULL;
+  xmlNodePtr DomicilioFiscal = NULL;
+  xmlNodePtr ExpedidoEn = NULL;
+  xmlNodePtr Receptor = NULL;
+  xmlNodePtr Domicilio = NULL;
   xmlNodePtr Conceptos = NULL;
   xmlNodePtr Concepto = NULL;
   xmlNsPtr cfdi_ns = NULL;
@@ -793,10 +1112,6 @@ n", __FILE__, __LINE__);
     xmlNewProp(Comprobante, (const xmlChar *)"Moneda", cfdi->Moneda);
   }
 
-  if ( cfdi->LugarExpedicion != NULL ) {
-    xmlNewProp(Comprobante, (const xmlChar *)"LugarExpedicion", cfdi->LugarExpedicion);
-  }
-
   if ( cfdi->NumCtaPago != NULL ) {
     xmlNewProp(Comprobante, (const xmlChar *)"NumCtaPago", cfdi->NumCtaPago);
   }
@@ -818,8 +1133,146 @@ n", __FILE__, __LINE__);
   }
 
   /* Ahora los datos del emisor */
+  Emisor = xmlNewChild(Comprobante, cfdi_ns, (const xmlChar *)"Emisor", NULL);
+  xmlNewProp(Emisor, (const xmlChar *)"rfc", cfdi->Emisor->rfc);
+  if ( cfdi->Emisor->nombre != NULL ) {
+    xmlNewProp(Emisor, (const xmlChar *)"nombre", cfdi->Emisor->nombre);
+  }
+
+  /* Ahora el domicilio fiscal del emisor, en caso de que exista */
+  if ( cfdi->Emisor->DomicilioFiscal != NULL ) {
+    DomicilioFiscal = xmlNewChild(Emisor, cfdi_ns, (const xmlChar *)"DomicilioFiscal", NULL);
+    /* Primero los parametros obligatorio */
+    xmlNewProp(DomicilioFiscal, (const xmlChar *)"calle", cfdi->Emisor->DomicilioFiscal->calle);
+    xmlNewProp(DomicilioFiscal, (const xmlChar *)"municipio", cfdi->Emisor->DomicilioFiscal->municipio);
+    xmlNewProp(DomicilioFiscal, (const xmlChar *)"estado", cfdi->Emisor->DomicilioFiscal->estado);
+    xmlNewProp(DomicilioFiscal, (const xmlChar *)"pais", cfdi->Emisor->DomicilioFiscal->pais);
+    xmlNewProp(DomicilioFiscal, (const xmlChar *)"codigoPostal", cfdi->Emisor->DomicilioFiscal->codigoPostal);
+
+    /* Y ahora algunos parametros opcionales */
+    if ( cfdi->Emisor->DomicilioFiscal->noExterior != NULL ) {
+      xmlNewProp(DomicilioFiscal, (const xmlChar *)"noExterior", cfdi->Emisor->DomicilioFiscal->noExterior);
+    }
+
+    if ( cfdi->Emisor->DomicilioFiscal->noInterior != NULL ) {
+      xmlNewProp(DomicilioFiscal, (const xmlChar *)"noInterior", cfdi->Emisor->DomicilioFiscal->noInterior);
+    }
+
+    if ( cfdi->Emisor->DomicilioFiscal->colonia != NULL ) {
+      xmlNewProp(DomicilioFiscal, (const xmlChar *)"colonia", cfdi->Emisor->DomicilioFiscal->colonia);
+    }
+
+    if ( cfdi->Emisor->DomicilioFiscal->localidad != NULL ) {
+      xmlNewProp(DomicilioFiscal, (const xmlChar *)"localidad", cfdi->Emisor->DomicilioFiscal->localidad);
+    }
+
+    if ( cfdi->Emisor->DomicilioFiscal->referencia != NULL ) {
+      xmlNewProp(DomicilioFiscal, (const xmlChar *)"referencia", cfdi->Emisor->DomicilioFiscal->referencia);
+    }
+
+  }
+
+  /* Ahora los datos del sitio en que fue expedido el CFDI */
+  if ( cfdi->Emisor->ExpedidoEn != NULL ) {
+    ExpedidoEn = xmlNewChild(Emisor, cfdi_ns, (const xmlChar *)"ExpedidoEn", NULL);
+
+    /* Primero los parametros obligatorios */
+    xmlNewProp(ExpedidoEn, (const xmlChar *)"pais", cfdi->Emisor->ExpedidoEn->pais);
+
+    /* Y ahora los parametros opcionales */
+    if ( cfdi->Emisor->ExpedidoEn->calle != NULL ) {
+      xmlNewProp(ExpedidoEn, (const xmlChar *)"calle", cfdi->Emisor->ExpedidoEn->calle);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->municipio != NULL ) {
+      xmlNewProp(ExpedidoEn, (const xmlChar *)"municipio", cfdi->Emisor->ExpedidoEn->municipio);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->estado != NULL ) {
+      xmlNewProp(ExpedidoEn, (const xmlChar *)"estado", cfdi->Emisor->ExpedidoEn->estado);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->codigoPostal != NULL ) {
+      xmlNewProp(ExpedidoEn, (const xmlChar *)"codigoPostal", cfdi->Emisor->ExpedidoEn->codigoPostal);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->noExterior != NULL ) {
+      xmlNewProp(ExpedidoEn, (const xmlChar *)"noExterior", cfdi->Emisor->ExpedidoEn->noExterior);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->noInterior != NULL ) {
+      xmlNewProp(ExpedidoEn, (const xmlChar *)"noInterior", cfdi->Emisor->ExpedidoEn->noInterior);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->colonia != NULL ) {
+      xmlNewProp(ExpedidoEn, (const xmlChar *)"colonia", cfdi->Emisor->ExpedidoEn->colonia);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->localidad != NULL ) {
+      xmlNewProp(ExpedidoEn, (const xmlChar *)"localidad", cfdi->Emisor->ExpedidoEn->localidad);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->referencia != NULL ) {
+      xmlNewProp(ExpedidoEn, (const xmlChar *)"referencia", cfdi->Emisor->ExpedidoEn->referencia);
+    }
+
+  }
+
 
   /* Ahora los datos del receptor */
+  Receptor = xmlNewChild(Comprobante, cfdi_ns, (const xmlChar *)"Receptor", NULL);
+  xmlNewProp(Receptor, (const xmlChar *)"rfc", cfdi->Receptor->rfc);
+  if ( cfdi->Receptor->nombre != NULL ) {
+    xmlNewProp(Receptor, (const xmlChar *)"nombre", cfdi->Receptor->nombre);
+  }
+
+  /* Ahora el domicilio del receptor */
+  if ( cfdi->Receptor->Domicilio != NULL ) {
+
+    Domicilio = xmlNewChild(Receptor, cfdi_ns, (const xmlChar *)"Domicilio", NULL);
+
+    /* Primero los parametros obligatorios */
+    xmlNewProp(Domicilio, (const xmlChar *)"pais", cfdi->Receptor->Domicilio->pais);
+
+    /* Y ahora los parametros opcionales */
+    if ( cfdi->Receptor->Domicilio->calle != NULL ) {
+      xmlNewProp(Domicilio, (const xmlChar *)"calle", cfdi->Receptor->Domicilio->calle);
+    }
+
+    if ( cfdi->Receptor->Domicilio->noExterior != NULL ) {
+      xmlNewProp(Domicilio, (const xmlChar *)"noExterior", cfdi->Receptor->Domicilio->noExterior);
+    }
+
+    if ( cfdi->Receptor->Domicilio->noInterior != NULL ) {
+      xmlNewProp(Domicilio, (const xmlChar *)"noInterior", cfdi->Receptor->Domicilio->noInterior);
+    }
+
+    if ( cfdi->Receptor->Domicilio->colonia != NULL ) {
+      xmlNewProp(Domicilio, (const xmlChar *)"colonia", cfdi->Receptor->Domicilio->colonia);
+    }
+
+    if ( cfdi->Receptor->Domicilio->localidad != NULL ) {
+      xmlNewProp(Domicilio, (const xmlChar *)"localidad", cfdi->Receptor->Domicilio->localidad);
+    }
+
+    if ( cfdi->Receptor->Domicilio->referencia != NULL ) {
+      xmlNewProp(Domicilio, (const xmlChar *)"referencia", cfdi->Receptor->Domicilio->referencia);
+    }
+
+    if ( cfdi->Receptor->Domicilio->municipio != NULL ) {
+      xmlNewProp(Domicilio, (const xmlChar *)"municipio", cfdi->Receptor->Domicilio->municipio);
+    }
+
+    if ( cfdi->Receptor->Domicilio->estado != NULL ) {
+      xmlNewProp(Domicilio, (const xmlChar *)"estado", cfdi->Receptor->Domicilio->estado);
+    }
+
+    if ( cfdi->Receptor->Domicilio->codigoPostal != NULL ) {
+      xmlNewProp(Domicilio, (const xmlChar *)"codigoPostal", cfdi->Receptor->Domicilio->codigoPostal);
+    }
+
+  }
+
 
   /* Ahora los conceptos */
   Conceptos = xmlNewChild(Comprobante, cfdi_ns, (const xmlChar *)"Conceptos", NULL);
@@ -845,6 +1298,9 @@ n", __FILE__, __LINE__);
 
   /* Define el nodo comprobante como el nodo raiz */
   xmlDocSetRootElement(doc, Comprobante);
+
+  /* Reajusta el namespace */
+  xmlReconciliateNs(doc, Comprobante);
 
   /* Escribe el CFDI a un buffer */
   xmlDocDumpMemoryEnc(doc, &comprobante, &len, "UTF-8");
