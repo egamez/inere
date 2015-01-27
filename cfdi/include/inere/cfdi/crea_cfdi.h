@@ -38,6 +38,8 @@ extern "C" {
 #include <libxml/tree.h>
 
 extern Comprobante_t *crea_comprobante(unsigned char *version);
+extern int termina_comprobante(Comprobante_t *cfdi);
+extern unsigned char *obten_fecha_ISO8601_alloc(const int verbose);
 extern int asigna_serie(Comprobante_t *cfdi,
 			unsigned char *serie);
 extern int asigna_folio(Comprobante_t *cfdi,
@@ -137,39 +139,7 @@ extern int agrega_Impuesto_Traslado(Comprobante_t *cfdi,
 				    unsigned char *impuesto,
 				    unsigned char *tasa,
 				    unsigned char *importe);
-typedef struct cfdi_items_list {
-  xmlNodePtr xml_node;
-  struct cfdi_items_list *next;
-} cfdi_items_list_t;
 
-extern xmlDocPtr crea_cfdi(const xmlChar *subTotal,
-			   const xmlChar *descuento,
-			   const xmlChar *total,
-			   cfdi_items_list_t* productos,
-			   cfdi_items_list_t *retencion,
-			   cfdi_items_list_t *traslado,
-			   const char *archivo_del_emisor,
-			   const char *archivo_certificado,
-			   const char *archivo_llave_privada,
-			   const int verbose);
-
-extern cfdi_items_list_t *append_concepto(cfdi_items_list_t *head,
-					  const xmlChar *cantidad,
-					  const xmlChar *unidad,
-					  const xmlChar *noIdentificacion,
-					  const xmlChar *descripcion,
-					  const xmlChar *valorUnitario,
-					  const xmlChar *importe,
-					  const int verbose);
-
-extern cfdi_items_list_t *append_impuesto(cfdi_items_list_t *head,
-					  const xmlChar *tipo,
-					  const xmlChar *impuesto,
-					  const xmlChar *tasa,
-					  const xmlChar *importe,
-					  const int verbose);
-
-extern void free_cfdi_items_list(cfdi_items_list_t* head);
 
 #ifdef __cplusplus
 }
