@@ -70,10 +70,11 @@ cantidadcl_alloc(const char* numero, const int debug)
 
   /* Now remove the period from the fractional part */
   if ( cents_len <= 1 ) {
+    cents = NULL;
     cents = (char*)malloc(3);
     memset(cents, 0, 3);
 #if _MSC_VER
-  strncpy_s(cents, 3, "00", 2);
+    strncpy_s(cents, 3, "00", 2);
 #else
     cents = strncpy(cents, "00", 2);
 #endif
@@ -103,7 +104,6 @@ cantidadcl_alloc(const char* numero, const int debug)
   buffer = numeral_alloc(integral, debug);
 
   free(integral);
-  if ( must_freed ) free(cents);
 
   /* Capitalize the first letter */
   *buffer -= 32;
@@ -118,6 +118,7 @@ cantidadcl_alloc(const char* numero, const int debug)
 #else
   snprintf(nombre, strlen(buffer)+19, "%s pesos %02d/100 M.N.", buffer, atoi(cents));
 #endif
+  if ( must_freed ) free(cents);
   free(buffer);
 
   return nombre;

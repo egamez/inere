@@ -270,41 +270,18 @@ fisica_regla6(char* nombre, const int debug)
   int counter = 0;
   int i = 0;
   size_t len = 0;
-  char* copy = 0;
+  char *copy = NULL;
   int applied = 0;
-#if _MSC_VER
-  char* next = NULL;
-#endif
 
   len = strlen(nombre);
-  copy = (char*)calloc(len+1, sizeof(char));
-  memset(copy, 0, len+1);
-#if _MSC_VER
-  strncpy_s(copy, len+1, nombre, len);
-#else
-  strncpy(copy, nombre, len);
-#endif
+  copy = strdupa(nombre);
   memset(nombre, 0, len+1);
 
-#if _MSC_VER
-  *ap = strtok_s(copy, " \t\n", &next);
-  word[i++] = *ap;
-  while ( *ap != NULL ) {
-    *ap = strtok_s(copy, " \t\n", &next);
-    if ( *ap != NULL ) {
-      word[i++] = *ap;
-      counter++;
-    }
-  }
-  word[i] = NULL;
-  i = 0;
-#else
   for (ap = word; ap < &word[9] && (*ap = strsep(&copy, " \t\n")) != NULL; ) {
     if ( **ap != '\0' ) ap++;
     counter++;
   }
   *ap = NULL;
-#endif
 
   /* Now make a loop for all the words in nombre, and append only those
    * which are not MARIA or JOSE.
@@ -323,33 +300,20 @@ fisica_regla6(char* nombre, const int debug)
       }
 
       if ( !excluded ) {
-#if _MSC_VER
-	if ( strlen(nombre) ) strncat_s(nombre, _countof(nombre), " ", 1);
-	strncat_s(nombre, _countof(nombre), word[i], strlen(word[i]));
-#else
 	if ( strlen(nombre) ) strncat(nombre, " ", 1);
 	strncat(nombre, word[i], strlen(word[i]));
-#endif
       }
 
     }
   } else {
-#if _MSC_VER
-    strncat_s(nombre, _countof(nombre), word[0], strlen(word[0]));
-#else
     strncat(nombre, word[0], strlen(word[0]));
-#endif
   }
 
   /* Check if this was not the case in which the names are those who
    * need to be supressed. If this is the case take the last name.
    */
   if ( !strlen(nombre) ) {
-#if _MSC_VER
-    strncat_s(nombre, _countof(nombre), word[counter-1], strlen(word[counter-1]));
-#else
     strncat(nombre, word[counter-1], strlen(word[counter-1]));
-#endif
   }
   return applied;
 }
@@ -405,43 +369,22 @@ fisica_regla8(char* palabra, int debug)
   int counter = 0;
   int i = 0;
   size_t len = 0;
-  char *copy = NULL;
+  char *copy = NULL; /* To free */
   int applied = 0;
-#if _MSC_VER
-  char* next = NULL;
-#endif
 
   len = strlen(palabra);
-  copy = (char *)calloc(len+1, sizeof(char));
-  memset(copy, 0, len+1);
-#if _MSC_VER
-  strncpy_s(copy, len+1, palabra, len);
-#else
-  strncpy(copy, palabra, len);
-#endif
+  copy = strdupa(palabra);
   memset(palabra, 0, len+1);
 
+
   /* Split the palabra onto its words */
-#if _MSC_VER
-  *ap = strtok_s(copy, " \t\n", &next);
-  word[i++] = *ap;
-  while ( *ap != NULL ) {
-    *ap = strtok_s(copy, " \t\n", &next);
-    if ( *ap != NULL ) {
-      word[i++] = *ap;
-      counter++;
-    }
-  }
-  word[i] = NULL;
-  i = 0;
-#else
   for (ap = word; ap < &word[9] && (*ap = strsep(&copy, " \t\n")) != NULL;) {
-   if (**ap != '\0')
+   if (**ap != '\0') {
      ap++;
+   }
    counter++;
   }
   *ap = NULL;
-#endif
 
   for (i = 0; i < counter; i++ ) {
 
@@ -459,13 +402,8 @@ fisica_regla8(char* palabra, int debug)
     else if ( strcmp(word[i], "VON") == 0 ) excluded = 1;
     else if ( strcmp(word[i], "Y")   == 0 ) excluded = 1;
     else {
-#if _MSC_VER
-      if ( strlen(palabra) ) strncat_s(palabra, _countof(palabra), " ", 1);
-      strncat_s(palabra, _countof(palabra), word[i], strlen(word[i]));
-#else
       if ( strlen(palabra) ) strncat(palabra, " ", 1);
       strncat(palabra, word[i], strlen(word[i]));
-#endif
     }
 
     if ( excluded ) {
@@ -474,8 +412,6 @@ fisica_regla8(char* palabra, int debug)
     }
 
   }
-
-  free(copy);
 
   return applied;
 }

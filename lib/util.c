@@ -56,12 +56,12 @@ to_upper_case_and_convert(const unsigned char* buffer)
   char *inbuf;
   char *outbuf;
   char *in = NULL;
-  size_t res = 0;
   size_t inbytes = 0;
   size_t outbytes = 0;
   char* out = NULL;
   int j = 0;
   size_t len = 0;
+  size_t res = 0;
 
   /* Allocate the descriptor for the character conversion */
   desc = iconv_open("UTF-8//TRANSLIT", INERE_LOCAL_CHARSET);
@@ -123,28 +123,32 @@ recover_translations(const char* in, unsigned char* out)
   size_t inbytes = 0;
   size_t outbytes = 0;
 
-  /* Allocate the descriptor for the character conversion */
-  desc = iconv_open(INERE_LOCAL_CHARSET, "UTF-8");
-
-  /* Check for errors */
-
-  inbytes = 2; /* The ñ character is represented by two bytes in UTF-8 */
-  outbytes = 2*inbytes;
-  inbuf = source;
-  enhe = (char *)calloc(outbytes, sizeof(char));
-  outbuf = enhe;
-  res = iconv(desc, &inbuf, &inbytes, &outbuf, &outbytes);
-  outbytes = strlen(enhe);
-
-  /* Close the conversion descriptor */
-  iconv_close(desc);
 
   while ( *in ) {
     if ( *in == '^' ) {
       /* Convert the UTF-8 Ñ to the a Ñ in the local charset */
+
+      /* Allocate the descriptor for the character conversion */
+      desc = iconv_open(INERE_LOCAL_CHARSET, "UTF-8");
+
+      /* Check for errors */
+
+      inbytes = 2; /* The ñ character is represented by two bytes in UTF-8 */
+      outbytes = 2*inbytes;
+      inbuf = source;
+      enhe = (char *)calloc(outbytes, sizeof(char));
+      outbuf = enhe;
+      res = iconv(desc, &inbuf, &inbytes, &outbuf, &outbytes);
+
+      /* Close the conversion descriptor */
+      iconv_close(desc);
+
       while ( *enhe ) {
 	out[j++] = *enhe++;
       }
+      enhe -= outbytes;
+      free(enhe);
+
     } else {
       out[j++] = *in;
     }
