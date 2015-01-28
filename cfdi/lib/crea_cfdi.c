@@ -43,10 +43,13 @@
 #include <string.h>
 
 /* algunas constantes */
-static const xmlChar *version = (const xmlChar *)"3.2";
-static const xmlChar *cfdi_url = (const xmlChar *)"http://www.sat.gob.mx/cfd/3";
 static const xmlChar *xsi_url = (const xmlChar *)"http://www.w3.org/2001/XMLSchema-instance";
+
+static const xmlChar *cfdi_url = (const xmlChar *)"http://www.sat.gob.mx/cfd/3";
 static const xmlChar *cfdi_schemaLocation = (const xmlChar *)"http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd";
+
+static const xmlChar *tfd_url = (const xmlChar *)"http://www.sat.gob.mx/TimbreFiscalDigital";
+static const xmlChar *tfd_schemaLocation = (const xmlChar *)"http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/TimbreFiscalDigital/TimbreFiscalDigital.xsd";
 
 static const char *cadena_original_stylesheet = "cadenaoriginal_3_2.xslt";
 
@@ -155,11 +158,12 @@ termina_comprobante(Comprobante_t *cfdi)
     free(cfdi->Addenda);
   }
 
-  if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
-    free(cfdi->Complemento->TimbreFiscalDigital);
-  }
-
   if ( cfdi->Complemento != NULL ) {
+
+    if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
+      free(cfdi->Complemento->TimbreFiscalDigital);
+    }
+
     free(cfdi->Complemento);
   }
 
@@ -1326,6 +1330,7 @@ genera_comprobante_alloc(Comprobante_t *cfdi)
 {
   xmlDocPtr doc                 = NULL;
   xmlNsPtr cfdi_ns              = NULL;
+  xmlNsPtr tfd_ns               = NULL;
   xmlNodePtr Comprobante        = NULL;
   xmlNodePtr Emisor             = NULL;
   xmlNodePtr RegimenFiscal      = NULL;
@@ -1372,6 +1377,12 @@ n", __FILE__, __LINE__);
     xmlFreeDoc(doc);
     return NULL;
   }
+
+  /* Define el nodo comprobante como el nodo raiz */
+  xmlDocSetRootElement(doc, Comprobante);
+
+  /* Reajusta el namespace */
+  xmlReconciliateNs(doc, Comprobante);
 
   /* Crea el namespace xsi. pero para que el CFDi se vea bonito
    * no declares este namespace de la manera usual (via xmlNewNs)
@@ -1648,17 +1659,29 @@ n", __FILE__, __LINE__);
     Complemento = xmlNewChild(Comprobante, cfdi_ns, (const xmlChar *)"Complemento", NULL);
 
     if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
+
+      TimbreFiscalDigital = xmlNewNode(NULL, (const xmlChar *)"TimbreFiscalDigital");
+      tfd_ns = xmlNewNs(TimbreFiscalDigital, tfd_url, (const xmlChar *)"tfd");
+
+      xmlNewProp(TimbreFiscalDigital, (const xmlChar *)"xsi:schemaLocation", tfd_schemaLocation);
+      xmlNewProp(TimbreFiscalDigital, (const xmlChar *)"version", cfdi->Complemento->TimbreFiscalDigital->version);
+      xmlNewProp(TimbreFiscalDigital, (const xmlChar *)"UUID", cfdi->Complemento->TimbreFiscalDigital->UUID);
+      xmlNewProp(TimbreFiscalDigital, (const xmlChar *)"noCertificadoSAT", cfdi->Complemento->TimbreFiscalDigital->noCertificadoSAT);
+      xmlNewProp(TimbreFiscalDigital, (const xmlChar *)"FechaTimbrado", cfdi->Complemento->TimbreFiscalDigital->FechaTimbrado);
+      xmlNewProp(TimbreFiscalDigital, (const xmlChar *)"selloCFD", cfdi->Complemento->TimbreFiscalDigital->selloCFD);
+      xmlNewProp(TimbreFiscalDigital, (const xmlChar *)"selloSAT", cfdi->Complemento->TimbreFiscalDigital->selloSAT);
+
+      xmlSetNs(TimbreFiscalDigital, tfd_ns);
+      xmlAddChild(Complemento, TimbreFiscalDigital);
+
     }
 
   }
 
   /* Agrega la addenda */
 
-  /* Define el nodo comprobante como el nodo raiz */
-  xmlDocSetRootElement(doc, Comprobante);
-
   /* Reajusta el namespace */
-  xmlReconciliateNs(doc, Comprobante);
+  /*xmlReconciliateNs(doc, Comprobante);*/
 
   /* Escribe el CFDI a un buffer */
   xmlDocDumpMemoryEnc(doc, &comprobante, &len, "UTF-8");
