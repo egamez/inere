@@ -2,8 +2,8 @@
 CC		:= gcc
 DBG		:= -g -O2
 XTRACCFLAGS	:= -D_GNU_SOURCE -fPIC -pipe -funsigned-char -ansi -pedantic -pedantic-errors
-INCLUDES	:= -I../include -I@OPENSSL_INC_DIR@  @XML2_INCLUDE@ @XSLT_INCLUDE@
-LIBS		:= -L../lib/src/.libs -linere -Wl,-rpath=../lib/src/.libs @XSLT_LIB@ @XML2_LIB@ @OPENSSL_LIBS@
+INCLUDES	:= -I../include 
+LIBS		:= -L../lib/.libs -linere -Wl,-rpath=../lib/.libs
 
 WARNINGS	:= -Wextra -Wall -W
 CCFLAGS		:= $(DBG) $(WARNINGS) $(XTRACCFLAGS) $(INCLUDES)
