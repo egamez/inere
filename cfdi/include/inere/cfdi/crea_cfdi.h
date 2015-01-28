@@ -140,6 +140,13 @@ extern int agrega_Impuesto_Traslado(Comprobante_t *cfdi,
 				    unsigned char *impuesto,
 				    unsigned char *tasa,
 				    unsigned char *importe);
+extern int agrega_Complemento_TimbreFiscalDigital(Comprobante_t *cfdi,
+				      unsigned char *version,
+				      unsigned char *UUID,
+				      unsigned char *noCertificadoSAT,
+				      unsigned char *FechaTimbrado,
+				      unsigned char *selloCFD,
+				      unsigned char *selloSAT);
 
 
 #ifdef __cplusplus

@@ -155,6 +155,10 @@ termina_comprobante(Comprobante_t *cfdi)
     free(cfdi->Addenda);
   }
 
+  if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
+    free(cfdi->Complemento->TimbreFiscalDigital);
+  }
+
   if ( cfdi->Complemento != NULL ) {
     free(cfdi->Complemento);
   }
@@ -680,6 +684,62 @@ asigna_MontoFolioFiscalOrig(Comprobante_t *cfdi, unsigned char *MontoFolioFiscal
   }
   return ret;
 }
+
+
+/**
+ *
+ */
+int
+agrega_Complemento_TimbreFiscalDigital(Comprobante_t *cfdi,
+			   unsigned char *version,
+			   unsigned char *UUID,
+			   unsigned char *noCertificadoSAT,
+			   unsigned char *FechaTimbrado,
+			   unsigned char *selloCFD,
+			   unsigned char *selloSAT)
+{
+  int res = 0;
+
+  if ( cfdi == NULL ) {
+    res = 1;
+    fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+  } else {
+
+    if ( version          == NULL ||
+	 UUID             == NULL ||
+	 noCertificadoSAT == NULL ||
+	 FechaTimbrado    == NULL ||
+	 selloCFD         == NULL ||
+	 selloSAT         == NULL ) {
+
+      res = 2;
+      fprintf(stderr, "%s:%d Error. Alguno o todos los parametros para expresar el Timbre Fiscal digital son nulos.\n", __FILE__, __LINE__);
+
+    } else {
+
+      if ( cfdi->Complemento == NULL ) {
+	cfdi->Complemento = (Complemento_t *)malloc(sizeof(Complemento_t));
+      }
+
+      if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
+	free(cfdi->Complemento->TimbreFiscalDigital);
+      }
+
+      cfdi->Complemento->TimbreFiscalDigital = (TimbreFiscalDigital_t *)malloc(sizeof(TimbreFiscalDigital_t));
+      cfdi->Complemento->TimbreFiscalDigital->version = version;
+      cfdi->Complemento->TimbreFiscalDigital->UUID = UUID;
+      cfdi->Complemento->TimbreFiscalDigital->noCertificadoSAT = noCertificadoSAT;
+      cfdi->Complemento->TimbreFiscalDigital->FechaTimbrado = FechaTimbrado;
+      cfdi->Complemento->TimbreFiscalDigital->selloCFD = selloCFD;
+      cfdi->Complemento->TimbreFiscalDigital->selloSAT = selloSAT;
+
+    }
+
+  }
+
+  return res;
+}
+
 
 /**
  *
@@ -1280,6 +1340,8 @@ genera_comprobante_alloc(Comprobante_t *cfdi)
   xmlNodePtr Retencion          = NULL;
   xmlNodePtr Traslados          = NULL;
   xmlNodePtr Traslado           = NULL;
+  xmlNodePtr Complemento        = NULL;
+  xmlNodePtr TimbreFiscalDigital= NULL;
   Concepto_list_t *conceptos    = NULL;
   Retencion_list_t *retenciones = NULL;
   Traslado_list_t *traslados    = NULL;
@@ -1582,6 +1644,13 @@ n", __FILE__, __LINE__);
 
 
   /* Agrega el complemento */
+  if ( cfdi->Complemento != NULL ) {
+    Complemento = xmlNewChild(Comprobante, cfdi_ns, (const xmlChar *)"Complemento", NULL);
+
+    if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
+    }
+
+  }
 
   /* Agrega la addenda */
 
