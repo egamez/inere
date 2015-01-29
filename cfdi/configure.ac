@@ -112,6 +112,98 @@ AC_CHECK_LIB(crypto, X509_get_pubkey, OPENSSL_LIBS="-lcrypto")
 AC_SUBST(OPENSSL_LIBS)
 
 
+# Representacion Impresa
+RI_ENABLED=no
+AC_ARG_ENABLE([ri],
+	[AS_HELP_STRING([--enable-ri],
+		[Compila programas para soportar la representacion impresa de CFDIs])],
+	[
+		case "${enableval}" in
+			yes)	RI_ENABLED=true  ;;
+			no)	RI_ENABLED=false ;;
+			*)	AC_MSG_ERROR([valor inapropiado ${enableval} para --enable-ri]) ;;
+		esac
+	],
+	[
+		RI_ENABLED=false
+	])
+
+
+# libpng
+LIBPNG_LIBS=
+LIBPNG_INCLUDES=
+AC_ARG_WITH([libpng-config],
+	[AS_HELP_STRING([--with-libpng-config@<:@=PATH@:>@],
+		[Define la ruta en donde se encuentra el script libpng-config @<:@default=/usr/bin@:>@])],
+	[
+		RI_ENABLED=true
+
+		if test "x$withval" = "xyes" ; then
+			LIBPNG_LIBS="-L`/usr/bin/libpng-config --libdir` `/usr/bin/libpng-config --libs`"
+			LIBPNG_INCLUDES=`/usr/bin/libpng-config --cflags`
+		else
+			LIBPNG_LIBS="-L`${withval}/libpng-config --libdir` `${withval}/libpng-config --libs`"
+			LIBPNG_INCLUDES=`${withval}/libpng-config --cflags`
+		fi
+	],
+	[
+		RI_ENABLED=false
+		AC_MSG_NOTICE([libpng not selected?])
+	])
+AC_SUBST(LIBPNG_LIBS)
+AC_SUBST(LIBPNG_INCLUDES)
+
+
+# libqrencode
+LIBQRENCODE_INCLUDES=
+LIBQRENCODE_LIBS=
+AC_ARG_WITH([libqrencode-dir],
+	[AS_HELP_STRING([--with-libqrencode-dir@<:@=PATH@:>@],
+		[Define la ruta de instalacion de libqrencode @<:@default=/usr/local@:>@])],
+	[
+		RI_ENABLED=true
+
+		if test "x$withval" = "xyes" ; then
+			LIBQRENCODE_LIBS="-L/usr/local/lib -lqrencode"
+			LIBQRENCODE_INCLUDES="-I/usr/local/include"
+		else
+			LIBQRENCODE_LIBS="-L$withval/lib -lqrencode"
+			LIBQRENCODE_INCLUDES="-I$withval/include"
+		fi
+	],
+	[
+		RI_ENABLED=false
+	])
+AC_SUBST(LIBQRENCODE_LIBS)
+AC_SUBST(LIBQRENCODE_INCLUDES)
+
+
+# libHpdf
+LIBHPDF_INCLUDES=
+LIBHPDF_LIBS=
+AC_ARG_WITH([libhpdf-dir],
+	[AS_HELP_STRING([--with-libhpdf-dir@<:@=PATH@:>@],
+		[Define la ruta de instalacion de libhpdf @<:@default=/usr/local@:>@])],
+	[
+		RI_ENABLED=true
+
+		if test "x$withval" = "xyes" ; then
+			LIBHPDF_LIBS="-L/usr/local/lib -lhpdf"
+			LIBHPDF_INCLUDES="-I/usr/local/include"
+		else
+			LIBHPDF_LIBS="-L$withval/lib -lhpdf"
+			LIBHPDF_INCLUDES="-I$withval/include"
+		fi
+	],
+	[
+		RI_ENABLED=false
+	])
+AC_SUBST(LIBHPDF_LIBS)
+AC_SUBST(LIBHPDF_INCLUDES)
+
+
+AM_CONDITIONAL([RI_ENABLED], [ test x$RI_ENABLED = xtrue ])
+
 AC_CONFIG_FILES([Makefile
                  lib/Makefile
                  src/Makefile
