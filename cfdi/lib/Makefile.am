@@ -5,6 +5,10 @@ libinerecfdi_la_SOURCES = verifica_sello_digital.c lee_certificado.c sello.c \
 			  genera_cadena_original.c crea_cfdi.c lee_cfdi.c \
 			  base64.c
 
+if RI_ENABLED
+  libinerecfdi_la_SOURCES += crea_cfdi_qrcode_alloc.c
+endif
+
 libinerecfdi_la_LDFLAGS = -version-info 0:1:0
 
 nobase_dist_include_HEADERS = $(top_srcdir)/include/inere/cfdi/verifica_sello_digital.h \
@@ -15,6 +19,10 @@ nobase_dist_include_HEADERS = $(top_srcdir)/include/inere/cfdi/verifica_sello_di
 			$(top_srcdir)/include/inere/cfdi/comprobante.h \
 			$(top_srcdir)/include/inere/cfdi/lee_cfdi.h \
 			$(top_srcdir)/include/inere/cfdi/base64.h
+
+if RI_ENABLED
+  nobase_dist_include_HEADERS += $(top_srcdir)/include/inere/cfdi/crea_cfdi_qrcode_alloc.h
+endif
 
 INCLUDES = -I$(top_srcdir)/include $(XML2_INCLUDE) $(XSLT_INCLUDE)
 
