@@ -146,10 +146,6 @@ termina_comprobante(Comprobante_t *cfdi)
 {
   Concepto_list_t *prods1 = NULL;
   Concepto_list_t *prods2 = NULL;
-  Retencion_list_t *ret1 = NULL;
-  Retencion_list_t *ret2 = NULL;
-  Traslado_list_t *tras1 = NULL;
-  Traslado_list_t *tras2 = NULL;
   RegimenFiscal_list_t *reg1 = NULL;
   RegimenFiscal_list_t *reg2 = NULL;
   int res = 0;
@@ -167,27 +163,38 @@ termina_comprobante(Comprobante_t *cfdi)
     free(cfdi->Complemento);
   }
 
-  ret1 = cfdi->Impuestos->Retenciones;
-  while ( ret1 != NULL ) {
-    ret2 = ret1;
-    free(ret2);
-    ret1 = ret1->next;
+  if ( cfdi->Impuestos->Retenciones != NULL ) {
+    Retencion_list_t *node = cfdi->Impuestos->Retenciones;
+    Retencion_list_t *tmp = NULL;
+    while ( node != NULL ) {
+      tmp = node;
+      node = node->next;
+      free(tmp);
+    }
+    cfdi->Impuestos->Retenciones = NULL;
   }
-  tras1 = cfdi->Impuestos->Traslados;
-  while ( tras1 != NULL ) {
-    tras2 = tras1;
-    free(tras2);
-    tras1 = tras1->next;
+
+  if ( cfdi->Impuestos->Traslados != NULL ) {
+    Traslado_list_t *node = cfdi->Impuestos->Traslados;
+    Traslado_list_t *tmp = NULL;
+    while ( node != NULL ) {
+      tmp = node;
+      node = node->next;
+      free(tmp);
+    }
+    cfdi->Impuestos->Traslados = NULL;
   }
+
   free(cfdi->Impuestos);
 
   prods1 = cfdi->Conceptos;
   while ( prods1 != NULL ) {
     prods2 = prods1;
-    free(prods2);
     prods1 = prods1->next;
+    free(prods2);
   }
-  free(cfdi->Conceptos);
+  cfdi->Conceptos = NULL;
+  /*free(cfdi->Conceptos);*/
 
   if ( cfdi->Receptor->Domicilio != NULL ) {
     free(cfdi->Receptor->Domicilio);
@@ -197,9 +204,10 @@ termina_comprobante(Comprobante_t *cfdi)
   reg1 = cfdi->Emisor->RegimenFiscal;
   while ( reg1 != NULL ) {
     reg2 = reg1;
-    free(reg2);
     reg1 = reg1->next;
+    free(reg2);
   }
+  cfdi->Emisor->RegimenFiscal = NULL;
 
   if ( cfdi->Emisor->ExpedidoEn != NULL ) {
     free(cfdi->Emisor->ExpedidoEn);
@@ -1690,6 +1698,7 @@ n", __FILE__, __LINE__);
   }
 
   xmlFreeDoc(doc);
+  xmlFreeNs(cfdi_ns);
 
   return comprobante;
 }

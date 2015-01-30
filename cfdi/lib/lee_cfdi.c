@@ -310,16 +310,16 @@ termina_cfdi(Comprobante_t *cfdi)
   cfdi->Receptor = NULL;
 
   /* Ahora el emisor */
-  if ( cfdi->Emisor->DomicilioFiscal != NULL ) {
+  regimen1 = cfdi->Emisor->RegimenFiscal;
+  while ( regimen1 != NULL ) {
+    regimen2 = regimen1;
+    regimen1 = regimen1->next;
+    xmlFree(regimen2->Regimen);
+    free(regimen2);
+  }
+  cfdi->Emisor->RegimenFiscal = NULL;
 
-    regimen1 = cfdi->Emisor->RegimenFiscal;
-    while ( regimen1 != NULL ) {
-      regimen2 = regimen1;
-      xmlFree(regimen2->Regimen);
-      free(regimen2);
-      regimen1 = regimen1->next;
-    }
-    free(cfdi->Emisor->RegimenFiscal);
+  if ( cfdi->Emisor->DomicilioFiscal != NULL ) {
 
     if ( cfdi->Emisor->DomicilioFiscal->codigoPostal != NULL ) {
       xmlFree(cfdi->Emisor->DomicilioFiscal->codigoPostal);
@@ -390,7 +390,6 @@ termina_cfdi(Comprobante_t *cfdi)
     xmlFree(cfdi->Emisor->nombre);
   }
   xmlFree(cfdi->Emisor->rfc);
-  xmlFree(cfdi->Emisor->RegimenFiscal);
   free(cfdi->Emisor);
   cfdi->Emisor = NULL;
 
@@ -877,6 +876,7 @@ lee_datos_emisor(const xmlNodePtr node,
 
 	tmp = (RegimenFiscal_list_t *)malloc(sizeof(RegimenFiscal_list_t));
 	tmp->Regimen = xmlGetProp(cur, (const xmlChar *)"Regimen");
+	tmp->next = NULL;
 	if ( verbose ) {
 	  printf("%s:%d Info. Nodo actual: %s, valor = %s\n", __FILE__, __LINE__, cur->name, tmp->Regimen);
 	}
@@ -908,6 +908,7 @@ lee_datos_emisor(const xmlNodePtr node,
 
   emisor->ExpedidoEn = expedido;
   emisor->DomicilioFiscal = fiscal;
+  emisor->RegimenFiscal = regimen;
 
   cfdi->Emisor = emisor;
   return 0;
