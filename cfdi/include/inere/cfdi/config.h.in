@@ -3,6 +3,9 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
+/* Define to 1 if you have the <hpdf.h> header file. */
+#undef HAVE_HPDF_H
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -21,6 +24,12 @@
 
 /* Define to 1 if you have the <openssl/evp.h> header file. */
 #undef HAVE_OPENSSL_EVP_H
+
+/* Define to 1 if you have the <png.h> header file. */
+#undef HAVE_PNG_H
+
+/* Define to 1 if you have the <qrencode.h> header file. */
+#undef HAVE_QRENCODE_H
 
 /* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H

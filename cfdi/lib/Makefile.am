@@ -26,5 +26,8 @@ if RI_ENABLED
 endif
 
 INCLUDES = -I$(top_srcdir)/include $(XML2_INCLUDE) $(XSLT_INCLUDE)
+if RI_ENABLED
+  INCLUDES += $(LIBQRENCODE_INCLUDES) $(LIBHPDF_INCLUDES) $(LIBPNG_INCLUDES)
+endif
 
 AM_CFLAGS = -Wall -Wextra -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -Wuninitialized -Wmissing-declarations -Winit-self -ansi -pedantic -pthread -pedantic-errors -D_GNU_SOURCE -funsigned-char

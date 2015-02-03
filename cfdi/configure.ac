@@ -91,21 +91,17 @@ AC_ARG_WITH([openssl],
 			LIBS="-L/usr/lib ${LIBS}"
 			LDFLAGS="${LDFLAGS} -L/usr/lib"
 			CFLAGS="${CFLAGS} -I/usr/include"
-			OPENSSL_INC_DIR="/usr/include"
 		else
 			LIBS="-L$withval/lib ${LIBS}"
 			LDFLAGS="${LDFLAGS} -L$withval/lib"
 			CFLAGS="${CFLAGS} -I$withval/include"
-			OPENSSL_INC_DIR="$withval/include"
 		fi
 	],
 	[
 		LIBS="-L/usr/lib ${LIBS}"
 		LDFLAGS="${LDFLAGS} -L/usr/lib"
 		CFLAGS="${CFLAGS} -I/usr/include"
-		OPENSSL_INC_DIR="/usr/include"
 	])
-AC_SUBST(OPENSSL_INC_DIR)
 AC_CHECK_HEADERS([openssl/evp.h])
 OPENSSL_LIBS=
 AC_CHECK_LIB(crypto, X509_get_pubkey, OPENSSL_LIBS="-lcrypto")
@@ -113,7 +109,7 @@ AC_SUBST(OPENSSL_LIBS)
 
 
 # Representacion Impresa
-RI_ENABLED=no
+RI_ENABLED=false
 AC_ARG_ENABLE([ri],
 	[AS_HELP_STRING([--enable-ri],
 		[Compila programas para soportar la representacion impresa de CFDIs])],
@@ -130,8 +126,6 @@ AC_ARG_ENABLE([ri],
 
 
 # libpng
-LIBPNG_LIBS=
-LIBPNG_INCLUDES=
 AC_ARG_WITH([libpng-config],
 	[AS_HELP_STRING([--with-libpng-config@<:@=PATH@:>@],
 		[Define la ruta en donde se encuentra el script libpng-config @<:@default=/usr/bin@:>@])],
@@ -139,23 +133,21 @@ AC_ARG_WITH([libpng-config],
 		RI_ENABLED=true
 
 		if test "x$withval" = "xyes" ; then
-			LIBPNG_LIBS="-L`/usr/bin/libpng-config --libdir` `/usr/bin/libpng-config --libs`"
-			LIBPNG_INCLUDES=`/usr/bin/libpng-config --cflags`
+			CFLAGS="`/usr/bin/libpng-config --cflags` ${CFLAGS}"
+			LIBS="`/usr/bin/libpng-config --L_opts` ${LIBS}"
 		else
-			LIBPNG_LIBS="-L`${withval}/libpng-config --libdir` `${withval}/libpng-config --libs`"
-			LIBPNG_INCLUDES=`${withval}/libpng-config --cflags`
+			CFLAGS="`${withval}/libpng-config --cflags` ${CFLAGS}"
+			LIBS="`${withval}/libpng-config --L_opts` ${LIBS}"
 		fi
+		AC_CHECK_HEADERS([png.h])
+		AC_SEARCH_LIBS([png_create_info_struct], [png12])
 	],
 	[
 		RI_ENABLED=false
-		AC_MSG_NOTICE([libpng not selected?])
 	])
-AC_SUBST(LIBPNG_LIBS)
-AC_SUBST(LIBPNG_INCLUDES)
 
 
 # libqrencode
-LIBQRENCODE_INCLUDES=
 LIBQRENCODE_LIBS=
 AC_ARG_WITH([libqrencode-dir],
 	[AS_HELP_STRING([--with-libqrencode-dir@<:@=PATH@:>@],
@@ -164,22 +156,21 @@ AC_ARG_WITH([libqrencode-dir],
 		RI_ENABLED=true
 
 		if test "x$withval" = "xyes" ; then
-			LIBQRENCODE_LIBS="-L/usr/local/lib -lqrencode"
-			LIBQRENCODE_INCLUDES="-I/usr/local/include"
+			LIBS="-L/usr/local/lib ${LIBS}"
+			CFLAGS="-I/usr/local/include ${CFLAGS}"
 		else
-			LIBQRENCODE_LIBS="-L$withval/lib -lqrencode"
-			LIBQRENCODE_INCLUDES="-I$withval/include"
+			LIBS="-L${withval}/lib ${LIBS}"
+			CFLAGS="-I${withval}/include ${CFLAGS}"
 		fi
+		AC_CHECK_HEADERS([qrencode.h])
+		AC_SEARCH_LIBS([QRcode_encodeString8bit], [qrencode])
 	],
 	[
 		RI_ENABLED=false
 	])
-AC_SUBST(LIBQRENCODE_LIBS)
-AC_SUBST(LIBQRENCODE_INCLUDES)
 
 
 # libHpdf
-LIBHPDF_INCLUDES=
 LIBHPDF_LIBS=
 AC_ARG_WITH([libhpdf-dir],
 	[AS_HELP_STRING([--with-libhpdf-dir@<:@=PATH@:>@],
@@ -188,18 +179,18 @@ AC_ARG_WITH([libhpdf-dir],
 		RI_ENABLED=true
 
 		if test "x$withval" = "xyes" ; then
-			LIBHPDF_LIBS="-L/usr/local/lib -lhpdf"
-			LIBHPDF_INCLUDES="-I/usr/local/include"
+			LIBS="-L/usr/local/lib ${LIBS}"
+			CFLAGS="-I/usr/local/include ${CFLAGS}"
 		else
-			LIBHPDF_LIBS="-L$withval/lib -lhpdf"
-			LIBHPDF_INCLUDES="-I$withval/include"
+			LIBS="-L${withval}/lib ${LIBS}"
+			CFLAGS="-I${withval}/include ${CFLAGS}"
 		fi
+		AC_CHECK_HEADERS([hpdf.h])
+		AC_SEARCH_LIBS([HPDF_New], [hpdf])
 	],
 	[
 		RI_ENABLED=false
 	])
-AC_SUBST(LIBHPDF_LIBS)
-AC_SUBST(LIBHPDF_INCLUDES)
 
 
 AM_CONDITIONAL([RI_ENABLED], [ test x$RI_ENABLED = xtrue ])
