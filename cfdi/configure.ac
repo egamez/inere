@@ -140,7 +140,13 @@ AC_ARG_WITH([libpng-config],
 			LIBS="`${withval}/libpng-config --L_opts` ${LIBS}"
 		fi
 		AC_CHECK_HEADERS([png.h])
-		AC_SEARCH_LIBS([png_create_info_struct], [png12])
+		AC_SEARCH_LIBS([png_create_info_struct],
+				[png12],
+				[],
+				[
+					AC_MSG_NOTICE([No se encontro la libraria libpng, necesaria para compilar el soporte para la representacion impresa de CFDIs])
+					RI_ENABLED=false
+				])
 	],
 	[
 		RI_ENABLED=false
@@ -148,7 +154,6 @@ AC_ARG_WITH([libpng-config],
 
 
 # libqrencode
-LIBQRENCODE_LIBS=
 AC_ARG_WITH([libqrencode-dir],
 	[AS_HELP_STRING([--with-libqrencode-dir@<:@=PATH@:>@],
 		[Define la ruta de instalacion de libqrencode @<:@default=/usr/local@:>@])],
@@ -163,7 +168,13 @@ AC_ARG_WITH([libqrencode-dir],
 			CFLAGS="-I${withval}/include ${CFLAGS}"
 		fi
 		AC_CHECK_HEADERS([qrencode.h])
-		AC_SEARCH_LIBS([QRcode_encodeString8bit], [qrencode])
+		AC_SEARCH_LIBS([QRcode_encodeString8bit],
+				[qrencode],
+				[],
+				[
+					AC_MSG_NOTICE([No se encontro la libraria libqrencode, necesaria para compilar el soporte para la representacion impresa de CFDIs])
+					RI_ENABLED=false
+				])
 	],
 	[
 		RI_ENABLED=false
@@ -171,7 +182,6 @@ AC_ARG_WITH([libqrencode-dir],
 
 
 # libHpdf
-LIBHPDF_LIBS=
 AC_ARG_WITH([libhpdf-dir],
 	[AS_HELP_STRING([--with-libhpdf-dir@<:@=PATH@:>@],
 		[Define la ruta de instalacion de libhpdf @<:@default=/usr/local@:>@])],
@@ -186,10 +196,57 @@ AC_ARG_WITH([libhpdf-dir],
 			CFLAGS="-I${withval}/include ${CFLAGS}"
 		fi
 		AC_CHECK_HEADERS([hpdf.h])
-		AC_SEARCH_LIBS([HPDF_New], [hpdf])
+		AC_SEARCH_LIBS([HPDF_New],
+				[hpdf],
+				[],
+				[
+					AC_MSG_NOTICE([No se encontro la libraria libqrencode, necesaria para compilar el soporte para la representacion impresa de CFDIs])
+					RI_ENABLED=false
+				])
 	],
 	[
 		RI_ENABLED=false
+	])
+
+
+# Ahora define la ruta de localizacion de las fonts que se utilizaran
+# para la generacion de la representacion impresa
+AC_ARG_WITH([ttf-font-file],
+	[AS_HELP_STRING([--with-ttf-font-file@<:@=PATH@:>@],
+		[Define la ruta en donde se localizan las TTF que libHaru utilizara para general la representacion impresa])
+	],
+	[
+		# Ahora verifica que exista un archivo asi
+		if test -f ${withval} ; then
+			AC_DEFINE_UNQUOTED([INERE_TTF_FONT_PATH], ["${withval}"], [Ruta de las TTF para la representacion impresa])
+		else
+			AC_MSG_ERROR([El archivo dado como fuente para las TTF, para la representacion impresa, no existe o no es de lectura.])
+		fi
+	],
+	[
+		if test ${RI_ENABLED} ; then
+			AC_MSG_ERROR([Es necesario definir la ruta de las TTF que se utilizaran para la representacion impresa.])
+		fi
+	])
+
+
+# TTF BOLD
+AC_ARG_WITH([ttf-bold-font-file],
+	[AS_HELP_STRING([--with-ttf-bold-font-file@<:@=PATH@:>@],
+		[Define la ruta en donde se localizan las TTF, en negritas, que libHaru utilizara para general la representacion impresa])
+	],
+	[
+		# Ahora verifica que exista un archivo asi
+		if test -f ${withval} ; then
+			AC_DEFINE_UNQUOTED([INERE_TTF_FONT_BOLD_PATH], ["${withval}"], [Ruta de las TTF, en negritas, para la representacion impresa])
+		else
+			AC_MSG_ERROR([El archivo dado como fuente para las TTF en negritas, para la representacion impresa, no existe o no es de lectura.])
+		fi
+	],
+	[
+		if test ${RI_ENABLED} ; then
+			AC_MSG_ERROR([Es necesario definir la ruta de las TTF, en negritas, que se utilizaran para la representacion impresa.])
+		fi
 	])
 
 

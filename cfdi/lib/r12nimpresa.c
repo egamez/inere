@@ -27,6 +27,9 @@
 #ifndef INERE_INVOICE_R12NIMPRESA_H_
 #include "inere/cfdi/r12nimpresa.h"
 #endif
+
+#include "inere/cfdi/config.h"
+
 #ifndef INERE_CFDI_CREA_CFDI_QRCODE_ALLOC_H_
 #include "inere/cfdi/crea_cfdi_qrcode_alloc.h"
 #endif
@@ -598,8 +601,10 @@ r12nimpresa(const char *input, const char *output, int verbose)
   page_width = HPDF_Page_GetWidth(page);
 
   /* Define las fonts a utilizar */
-  font_name = HPDF_LoadTTFontFromFile(pdf, "/file/path/to/the/font", HPDF_TRUE);
-  font_bold_name = HPDF_LoadTTFontFromFile(pdf, "/file/path/to/the/font", HPDF_TRUE);
+  /*font_name = HPDF_LoadTTFontFromFile(pdf, "/file/path/to/the/font", HPDF_TRUE);*/
+  font_name = HPDF_LoadTTFontFromFile(pdf, INERE_TTF_FONT_PATH, HPDF_TRUE);
+  /*font_bold_name = HPDF_LoadTTFontFromFile(pdf, "/file/path/to/the/font", HPDF_TRUE);*/
+  font_bold_name = HPDF_LoadTTFontFromFile(pdf, INERE_TTF_FONT_BOLD_PATH, HPDF_TRUE);
   font = HPDF_GetFont(pdf, font_name, "UTF-8");
   font_bold = HPDF_GetFont(pdf, font_bold_name, "UTF-8");
 

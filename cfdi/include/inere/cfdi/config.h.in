@@ -61,6 +61,12 @@
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 
+/* Ruta de las TTF, en negritas, para la representacion impresa */
+#undef INERE_TTF_FONT_BOLD_PATH
+
+/* Ruta de las TTF para la representacion impresa */
+#undef INERE_TTF_FONT_PATH
+
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
