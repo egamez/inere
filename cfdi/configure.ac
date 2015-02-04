@@ -224,7 +224,7 @@ AC_ARG_WITH([ttf-font-file],
 		fi
 	],
 	[
-		if test ${RI_ENABLED} ; then
+		if test "${RI_ENABLED}" = "true" ; then
 			AC_MSG_ERROR([Es necesario definir la ruta de las TTF que se utilizaran para la representacion impresa.])
 		fi
 	])
@@ -244,7 +244,7 @@ AC_ARG_WITH([ttf-bold-font-file],
 		fi
 	],
 	[
-		if test ${RI_ENABLED} ; then
+		if test "${RI_ENABLED}" = "true" ; then
 			AC_MSG_ERROR([Es necesario definir la ruta de las TTF, en negritas, que se utilizaran para la representacion impresa.])
 		fi
 	])
