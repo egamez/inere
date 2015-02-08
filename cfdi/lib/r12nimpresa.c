@@ -95,6 +95,7 @@ error_handler(HPDF_STATUS error_no, HPDF_STATUS detail_no, void *user_data)
 
 /**
  * Funcion auxiliar para fijar algunas opciones del documento
+ * OK
  */
 HPDF_STATUS
 fija_opciones_del_documento(HPDF_Doc pdf, Comprobante_t* cfdi)
@@ -115,7 +116,8 @@ fija_opciones_del_documento(HPDF_Doc pdf, Comprobante_t* cfdi)
 
   /* El atributo Titulo del PDF */
   memset(buffer, 0, 256);
-  snprintf(buffer, 49, "CFDi - Representacion Impresa para %s", cfdi->Receptor->rfc);
+  snprintf(buffer, 49, "CFDi - Representacion Impresa para %s",
+							cfdi->Receptor->rfc);
   res = HPDF_SetInfoAttr(pdf, HPDF_INFO_TITLE, buffer);
 
   /* El asunto del PDF */
@@ -160,10 +162,10 @@ fija_opciones_del_documento(HPDF_Doc pdf, Comprobante_t* cfdi)
   now = time(&now);
   moddate = (struct tm *)calloc(1, sizeof(struct tm));
   localtime_r(&now, moddate);
-  creation_date.year = moddate->tm_year;
-  creation_date.month = moddate->tm_mon + 1;
-  creation_date.day = moddate->tm_mday;
-  creation_date.hour = moddate->tm_hour;
+  creation_date.year    = moddate->tm_year;
+  creation_date.month   = moddate->tm_mon + 1;
+  creation_date.day     = moddate->tm_mday;
+  creation_date.hour    = moddate->tm_hour;
   creation_date.minutes = moddate->tm_min;
   creation_date.seconds = moddate->tm_sec;
   res = HPDF_SetInfoDateAttr(pdf, HPDF_INFO_MOD_DATE, creation_date);
@@ -183,6 +185,7 @@ fija_opciones_del_documento(HPDF_Doc pdf, Comprobante_t* cfdi)
  *
  * Write onto the given window at left = x, top = y and width 'data'
  * and return the number of lines used.
+ * OK
  */
 HPDF_UINT
 write_in_a_box(HPDF_Page page, HPDF_REAL x, HPDF_REAL y, HPDF_REAL width,
@@ -231,7 +234,6 @@ write_in_a_box(HPDF_Page page, HPDF_REAL x, HPDF_REAL y, HPDF_REAL width,
  * Esta función es para imprimir los conceptos del CFDi.
  * La función regresara la posicion en la que se dibujo la ultima linea
  * que corresponde a la tabla de conceptos.
-
  */
 HPDF_Point
 imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
@@ -380,7 +382,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
    * el ancho para el importe y el total para cada concepto
    */
   width_precio = HPDF_Page_TextWidth(page, "888888888888");
-  width_importe = HPDF_Page_TextWidth(page, "8888888888");
+  width_importe = HPDF_Page_TextWidth(page, "$ 8888888888");
   rect_desc.top    = point->y;
   rect_desc.bottom = point->y - 10;
   rect_desc.left   = rect_unidad.right;
