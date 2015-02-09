@@ -35,34 +35,56 @@ AC_CHECK_FUNCS([localtime_r memset])
 
 # Check for libxml2
 XML2_CONFIG=
-AC_ARG_WITH([xml2config],
-	[AS_HELP_STRING([--with-xml2config@<:@=PATH@:>@],
-		[Especifica la ruta del ejecutable xml2-config @<:@default=/usr/local/bin@:>@])],
+AC_ARG_WITH([xml2-config],
+	[AS_HELP_STRING([--with-xml2-config@<:@=PATH@:>@],
+		[Especifica la ruta del script xml2-config @<:@default=/usr/local/bin@:>@])],
 	[
-		XML2_CONFIG=$withval/xml2-config
+		if test "x${withval}" = "xyes" ; then
+			XML2_CONFIG=/usr/local/bin/xml2-config
+		else
+			XML2_CONFIG=${withval}/xml2-config
+		fi
 	],
 	[
 		AC_PATH_PROGS(XML2_CONFIG, xml2-config)
 	])
-if test -z "$XML2_CONFIG" || test ! -r "$XML2_CONFIG"; then
+if test -z "${XML2_CONFIG}" || test ! -r "${XML2_CONFIG}"; then
 	AC_MSG_ERROR([
 libXML2 (through xml2-config) required.
 ])
 fi
 
-with_xml2_include=`$XML2_CONFIG --prefix`
-AC_MSG_NOTICE([using libxml2 headers at $with_xml2_include])
-with_xml2_lib=`$XML2_CONFIG --prefix`
-AC_MSG_NOTICE([using libxml2 libraries at $with_xml2_lib])
 
-XML2_LIB=`$XML2_CONFIG --libs`
-AC_SUBST(XML2_LIB)
-XML2_INCLUDE=`$XML2_CONFIG --cflags`
-AC_SUBST(XML2_INCLUDE)
-XML2_PREFIX=`$XML2_CONFIG --prefix`
-AC_SUBST(XML2_PREFIX)
+
+# Verifica la instalacion
+CFLAGS="`${XML2_CONFIG} --cflags` ${CFLAGS}"
+LIBS="-L`${XML2_CONFIG} --prefix`/lib ${LIBS}"
+AC_CHECK_HEADERS([libxml/tree.h])
+AC_SEARCH_LIBS([xmlParseFile],
+		[xml2],
+		[],
+		[
+			AC_MSG_NOTICE([No se encontro la libreria libxml2, necesaria para compilar soporte para lectura y escritura de CFDIs])
+		],
+		[-lz -lm -ldl])
+
+
 
 # xslt
+XSLT_CONFIG=
+AC_ARG_WITH([xslt-config],
+	[AS_HELP_STRING([--with-xslt-config@<:@=PATH@:>@],
+		[Especifica la ruta del script xslt-config @<:@default=/usr/local/bin@:>@])],
+	[
+		if test "x${withval}" = "xyes" ; then
+			XSLT_CONFIG=/usr/local/bin/xslt-config
+		else
+			XSLT_CONFIG=${withval}/xslt-config
+		fi
+	],
+	[
+		AC_PATH_PROGS(XSLT_CONFIG, xslt-config)
+	])
 AC_PATH_PROG(XSLT_CONFIG, xslt-config)
 if test -z "$XSLT_CONFIG" || test ! -r "$XSLT_CONFIG"; then
 	AC_MSG_ERROR([
@@ -70,19 +92,21 @@ XSLT required.
 ])
 fi
 
-with_xslt_include=`$XSLT_CONFIG --prefix`
-AC_MSG_NOTICE([using XSLT headers at $with_xslt_include])
-with_xslt_lib=`$XSLT_CONFIG --prefix`
-AC_MSG_NOTICE([using XSLT libraries at $with_xslt_lib])
+# Verifica la instalacion
+CFLAGS="`${XSLT_CONFIG} --cflags` ${CFLAGS}"
+LIBS="-L`${XSLT_CONFIG} --prefix`/lib ${LIBS}"
+AC_CHECK_HEADERS([libxslt/transform.h])
+AC_SEARCH_LIBS([xsltParseStylesheetFile],
+		[xslt],
+		[],
+		[
+			AC_MSG_NOTICE([No se encontro la libreria libxslt, necesaria para compilar soporte para generar la cadena original])
+		],
+		[-lxml2 -lz -ldl -lm -lrt])
 
-XSLT_LIB=`$XSLT_CONFIG --libs`
-AC_SUBST(XSLT_LIB)
-XSLT_INCLUDE=`$XSLT_CONFIG --cflags`
-AC_SUBST(XSLT_INCLUDE)
 
 
 # OpenSSL
-OPENSSL_INC_DIR=
 AC_ARG_WITH([openssl],
 	[AS_HELP_STRING([--with-openssl@<:@=PATH@:>@],
 		[Especifica la ruta de instalacion de la libreria OpenSSL @<:@default=/usr@:>@])],
@@ -103,9 +127,7 @@ AC_ARG_WITH([openssl],
 		CFLAGS="${CFLAGS} -I/usr/include"
 	])
 AC_CHECK_HEADERS([openssl/evp.h])
-OPENSSL_LIBS=
-AC_CHECK_LIB(crypto, X509_get_pubkey, OPENSSL_LIBS="-lcrypto")
-AC_SUBST(OPENSSL_LIBS)
+AC_CHECK_LIB([crypto], [X509_get_pubkey])
 
 
 # Representacion Impresa
@@ -189,7 +211,7 @@ AC_ARG_WITH([libhpdf-dir],
 		RI_ENABLED=true
 
 		if test "x$withval" = "xyes" ; then
-			LIBS="-L/usr/local/lib ${LIBS}"
+	 		LIBS="-L/usr/local/lib ${LIBS}"
 			CFLAGS="-I/usr/local/include ${CFLAGS}"
 		else
 			LIBS="-L${withval}/lib ${LIBS}"
