@@ -26,7 +26,7 @@ main(int argc, char *argv[])
     return 1;
   }
 
-  res = r12nimpresa(argv[1], argv[2], verbose);
+  res = r12nimpresa(argv[1], argv[2], NULL, NULL, verbose);
 
   return res;
 }

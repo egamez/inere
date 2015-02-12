@@ -56,17 +56,28 @@ const char *info_author          = "EDISSON Equipo Electrico";
 const char *info_creator         =  "EDISSON - TPV - Version: 0.4";
 
 const char *folio_fiscal_label   = "Folio Fiscal:";
-const char *no_serie_csd_label   = "No. de serie del CSD:";
-const char *fecha_emision_label  = "Lugar, fecha y hora de emisión:";
+const char *no_serie_csd_label   = "No. de Serie del CSD:";
+const char *fecha_emision_label  = "Lugar, Fecha y hora de emisión:";
 const char *serie_label          = "Serie:";
 const char *folio_label          = "Folio:";
+const char *regimen_label	 = "Régimen Fiscal";
 
 const char *cantidad_label       = "Cantidad";
 const char *clave_label          = "Clave";
 const char *unidad_label         = "Unidad";
 const char *descripcion_label    = "Descripción";
-const char *valor_unitario_label = "Valor unitario";
+const char *valor_unitario_label = "Precio unitario";
 const char *importe_label        = "Importe";
+
+const char *motivo_desc_label	 = "Motivo del Descuento:";
+const char *moneda_label	 = "Moneda:";
+const char *tipo_cambio_label	 = "Tipo de cambio:";
+const char *forma_pago_label	 = "Forma de Pago:";
+const char *metodo_pago_label	 = "Método de Pago:";
+const char *num_cta_pago_label	 = "Número de cuenta de Pago:";
+const char *cond_pago_label	 = "Condiciones de Pago:";
+
+const HPDF_REAL line_width	 = 10;
 
 
 /* Forward declarations */
@@ -263,7 +274,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   const HPDF_REAL page_height = HPDF_Page_GetHeight(page);
   Concepto_list_t *conceptos = NULL;
 
-  top_y = 150;
+  top_y = 150; /* ?? */ /* Este parametro deberia de ser suministrado como argumento de la funcion */
 
   if ( verbose ) {
     printf("%s:%d Dibujando la linea superior de los conceptos.\n", __FILE__, __LINE__); 
@@ -299,7 +310,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
 
   /* Cantidad */
   rect_cant.top    = point->y;
-  rect_cant.bottom = point->y - 10;
+  rect_cant.bottom = point->y - line_width;
   rect_cant.left   = margin;
   width_cant       = HPDF_Page_TextWidth(page, "8") * ndigits;
   rect_cant.right  = margin + width_cant + 2;
@@ -329,7 +340,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   if ( tiene_noIdent ) {
     /* Hay numeros de identificacion de al menos uno de los conceptos */
     rect_ident.top    = point->y;
-    rect_ident.bottom = point->y - 10;
+    rect_ident.bottom = point->y - line_width;
     rect_ident.left   = rect_cant.right;
     width_ident       = HPDF_Page_TextWidth(page, "AAAAAAAAAAAAAAAAAAAA");
     rect_ident.right  = rect_ident.left + width_ident + 2;
@@ -352,14 +363,14 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
     }
 
     rect_ident.top    = point->y;
-    rect_ident.bottom = point->y - 10;
+    rect_ident.bottom = point->y - line_width;
     rect_ident.left   = rect_cant.right;
     rect_ident.right  = rect_cant.right;
   }
 
   /* La unidad de venta */
   rect_unidad.top    = point->y;
-  rect_unidad.bottom = point->y - 10;
+  rect_unidad.bottom = point->y - line_width;
   rect_unidad.left   = rect_ident.right;
   width_unidad       = HPDF_Page_TextWidth(page, unidad_label);
   rect_unidad.right  = rect_unidad.left + width_unidad + 2;
@@ -384,7 +395,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   width_precio = HPDF_Page_TextWidth(page, "888888888888");
   width_importe = HPDF_Page_TextWidth(page, "$ 8888888888");
   rect_desc.top    = point->y;
-  rect_desc.bottom = point->y - 10;
+  rect_desc.bottom = point->y - line_width;
   rect_desc.left   = rect_unidad.right;
   width_desc       = page_width - margin - width_importe - width_precio - rect_unidad.right;
   rect_desc.right  = rect_desc.left + width_desc + 2;
@@ -403,7 +414,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
 
   /* El valor unitario */
   rect_precio.top    = point->y;
-  rect_precio.bottom = point->y - 10;
+  rect_precio.bottom = point->y - line_width;
   rect_precio.left   = rect_desc.right;
   rect_precio.right  = rect_precio.left + width_precio + 2;
   HPDF_Page_TextRect(page,
@@ -422,7 +433,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
 
   /* El importe */
   rect_importe.top    = point->y;
-  rect_importe.bottom = point->y - 10;
+  rect_importe.bottom = point->y - line_width;
   rect_importe.left   = rect_precio.right;
   rect_importe.right  = rect_importe.left + width_importe + 2;
   HPDF_Page_TextRect(page,
@@ -468,7 +479,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
      * La cantidad
      */
     top = point->y;
-    bottom = point->y - 10;
+    bottom = point->y - line_width;
     HPDF_Page_TextRect(page, rect_cant.left, top, rect_cant.right, bottom,
 		       (const char *)conceptos->cantidad, HPDF_TALIGN_RIGHT,
 		       NULL);
@@ -535,10 +546,24 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
 
 
 /**
+ * Comienzo de página 'page_height - 20'
+ *
+ * La pagina la dividiremos en 4 secciones,
+ *
+ *	- una sección para la informacion de identificación del comprobante
+ *	  (folio fiscal, fecha, etc.) secc1
+ *	- una sección para los datos del emisor y receptor del CFDI, secc2
+ *	- una sección para los conceptos que ampara el CFDI, y finalmente, secc3
+ *	- una sección para el sello y el qrcode, secc4
+ *
+ * El módelo a utilizar para escribir la información será de arriba hacía
+ * abajo, comenzando primero por la seccion de identificación, y de ahí a la
+ * sección del emisor y receptor.
  *
  */
 int
-r12nimpresa(const char *input, const char *output, int verbose)
+r12nimpresa(const char *input, const char *output, const char *ttf_font_path,
+	    const char *ttf_bold_font_path, int verbose)
 {
   Comprobante_t *cfdi = NULL;
 
@@ -550,6 +575,12 @@ r12nimpresa(const char *input, const char *output, int verbose)
   HPDF_REAL page_height;
   HPDF_REAL page_width;
   const HPDF_REAL margin = 20; /* width margin */
+  HPDF_INT lines = 1;
+  HPDF_REAL secc1_width = 0;
+  HPDF_REAL secc1_height = 0;
+
+  HPDF_REAL y = 0; /* Para la coordenada y en que se estará escribiendo */
+  HPDF_REAL x = 0; /* Para la coordenada x en que se estará escribiendo */
 
   const char *font_name;
   const char *font_bold_name;
@@ -584,14 +615,13 @@ r12nimpresa(const char *input, const char *output, int verbose)
   }
 
   if ( verbose ) {
-    printf("%s:%d Info. Fijando opciones basicas del documento.\n", __FILE__, __LINE__);
+    printf("%s:%d Info. Fijando opciones generales del documento.\n", __FILE__, __LINE__);
   }
-
   /* Fija las opciones generales del documento */
   fija_opciones_del_documento(pdf, cfdi);
 
   if ( verbose ) {
-    printf("%s:%d Info. Las opciones basicas del documento han sido fijadas.\n", __FILE__, __LINE__);
+    printf("%s:%d Info. Las opciones generales del documento han sido fijadas.\n", __FILE__, __LINE__);
   }
 
   /* Ahora es tiempo de comenzar con los atributos de la pagina */
@@ -603,10 +633,18 @@ r12nimpresa(const char *input, const char *output, int verbose)
   page_width = HPDF_Page_GetWidth(page);
 
   /* Define las fonts a utilizar */
-  /*font_name = HPDF_LoadTTFontFromFile(pdf, "/file/path/to/the/font", HPDF_TRUE);*/
-  font_name = HPDF_LoadTTFontFromFile(pdf, INERE_TTF_FONT_PATH, HPDF_TRUE);
-  /*font_bold_name = HPDF_LoadTTFontFromFile(pdf, "/file/path/to/the/font", HPDF_TRUE);*/
-  font_bold_name = HPDF_LoadTTFontFromFile(pdf, INERE_TTF_FONT_BOLD_PATH, HPDF_TRUE);
+  if ( ttf_font_path != NULL ) {
+    font_name = HPDF_LoadTTFontFromFile(pdf, ttf_font_path, HPDF_TRUE);
+  } else {
+    /* Use the default font path */
+    font_name = HPDF_LoadTTFontFromFile(pdf, INERE_TTF_FONT_PATH, HPDF_TRUE);
+  }
+  if ( ttf_bold_font_path != NULL ) {
+    font_bold_name = HPDF_LoadTTFontFromFile(pdf, ttf_bold_font_path,HPDF_TRUE);
+  } else {
+    /* Use the default font path */
+    font_bold_name = HPDF_LoadTTFontFromFile(pdf, INERE_TTF_FONT_BOLD_PATH, HPDF_TRUE);
+  }
   font = HPDF_GetFont(pdf, font_name, "UTF-8");
   font_bold = HPDF_GetFont(pdf, font_bold_name, "UTF-8");
 
@@ -620,84 +658,131 @@ r12nimpresa(const char *input, const char *output, int verbose)
 
   /* El folio fiscal */
   HPDF_Page_SetFontAndSize(page, font_bold, font_size_label);
-  HPDF_Page_TextOut(page,
-	    page_width - margin - HPDF_Page_TextWidth(page, folio_fiscal_label),
-	    page_height - 20, folio_fiscal_label);
+  y = page_height - 20;
+  x = page_width - margin - HPDF_Page_TextWidth(page, folio_fiscal_label);
+  HPDF_Page_TextOut(page, x, y, folio_fiscal_label);
 
   HPDF_Page_SetFontAndSize(page, font, font_size);
-  HPDF_Page_TextOut(page,
-            page_width - margin - HPDF_Page_TextWidth(page,
-			(const char *)cfdi->Complemento->TimbreFiscalDigital->UUID),
-	    page_height - 30, (const char *)cfdi->Complemento->TimbreFiscalDigital->UUID);
+  y -= line_width;
+  x = page_width - margin - HPDF_Page_TextWidth(page,
+		(const char *)cfdi->Complemento->TimbreFiscalDigital->UUID);
+  HPDF_Page_TextOut(page, x, y,
+		(const char *)cfdi->Complemento->TimbreFiscalDigital->UUID);
+  secc1_width = HPDF_Page_TextWidth(page,
+		   (const char *)cfdi->Complemento->TimbreFiscalDigital->UUID);
 
 
   /* Ahora la leyenda "No. de serie del CSD" */
   HPDF_Page_SetFontAndSize(page, font_bold, font_size_label);
-  HPDF_Page_TextOut(page,
-	    page_width - margin - HPDF_Page_TextWidth(page, no_serie_csd_label),
-	    page_height - 40, no_serie_csd_label);
+  y -= line_width;
+  x = page_width - margin - HPDF_Page_TextWidth(page, no_serie_csd_label);
+  HPDF_Page_TextOut(page, x, y, no_serie_csd_label);
 
   HPDF_Page_SetFontAndSize(page, font, font_size);
-  HPDF_Page_TextOut(page,
-            page_width - margin - HPDF_Page_TextWidth(page,(const char *)cfdi->noCertificado),
-	    page_height - 50, (const char *)cfdi->noCertificado);
+  y -= line_width;
+  x = page_width - margin - HPDF_Page_TextWidth(page,
+					(const char *)cfdi->noCertificado);
+  HPDF_Page_TextOut(page, x, y, (const char *)cfdi->noCertificado);
 
 
   /* Ahora la leyenda "Lugar, fecha y hora de emisión" */
   HPDF_Page_SetFontAndSize(page, font_bold, font_size_label);
-  HPDF_Page_TextOut(page,
-	    page_width - margin - HPDF_Page_TextWidth(page,fecha_emision_label),
-	    page_height - 60, fecha_emision_label);
+  y -= line_width;
+  x = page_width - margin - HPDF_Page_TextWidth(page,fecha_emision_label);
+  HPDF_Page_TextOut(page, x, y, fecha_emision_label);
 
   memset(buffer, 0, 256);
   snprintf(buffer, 256, "%s, %s", cfdi->LugarExpedicion, cfdi->fecha);
   HPDF_Page_SetFontAndSize(page, font, font_size);
-  HPDF_Page_TextOut(page,
-            page_width - margin - HPDF_Page_TextWidth(page, buffer),
-	    page_height - 70, buffer);
+  y -= line_width;
+  x = page_width - margin - HPDF_Page_TextWidth(page, buffer);
+  HPDF_Page_TextOut(page, x, y, buffer);
+
+  if ( HPDF_Page_TextWidth(page, buffer) > secc1_width ) {
+    secc1_width = HPDF_Page_TextWidth(page, buffer);
+  }
 
   /* Ahora, imprime la serie (interno) del CFDi. Este es un atributo opcional */
   if ( cfdi->serie != NULL ) {
 
     HPDF_Page_SetFontAndSize(page, font_bold, font_size_label);
-    HPDF_Page_TextOut(page,
-	    page_width - margin - HPDF_Page_TextWidth(page, serie_label),
-	    page_height - 80, serie_label);
+    y -= line_width;
+    x = page_width - margin - HPDF_Page_TextWidth(page, serie_label);
+    HPDF_Page_TextOut(page, x, y, serie_label);
 
     HPDF_Page_SetFontAndSize(page, font, font_size);
-    HPDF_Page_TextOut(page,
-            page_width - margin - HPDF_Page_TextWidth(page,(const char *)cfdi->serie),
-	    page_height - 90, (const char *)cfdi->serie);
+    y -= line_width;
+    x = page_width -margin -HPDF_Page_TextWidth(page,(const char *)cfdi->serie);
+    HPDF_Page_TextOut(page, x, y, (const char *)cfdi->serie);
 
   }
 
   /* Ahora, el folio (interno), otro atributo opcional */
   if ( cfdi->folio != NULL ) {
 
-    HPDF_REAL offset = 0;
-    if ( cfdi->serie != NULL ) {
-      offset = 20;
-    }
     HPDF_Page_SetFontAndSize(page, font_bold, font_size_label);
-    HPDF_Page_TextOut(page,
-	    page_width - margin - HPDF_Page_TextWidth(page, folio_label),
-	    page_height - 80 - offset, folio_label);
+    y -= line_width;
+    x = page_width - margin - HPDF_Page_TextWidth(page, folio_label);
+    HPDF_Page_TextOut(page, x, y, folio_label);
 
     HPDF_Page_SetFontAndSize(page, font, font_size);
-    HPDF_Page_TextOut(page,
-            page_width - margin - HPDF_Page_TextWidth(page,(const char *)cfdi->folio),
-	    page_height - 90 - offset, (const char *)cfdi->folio);
+    y -= line_width;
+    x = page_width -margin -HPDF_Page_TextWidth(page,(const char *)cfdi->folio);
+    HPDF_Page_TextOut(page, x, y, (const char *)cfdi->folio);
 
   }
 
+  /* Fija la coordenada y hasta la que se llegó en esta sección */
+  secc1_height = y;
+
   if ( verbose ) {
-    printf("%s:%d Info. Ahora se escribira la informacion del amisor y receptor.\n", __FILE__, __LINE__);
+    printf("%s:%d Info. Ahora se escribira la informacion del emisor y receptor.\n", __FILE__, __LINE__);
   }
 
   /* Ahora imprime los datos del emisor
-   * Para el emisor utilizaremos desde la base de "page_height - 30"
-   * hasta "page_height - 90"
+   *
+   * Para imprimir todos los datos del emisor y receptor utilizaremos el
+   * concepto de 'write_in_a_box', para hacer posible escribir campos
+   * con longitud casi ilimitada
    */
+
+  y = page_height - 20;
+  /* Banner */
+  /* El espacio para el banner va a ser de dos veces el valor de line_width
+   *
+   */
+  y -= 2*line_width;
+
+  /* Los datos del emisor */
+  HPDF_Page_SetFontAndSize(page, font_bold, 8);
+  y -= line_width;
+  x = margin;
+  HPDF_Page_TextOut(page, x, y, "Datos del emisor:");
+
+  y -= line_width;
+  HPDF_Page_SetFontAndSize(page, font_bold, font_size);
+
+  /* Nombre del emisor */
+  if ( cfdi->Emisor->nombre != NULL ) {
+    lines = write_in_a_box(page, x, y, page_width - x - secc1_width, (char *)cfdi->Emisor->nombre);
+  }
+
+  /* La clave del R.F.C. */
+  y -= line_width * lines;
+  lines = write_in_a_box(page, x, y, page_width - x - secc1_width, (char *)cfdi->Emisor->rfc);
+
+  /* Ahora los datos correspondientes a la domicilio fiscal */
+  if ( cfdi->Emisor->DomicilioFiscal != NULL ) {
+
+    if ( cfdi->Emisor->DomicilioFiscal->calle  != NULL ) {
+      y -= line_width * lines;
+      lines = write_in_a_box(page, x, y, page_width - x - secc1_width,
+		(char *)cfdi->Emisor->DomicilioFiscal->calle);
+    }
+
+  }
+
+
 
   /* Los datos del receptor */
   HPDF_Page_SetFontAndSize(page, font_bold, 8);

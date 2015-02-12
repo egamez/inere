@@ -31,7 +31,9 @@
 extern "C" {
 #endif
 
-extern int r12nimpresa(const char *input, const char *output, int verbose);
+extern int r12nimpresa(const char *input, const char *output,
+		       const char *ttf_font_path,const char *ttf_bold_font_path,
+		       int verbose);
 
 #ifdef __cplusplus
 }
