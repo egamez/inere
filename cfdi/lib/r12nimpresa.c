@@ -584,7 +584,9 @@ r12nimpresa(const char *input, const char *output, const char *ttf_font_path,
 
   const char *font_name;
   const char *font_bold_name;
-  char buffer[256];
+  char buffer[1024];
+
+  RegimenFiscal_list_t *regimen = NULL;
 
   setlocale(LC_ALL, "");
 
@@ -691,8 +693,8 @@ r12nimpresa(const char *input, const char *output, const char *ttf_font_path,
   x = page_width - margin - HPDF_Page_TextWidth(page,fecha_emision_label);
   HPDF_Page_TextOut(page, x, y, fecha_emision_label);
 
-  memset(buffer, 0, 256);
-  snprintf(buffer, 256, "%s, %s", cfdi->LugarExpedicion, cfdi->fecha);
+  memset(buffer, 0, 1024);
+  snprintf(buffer, 1024, "%s, %s", cfdi->LugarExpedicion, cfdi->fecha);
   HPDF_Page_SetFontAndSize(page, font, font_size);
   y -= line_width;
   x = page_width - margin - HPDF_Page_TextWidth(page, buffer);
@@ -771,29 +773,142 @@ r12nimpresa(const char *input, const char *output, const char *ttf_font_path,
   y -= line_width * lines;
   lines = write_in_a_box(page, x, y, page_width - x - secc1_width, (char *)cfdi->Emisor->rfc);
 
-  /* Ahora los datos correspondientes a la domicilio fiscal */
+  /*
+   * REGIMEN FISCAL
+   */
+  regimen = cfdi->Emisor->RegimenFiscal;
+  while ( regimen != NULL ) {
+    memset(buffer, 0, 1024);
+    snprintf(buffer, 1024, "%s", regimen->Regimen);
+    y -= line_width * lines;
+    lines = write_in_a_box(page, x, y, page_width - x - secc1_width, buffer);
+    regimen = regimen->next;
+  }
+
+  /*
+   * DOMICILIO FISCAL del EMISOR
+   */
   if ( cfdi->Emisor->DomicilioFiscal != NULL ) {
 
+    /* Para el domicilio fiscal, escribiremos primero:
+     *
+     *		- La calle, numero exterior, numero interior y colonia
+     */
+    memset(buffer, 0, 1024);
     if ( cfdi->Emisor->DomicilioFiscal->calle  != NULL ) {
-      y -= line_width * lines;
-      lines = write_in_a_box(page, x, y, page_width - x - secc1_width,
-		(char *)cfdi->Emisor->DomicilioFiscal->calle);
+      strcat(buffer, (char *)cfdi->Emisor->DomicilioFiscal->calle);
     }
 
+    if ( cfdi->Emisor->DomicilioFiscal->noExterior != NULL ) {
+      strcat(buffer, " ");
+      strcat(buffer, (char *)cfdi->Emisor->DomicilioFiscal->noExterior);
+    }
+
+    if ( cfdi->Emisor->DomicilioFiscal->noInterior != NULL ) {
+      strcat(buffer, " ");
+      strcat(buffer, (char *)cfdi->Emisor->DomicilioFiscal->noInterior);
+    }
+
+    if ( cfdi->Emisor->DomicilioFiscal->colonia != NULL ) {
+      strcat(buffer, ", COL. ");
+      strcat(buffer, (char *)cfdi->Emisor->DomicilioFiscal->colonia);
+    }
+
+    if ( cfdi->Emisor->DomicilioFiscal->codigoPostal != NULL ) {
+      strcat(buffer, ", C.P. ");
+      strcat(buffer, (char *)cfdi->Emisor->DomicilioFiscal->codigoPostal);
+    }
+
+    y -= line_width * lines;
+    lines = write_in_a_box(page, x, y, page_width - x - secc1_width, buffer);
+
+    memset(buffer, 0, 1024);
+    if ( cfdi->Emisor->DomicilioFiscal->municipio  != NULL ) {
+      strcat(buffer, (char *)cfdi->Emisor->DomicilioFiscal->municipio);
+    }
+
+    if ( cfdi->Emisor->DomicilioFiscal->estado != NULL ) {
+      strcat(buffer, ", ");
+      strcat(buffer, (char *)cfdi->Emisor->DomicilioFiscal->estado);
+    }
+
+    y -= line_width * lines;
+    lines = write_in_a_box(page, x, y, page_width - x - secc1_width, buffer);
+
   }
 
+  /*
+   * DOMICILIO DE EMISION del CFDI
+   */
+  if ( cfdi->Emisor->ExpedidoEn != NULL ) {
+  }
 
+  /* Actuliza la coordenada y, de todo lo que se ha escrito */
+  y -= line_width * lines;
 
-  /* Los datos del receptor */
+  /*
+   * Los datos del RECEPTOR
+   */
   HPDF_Page_SetFontAndSize(page, font_bold, 8);
-  HPDF_Page_TextOut(page, margin, page_height - 100, "Datos del receptor:");
+  HPDF_Page_TextOut(page, x, y, "Datos del receptor:");
   HPDF_Page_SetFontAndSize(page, font, 10);
   if ( cfdi->Receptor->nombre != NULL ) {
-    HPDF_Page_TextOut(page, margin, page_height - 110, (const char *)cfdi->Receptor->nombre);
+    y -= line_width;
+    HPDF_Page_TextOut(page, x, y, (const char *)cfdi->Receptor->nombre);
   }
-  HPDF_Page_TextOut(page, margin, page_height - 120, (const char *)cfdi->Receptor->rfc);
+
+  y -= line_width;
+  HPDF_Page_TextOut(page, x, y, (const char *)cfdi->Receptor->rfc);
+
   if ( cfdi->Receptor->Domicilio != NULL ) {
+
+    memset(buffer, 0, 1024);
+    if ( cfdi->Receptor->Domicilio->calle != NULL ) {
+      strcat(buffer, (const char *)cfdi->Receptor->Domicilio->calle);
+    }
+
+    if ( cfdi->Receptor->Domicilio->noExterior != NULL ) {
+      strcat(buffer, " ");
+      strcat(buffer, (const char *)cfdi->Receptor->Domicilio->noExterior);
+    }
+
+    if ( cfdi->Receptor->Domicilio->noInterior != NULL ) {
+      strcat(buffer, " ");
+      strcat(buffer, (const char *)cfdi->Receptor->Domicilio->noInterior);
+    }
+
+    if ( cfdi->Receptor->Domicilio->colonia != NULL ) {
+      strcat(buffer, ", COL. ");
+      strcat(buffer, (const char *)cfdi->Receptor->Domicilio->colonia);
+    }
+
+    if ( cfdi->Receptor->Domicilio->codigoPostal != NULL ) {
+      strcat(buffer, ", C.P. ");
+      strcat(buffer, (const char *)cfdi->Receptor->Domicilio->codigoPostal);
+    }
+    y -= line_width;
+    lines = write_in_a_box(page, x, y, page_width - x - secc1_width, buffer);
+
+    memset(buffer, 0, 1024);
+    if ( cfdi->Receptor->Domicilio->municipio != NULL ) {
+     strcat(buffer, (const char *)cfdi->Receptor->Domicilio->municipio);
+    }
+
+    if ( cfdi->Receptor->Domicilio->estado != NULL ) {
+     strcat(buffer, ", ");
+     strcat(buffer, (const char *)cfdi->Receptor->Domicilio->estado);
+    }
+
+    if ( cfdi->Receptor->Domicilio->pais != NULL ) {
+     strcat(buffer, ". ");
+     strcat(buffer, (const char *)cfdi->Receptor->Domicilio->pais);
+    }
+    y -= line_width * lines;
+    lines = write_in_a_box(page, x, y, page_width - x - secc1_width, buffer);
+
   }
+
+
   point = HPDF_Page_GetCurrentTextPos(page);
   printf("0. Despues de escribir los datos del cliente, x = %f, y = %f\n", point.x, point.y);
   HPDF_Page_EndText(page);
