@@ -254,7 +254,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   const float ndigits = 10;
   int tiene_noIdent = 0;
   char buffer[14];
-  HPDF_REAL top_y = 0;
+  HPDF_REAL top_y = point->y;
   HPDF_UINT len = 0;
   HPDF_Rect rect_cant;
   HPDF_Rect rect_ident;
@@ -274,8 +274,6 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   const HPDF_REAL page_height = HPDF_Page_GetHeight(page);
   Concepto_list_t *conceptos = NULL;
 
-  top_y = 150; /* ?? */ /* Este parametro deberia de ser suministrado como argumento de la funcion */
-
   if ( verbose ) {
     printf("%s:%d Dibujando la linea superior de los conceptos.\n", __FILE__, __LINE__); 
   }
@@ -284,12 +282,11 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
    * para los conceptos que el CFDi ampara, debemos cambiar a Path painting
    * mode
    */
-  printf("0'. sacatelas babuchas margin = %f, page_height = %f, top_y = %f, y = %f\n", margin, page_height, top_y, page_height - top_y);
   HPDF_Page_SetLineWidth(page, 1);
-  HPDF_Page_MoveTo(page, margin, page_height - top_y);
+  HPDF_Page_MoveTo(page, margin, top_y);
 
   /* Dibuja una linea */
-  HPDF_Page_LineTo(page, page_width - margin, page_height - top_y);
+  HPDF_Page_LineTo(page, page_width - margin, top_y);
 
   if ( verbose ) {
     printf("%s:%d Info. Ahora se escribira la informacion de los conceptos 2.\n", __FILE__, __LINE__);
@@ -313,7 +310,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   rect_cant.bottom = point->y - line_width;
   rect_cant.left   = margin;
   width_cant       = HPDF_Page_TextWidth(page, "8") * ndigits;
-  rect_cant.right  = margin + width_cant + 2;
+  rect_cant.right  = margin + width_cant + 2; /* 2 = espacio entre campos */
   HPDF_Page_TextRect(page,
 			rect_cant.left,
 			rect_cant.top,
@@ -341,9 +338,9 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
     /* Hay numeros de identificacion de al menos uno de los conceptos */
     rect_ident.top    = point->y;
     rect_ident.bottom = point->y - line_width;
-    rect_ident.left   = rect_cant.right;
+    rect_ident.left   = rect_cant.right + 2;
     width_ident       = HPDF_Page_TextWidth(page, "AAAAAAAAAAAAAAAAAAAA");
-    rect_ident.right  = rect_ident.left + width_ident + 2;
+    rect_ident.right  = rect_ident.left + width_ident;
     HPDF_Page_TextRect(page,
 			rect_ident.left,
 			rect_ident.top,
@@ -392,12 +389,12 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
    * Para este caso utilizaremos el espacio que quede de descontar 
    * el ancho para el importe y el total para cada concepto
    */
-  width_precio = HPDF_Page_TextWidth(page, "888888888888");
-  width_importe = HPDF_Page_TextWidth(page, "$ 8888888888");
+  width_precio = HPDF_Page_TextWidth(page, "8,888,888.8888");
+  width_importe = HPDF_Page_TextWidth(page, "$ 88,888,888.88");
   rect_desc.top    = point->y;
   rect_desc.bottom = point->y - line_width;
   rect_desc.left   = rect_unidad.right;
-  width_desc       = page_width - margin - width_importe - width_precio - rect_unidad.right;
+  width_desc       = page_width - margin - width_importe - width_precio - rect_unidad.right - 4; /* 4 espacio acumulado entre precio + importe */
   rect_desc.right  = rect_desc.left + width_desc + 2;
   HPDF_Page_TextRect(page,
 			rect_desc.left,
@@ -435,7 +432,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   rect_importe.top    = point->y;
   rect_importe.bottom = point->y - line_width;
   rect_importe.left   = rect_precio.right;
-  rect_importe.right  = rect_importe.left + width_importe + 2;
+  rect_importe.right  = rect_importe.left + width_importe;
   HPDF_Page_TextRect(page,
 			rect_importe.left,
 			rect_importe.top,
@@ -457,8 +454,8 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   printf("La linea inferior sera dibujada en: y = %f, x = %f\n", page_height - 150 - 15, page_width - margin);
 
   HPDF_Page_SetLineWidth(page, 1);
-  HPDF_Page_MoveTo(page, margin, page_height - top_y - 15);
-  HPDF_Page_LineTo(page, page_width - margin, page_height - top_y - 15);
+  HPDF_Page_MoveTo(page, margin, top_y - line_width);
+  HPDF_Page_LineTo(page, page_width - margin, top_y - line_width);
 
   *point = HPDF_Page_GetCurrentPos(page);
   printf("3. Current position: y = %f, x = %f\n", point->y, point->x);
@@ -548,13 +545,15 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
 /**
  * Comienzo de página 'page_height - 20'
  *
- * La pagina la dividiremos en 4 secciones,
+ * La pagina la dividiremos en 6 secciones,
  *
  *	- una sección para la informacion de identificación del comprobante
  *	  (folio fiscal, fecha, etc.) secc1
  *	- una sección para los datos del emisor y receptor del CFDI, secc2
- *	- una sección para los conceptos que ampara el CFDI, y finalmente, secc3
- *	- una sección para el sello y el qrcode, secc4
+ *	- una sección para los conceptos que ampara el CFDI, secc3
+ *	- una sección para los totales, secc4,
+ *	- una sección para la cantidad con letra, forma de pago, etc, secc5, y
+ *	- una sección para el sello y el qrcode, secc6
  *
  * El módelo a utilizar para escribir la información será de arriba hacía
  * abajo, comenzando primero por la seccion de identificación, y de ahí a la
@@ -906,30 +905,46 @@ r12nimpresa(const char *input, const char *output, const char *ttf_font_path,
     y -= line_width * lines;
     lines = write_in_a_box(page, x, y, page_width - x - secc1_width, buffer);
 
+    /* Actualiza el valor de la coordenada 'y' */
+    y -= line_width * lines;
   }
 
 
+  /* Lee la posicion en la se escribieron los datos de identificacion del
+   * receptor y emisor
+   */
   point = HPDF_Page_GetCurrentTextPos(page);
   printf("0. Despues de escribir los datos del cliente, x = %f, y = %f\n", point.x, point.y);
+
+  /* Cambia de modo */
   HPDF_Page_EndText(page);
+
+  /* Ahora debemos de seleccionar la posicion en la que comenzaran a escribirse
+   * los conceptos. Para esto, deberemos de elegir la sección más grande,
+   * si la sección 1, o la seccion 2
+   */
+  point.y = secc1_height <= y ? secc1_height : y;
+
 
   if ( verbose ) {
     printf("%s:%d Info. Ahora se escribira la informacion de los conceptos 1.\n", __FILE__, __LINE__);
   }
 
-  /* Ahora procederemos a escribir las conceptos
-   * top_x = page_width
-   * top_y = page_height - 150
-   * imprime_conceptos(page, margin, top_x, top_y);
-   */
-  /*imprime_conceptos(page, margin, 150, font, font_bold, cfdi, verbose);*/
+  /* Ahora procederemos a escribir las conceptos */
   point = imprime_conceptos(page, margin, &point, font, font_bold, cfdi, verbose);
   if ( verbose ) {
     printf("%s:%d Info. Conceptos terminados.\n", __FILE__, __LINE__);
   }
 
+
   /**
+   * SECCION 5
    * Ahora debemos de escribir los totales y el total con letra
+   *
+   * Procederemos de la misma manera que para las secciones 1 y 2,
+   * escribiremos primero la parte de los totales, a la derecha, y
+   * regresaremos a la cantidad con letra y demas parametros acerca del
+   * la forma de pago, moneda, etc.
    */
   HPDF_Page_BeginText(page);
 
