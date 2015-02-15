@@ -79,6 +79,13 @@ const char *cond_pago_label	 = "Condiciones de Pago:";
 
 const HPDF_REAL line_width	 = 10;
 
+const unsigned int decimales_importe      = 2;
+const unsigned int digitos_importe        = 7; /* 9,999,999 max */
+const unsigned int decimales_precio       = 4;
+const unsigned int digitos_precio         = 7; /* 9 999 999 max */
+const unsigned int decimales_cantidad     = 0;
+const unsigned int digitos_cantidad       = 7; /* 9999999 max */
+const unsigned int noIdentificacion_width = 20;
 
 /* Forward declarations */
 void error_handler(HPDF_STATUS error_no, HPDF_STATUS detail_no,void *user_data);
@@ -251,9 +258,11 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
 		  HPDF_Font font, HPDF_Font font_bold, Comprobante_t* cfdi,
 		  const int verbose)
 {
-  const float ndigits = 10;
   int tiene_noIdent = 0;
   char buffer[14];
+  char format_precio[16];
+  char format_importe[16];
+
   HPDF_REAL top_y = point->y;
   HPDF_UINT len = 0;
   HPDF_Rect rect_cant;
@@ -272,7 +281,9 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   HPDF_REAL bottom = 0;
   const HPDF_REAL page_width = HPDF_Page_GetWidth(page);
   const HPDF_REAL page_height = HPDF_Page_GetHeight(page);
+
   Concepto_list_t *conceptos = NULL;
+
 
   if ( verbose ) {
     printf("%s:%d Dibujando la linea superior de los conceptos.\n", __FILE__, __LINE__); 
@@ -309,7 +320,13 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   rect_cant.top    = point->y;
   rect_cant.bottom = point->y - line_width;
   rect_cant.left   = margin;
-  width_cant       = HPDF_Page_TextWidth(page, "8") * ndigits;
+  /* Para determinar al ancho del campo 'Cantidad' seleccionaremos el
+   * mayor entre la etiqueta 'Cantidad' y la cantidad de digitos
+   */
+  width_cant = (HPDF_Page_TextWidth(page, "8") * digitos_cantidad >
+		 HPDF_Page_TextWidth(page, "Cantidad") ?
+			HPDF_Page_TextWidth(page, "8") * digitos_cantidad :
+			HPDF_Page_TextWidth(page, "Cantidad"));
   rect_cant.right  = margin + width_cant + 2; /* 2 = espacio entre campos */
   HPDF_Page_TextRect(page,
 			rect_cant.left,
@@ -339,7 +356,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
     rect_ident.top    = point->y;
     rect_ident.bottom = point->y - line_width;
     rect_ident.left   = rect_cant.right + 2;
-    width_ident       = HPDF_Page_TextWidth(page, "AAAAAAAAAAAAAAAAAAAA");
+    width_ident       = HPDF_Page_TextWidth(page, "A") * noIdentificacion_width;
     rect_ident.right  = rect_ident.left + width_ident;
     HPDF_Page_TextRect(page,
 			rect_ident.left,
@@ -394,7 +411,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   rect_desc.top    = point->y;
   rect_desc.bottom = point->y - line_width;
   rect_desc.left   = rect_unidad.right;
-  width_desc       = page_width - margin - width_importe - width_precio - rect_unidad.right - 4; /* 4 espacio acumulado entre precio + importe */
+  width_desc       = page_width - margin - width_importe - width_precio - rect_unidad.right - 4; /* 4 espacio acumulado entre descripcion + precio */
   rect_desc.right  = rect_desc.left + width_desc + 2;
   HPDF_Page_TextRect(page,
 			rect_desc.left,
@@ -514,6 +531,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
 
     /**
      * El importe
+     *		%#7.4n
      */
     memset(buffer, 0, 14);
     strfmon(buffer, 14, "%n", atof((const char *)conceptos->importe));
