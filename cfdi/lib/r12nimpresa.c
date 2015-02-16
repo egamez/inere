@@ -867,10 +867,10 @@ r12nimpresa(const char *input, const char *output, const char *banner,
   /* Nombre del emisor */
   if ( cfdi->Emisor->nombre != NULL ) {
     lines = write_in_a_box(page, x, y, page_width - x - secc1_width, (char *)cfdi->Emisor->nombre);
+    y -= line_width * lines;
   }
 
   /* La clave del R.F.C. */
-  y -= line_width * lines;
   lines = write_in_a_box(page, x, y, page_width - x - secc1_width, (char *)cfdi->Emisor->rfc);
 
   /*
@@ -965,6 +965,7 @@ r12nimpresa(const char *input, const char *output, const char *banner,
 
   y -= line_width;
   HPDF_Page_TextOut(page, x, y, (const char *)cfdi->Receptor->rfc);
+  y -= line_width;
 
   if ( cfdi->Receptor->Domicilio != NULL ) {
 
@@ -992,7 +993,6 @@ r12nimpresa(const char *input, const char *output, const char *banner,
       strcat(buffer, ", C.P. ");
       strcat(buffer, (const char *)cfdi->Receptor->Domicilio->codigoPostal);
     }
-    y -= line_width;
     lines = write_in_a_box(page, x, y, page_width - x - secc1_width, buffer);
 
     memset(buffer, 0, 1024);
@@ -1036,7 +1036,9 @@ r12nimpresa(const char *input, const char *output, const char *banner,
     printf("%s:%d Info. Ahora se escribira la informacion de los conceptos 1.\n", __FILE__, __LINE__);
   }
 
-  /* Ahora procederemos a escribir las conceptos */
+  /* 
+   * CONCEPTOS
+   */
   point = imprime_conceptos(page, margin, &point, font, font_bold, cfdi, verbose);
   if ( verbose ) {
     printf("%s:%d Info. Conceptos terminados.\n", __FILE__, __LINE__);
