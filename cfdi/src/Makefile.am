@@ -6,15 +6,14 @@ endif
 
 sello_SOURCES = sello.c
 sello_LDFLAGS = $(top_srcdir)/lib/libinerecfdi.la \
+		$(top_srcdir)/../lib/libinere.la \
 		-lz -ldl -lm -lrt
 
 
 ri_SOURCES = ri.c
-ri_LDFLAGS = $(top_srcdir)/lib/libinerecfdi.la
-if RI_ENABLED
-  ri_LDFLAGS += $(top_srcdir)/../lib/libinere.la
-endif
-ri_LDFLAGS += -lz -ldl -lm -lrt
+ri_LDFLAGS = $(top_srcdir)/lib/libinerecfdi.la \
+		$(top_srcdir)/../lib/libinere.la \
+		-lz -ldl -lm -lrt
 
 
 
