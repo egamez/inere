@@ -181,20 +181,21 @@ termina_cfdi(Comprobante_t *cfdi)
   RegimenFiscal_list_t *regimen1 = NULL;
   RegimenFiscal_list_t *regimen2 = NULL;
 
-  /* Los datos del timbre */
-  if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
-    xmlFree(cfdi->Complemento->TimbreFiscalDigital->selloSAT);
-    xmlFree(cfdi->Complemento->TimbreFiscalDigital->selloCFD);
-    xmlFree(cfdi->Complemento->TimbreFiscalDigital->FechaTimbrado);
-    xmlFree(cfdi->Complemento->TimbreFiscalDigital->noCertificadoSAT);
-    xmlFree(cfdi->Complemento->TimbreFiscalDigital->UUID);
-    xmlFree(cfdi->Complemento->TimbreFiscalDigital->version);
-    free(cfdi->Complemento->TimbreFiscalDigital);
-    cfdi->Complemento->TimbreFiscalDigital = NULL;
-  }
-
   /* El complemento */
   if ( cfdi->Complemento != NULL ) {
+
+    /* Los datos del timbre */
+    if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
+      xmlFree(cfdi->Complemento->TimbreFiscalDigital->selloSAT);
+      xmlFree(cfdi->Complemento->TimbreFiscalDigital->selloCFD);
+      xmlFree(cfdi->Complemento->TimbreFiscalDigital->FechaTimbrado);
+      xmlFree(cfdi->Complemento->TimbreFiscalDigital->noCertificadoSAT);
+      xmlFree(cfdi->Complemento->TimbreFiscalDigital->UUID);
+      xmlFree(cfdi->Complemento->TimbreFiscalDigital->version);
+      free(cfdi->Complemento->TimbreFiscalDigital);
+      cfdi->Complemento->TimbreFiscalDigital = NULL;
+    }
+
     free(cfdi->Complemento);
     cfdi->Complemento = NULL;
   }
@@ -459,6 +460,9 @@ lee_complementos(const xmlNodePtr node, Comprobante_t *cfdi, const int verbose)
 
   complemento = (Complemento_t *)malloc(sizeof(Complemento_t));
   cfdi->Complemento = complemento;
+
+  /* Reset all the Complemento members */
+  cfdi->Complemento->TimbreFiscalDigital = NULL;
 
   /* Ahora has un loop para identificar el complemento correspondiente
    * al Timbre Fiscal Digital */
