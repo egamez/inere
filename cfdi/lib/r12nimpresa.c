@@ -37,6 +37,10 @@
 #include <inere/cfdi/lee_cfdi.h>
 #endif
 
+#ifndef INERE_CANTIDADCL_ALLOC_H_
+#include "inere/cantidadcl_alloc.h"
+#endif
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,8 +56,8 @@ jmp_buf env;
 const unsigned int font_size_label = 8;
 const unsigned int font_size       = 8;
 
-const char *info_author          = "EDISSON Equipo Electrico";
-const char *info_creator         =  "EDISSON - TPV - Version: 0.4";
+const char *info_author          = "INERE - Soporte para CFDI";
+const char *info_creator         = PACKAGE_STRING;
 
 const char *folio_fiscal_label   = "Folio Fiscal:";
 const char *no_serie_csd_label   = "No. de Serie del CSD:";
@@ -81,8 +85,12 @@ const HPDF_REAL line_width	 = 10;
 
 const unsigned int decimales_importe      = 2;
 const unsigned int digitos_importe        = 7; /* 9,999,999 max */
+const char *format_importe		  = "%13n";
 const unsigned int decimales_precio       = 4;
 const unsigned int digitos_precio         = 7; /* 9 999 999 max */
+const char *format_precio		  = "%!14.4n";
+const char *importe_signature		  = "$8,888,888.88";
+
 const unsigned int decimales_cantidad     = 0;
 const unsigned int digitos_cantidad       = 7; /* 9999999 max */
 const unsigned int noIdentificacion_width = 20;
@@ -95,8 +103,8 @@ HPDF_Point imprime_conceptos(HPDF_Page page, const HPDF_REAL margin,
 			      HPDF_Font font_bold, Comprobante_t* cfdi,
 			      const int verbose);
 HPDF_UINT write_in_a_box(HPDF_Page page, HPDF_REAL x, HPDF_REAL y,
-			 HPDF_REAL width, char *data);
-
+			 HPDF_REAL width, const char *data);
+char *cadena_original_de_certificacion_alloc(const TimbreFiscalDigital_t *timbre);
 
 
 /**
@@ -108,6 +116,37 @@ error_handler(HPDF_STATUS error_no, HPDF_STATUS detail_no, void *user_data)
   printf("function call: %s\n", (char *)user_data);
   fprintf(stderr, "ERROR: error_no=0x%04X, detail_no=%u\n", (HPDF_UINT)error_no, (HPDF_UINT)detail_no);
   longjmp(env, 1);
+}
+
+/**
+ * Función auxiliar para crear la cadena original del complemento de
+ * certificacion digital del SAT
+ *
+ *	||version|UUID|Fecha de timbrado|selloCFD|noCertificadoSAT||
+ *
+ */
+char *
+cadena_original_de_certificacion_alloc(const TimbreFiscalDigital_t *timbre)
+{
+  char *buffer = NULL;
+  const size_t len = 2 + strlen((char *)timbre->version) + 1 +
+			 strlen((char *)timbre->UUID) + 1 +
+			 strlen((char *)timbre->FechaTimbrado) + 1 +
+			 strlen((char *)timbre->selloCFD) + 1 +
+			 strlen((char *)timbre->noCertificadoSAT) + 1 + 2 + 1;
+
+  buffer = (char *)malloc(len);
+  if ( buffer != NULL ) {
+    memset(buffer, 0, len);
+    snprintf(buffer, len, "||%s|%s|%s|%s|%s||",
+		timbre->version,
+		timbre->UUID,
+		timbre->FechaTimbrado,
+		timbre->selloCFD,
+		timbre->noCertificadoSAT);
+  }
+
+  return buffer;
 }
 
 
@@ -146,10 +185,11 @@ fija_opciones_del_documento(HPDF_Doc pdf, Comprobante_t* cfdi)
 
   /* Algunas palabras claves */
   memset(buffer, 0, 256);
-  snprintf(buffer, 56, "EDISSON, %s, %s, %s, CFDi",
-				  cfdi->Emisor->rfc,
-				  cfdi->Receptor->rfc,
-				  cfdi->Complemento->TimbreFiscalDigital->UUID);
+  snprintf(buffer, 56, "%s, %s, %s, %s, CFDi",
+				PACKAGE_NAME,
+				cfdi->Emisor->rfc,
+				cfdi->Receptor->rfc,
+				cfdi->Complemento->TimbreFiscalDigital->UUID);
   res = HPDF_SetInfoAttr(pdf, HPDF_INFO_KEYWORDS, buffer);
 
   /* Fija opciones para que esta representacion impresa no pueda
@@ -207,7 +247,7 @@ fija_opciones_del_documento(HPDF_Doc pdf, Comprobante_t* cfdi)
  */
 HPDF_UINT
 write_in_a_box(HPDF_Page page, HPDF_REAL x, HPDF_REAL y, HPDF_REAL width,
-		char *data)
+		const char *data)
 {
   HPDF_UINT text_len = 0;
   HPDF_REAL real_width = 0;
@@ -259,9 +299,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
 		  const int verbose)
 {
   int tiene_noIdent = 0;
-  char buffer[14];
-  char format_precio[16];
-  char format_importe[16];
+  char buffer[15];
 
   HPDF_REAL top_y = point->y;
   HPDF_UINT len = 0;
@@ -405,9 +443,12 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   /* La descripcion.
    * Para este caso utilizaremos el espacio que quede de descontar 
    * el ancho para el importe y el total para cada concepto
+   *
+   * Para calcular el ancho del campo que corresponde al precio unitario y al
+   * importe deberemos de...
    */
   width_precio = HPDF_Page_TextWidth(page, "8,888,888.8888");
-  width_importe = HPDF_Page_TextWidth(page, "$ 88,888,888.88");
+  width_importe = HPDF_Page_TextWidth(page, importe_signature);
   rect_desc.top    = point->y;
   rect_desc.bottom = point->y - line_width;
   rect_desc.left   = rect_unidad.right;
@@ -524,17 +565,17 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
     /**
      * El precio unitario
      */
-    memset(buffer, 0, 14);
-    strfmon(buffer, 14, "%!.4n", atof((const char *)conceptos->valorUnitario));
+    memset(buffer, 0, 15);
+    strfmon(buffer, 15, format_precio,
+		atof((const char *)conceptos->valorUnitario));
     HPDF_Page_TextRect(page, rect_precio.left, top, rect_precio.right, bottom,
 		       buffer, HPDF_TALIGN_RIGHT, NULL);
 
     /**
      * El importe
-     *		%#7.4n
      */
-    memset(buffer, 0, 14);
-    strfmon(buffer, 14, "%n", atof((const char *)conceptos->importe));
+    memset(buffer, 0, 15);
+    strfmon(buffer, 15, format_importe, atof((const char *)conceptos->importe));
     HPDF_Page_TextRect(page, rect_importe.left, top, rect_importe.right, bottom,
 		       buffer, HPDF_TALIGN_RIGHT, NULL);
 
@@ -579,10 +620,18 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
  *
  */
 int
-r12nimpresa(const char *input, const char *output, const char *ttf_font_path,
+r12nimpresa(const char *input, const char *output, const char *banner,
+	    const char *extra_info,
+	    const char *ttf_font_path,
 	    const char *ttf_bold_font_path, int verbose)
 {
-  Comprobante_t *cfdi = NULL;
+  const char *font_name;
+  const char *font_bold_name;
+  char buffer[1024];
+  char totales[15];
+  char *cantidadcl = NULL;
+  char *cadena_certificacion = NULL;
+  cfdi_qrcode_t *qrcode = NULL;
 
   HPDF_Doc pdf;
   HPDF_Page page;
@@ -595,15 +644,21 @@ r12nimpresa(const char *input, const char *output, const char *ttf_font_path,
   HPDF_INT lines = 1;
   HPDF_REAL secc1_width = 0;
   HPDF_REAL secc1_height = 0;
+  HPDF_REAL secc5_width = 0;
+  HPDF_REAL secc5_height = 0;
+  HPDF_Image qrcode_image;
+  HPDF_REAL qrcode_image_size = 114 * .75; /* The image already measures 114dpi
+					    * which is roughly 4cm, and we
+					    * need one of 3cm
+					    */
 
   HPDF_REAL y = 0; /* Para la coordenada y en que se estará escribiendo */
   HPDF_REAL x = 0; /* Para la coordenada x en que se estará escribiendo */
 
-  const char *font_name;
-  const char *font_bold_name;
-  char buffer[1024];
-
+  Comprobante_t *cfdi = NULL;
   RegimenFiscal_list_t *regimen = NULL;
+  Retencion_list_t *retencion = NULL;
+  Traslado_list_t *traslado = NULL;
 
   setlocale(LC_ALL, "");
 
@@ -766,20 +821,24 @@ r12nimpresa(const char *input, const char *output, const char *ttf_font_path,
    */
 
   y = page_height - 20;
+  x = margin;
   /* Banner */
   /* El espacio para el banner va a ser de dos veces el valor de line_width
    *
    */
-  y -= 2*line_width;
+  if ( banner != NULL ) {
+    y -= 2*line_width;
+    HPDF_Page_SetFontAndSize(page, font_bold, 20);
+    HPDF_Page_TextOut(page, x, y, banner);
+  }
 
   /* Los datos del emisor */
   HPDF_Page_SetFontAndSize(page, font_bold, 8);
   y -= line_width;
-  x = margin;
   HPDF_Page_TextOut(page, x, y, "Datos del emisor:");
 
   y -= line_width;
-  HPDF_Page_SetFontAndSize(page, font_bold, font_size);
+  HPDF_Page_SetFontAndSize(page, font_bold, 10);
 
   /* Nombre del emisor */
   if ( cfdi->Emisor->nombre != NULL ) {
@@ -858,6 +917,12 @@ r12nimpresa(const char *input, const char *output, const char *ttf_font_path,
    * DOMICILIO DE EMISION del CFDI
    */
   if ( cfdi->Emisor->ExpedidoEn != NULL ) {
+  }
+
+  /* Extra info del emisor */
+  if ( extra_info != NULL ) {
+    y -= line_width * lines;
+    lines = write_in_a_box(page, x, y, page_width - x - secc1_width,extra_info);
   }
 
   /* Actuliza la coordenada y, de todo lo que se ha escrito */
@@ -970,17 +1035,291 @@ r12nimpresa(const char *input, const char *output, const char *ttf_font_path,
     printf("%s:%d Info. Posicion antes de imprimir los totales, x = %f, y = %f.\n", __FILE__, __LINE__, point.x, point.y);
   }
 
-  /**
-   * Comenzaremos primero con el total con letra y la forma de pago
+  /*
+   * El formato en el que se escribiran los totales sera:
+   *
+   *	subtotal
+   *	descuento
+   *	impuestos
+   *	total
+   *
+   * De todos los mencionados, el 'descuento' es un parametro opcional.
+   * y los impuestos son lo unicos variables, habiendo dos grupos:
+   *
+   *		Retencion
+   *				ISR
+   *				IVA
+   * y
+   *		Traslado
+   *				IVA
+   *				IEPS
+   *
+   * de modo que imprimiremos la leyenda acerca del tipo de impuesto,
+   * Retencion o Traslado entre parentesis, despues el impuesto, y nuevamente
+   * entre parentesis la tasa del impuesto, en caso de que exista
+   *
+   * Debemos de calcular el tamaño de la caja, y la palabra más grande es:
+   *
+   *		(Retencion) IEPS (%16.00): $9,999,999.99
+   *		(Traslado) IEPS (%16.00): $9,999,999.99
    */
   HPDF_Page_SetFontAndSize(page, font_bold, font_size_label);
-  HPDF_Page_TextRect(page, margin, point.y, margin + HPDF_Page_TextWidth(page, "Total con letra:") + 10, point.y - 10, "Total con letra:", HPDF_TALIGN_LEFT, NULL);
-  HPDF_Page_SetFontAndSize(page, font, font_size);
+  secc5_width = HPDF_Page_TextWidth(page, "  (Retencion) IEPS (%16.00): $9,999,999.99");
+  y = point.y;
+  x = page_width - margin - secc5_width;
+  memset(totales, 0, 15);
+  strfmon(totales, 15, format_importe, atof((char *)cfdi->subTotal));
+  memset(buffer, 0, 1024);
+  snprintf(buffer, 1024, "Subtotal: %s", totales);
+  HPDF_Page_TextRect(page, page_width - margin -secc5_width,
+			   y,
+			   page_width - margin,
+			   y - line_width,
+			   buffer,
+			   HPDF_TALIGN_RIGHT,
+			   NULL);
+  y -= line_width;
 
+  if ( cfdi->descuento != NULL ) {
+    memset(totales, 0, 15);
+    strfmon(totales, 15, format_importe, atof((char *)cfdi->descuento));
+    memset(buffer, 0, 1024);
+    snprintf(buffer, 1024, "Descuento: %s", totales);
+    HPDF_Page_TextRect(page, page_width - margin -secc5_width,
+			     y,
+			     page_width - margin,
+			     y - line_width,
+			     buffer,
+			     HPDF_TALIGN_RIGHT,
+			     NULL);
+    y -= line_width;
+  }
+
+  /* Ahora los impuestos */
+  if ( cfdi->Impuestos->Retenciones != NULL ) {
+    retencion = cfdi->Impuestos->Retenciones;
+    while ( retencion != NULL ) {
+      memset(totales, 0, 15);
+      strfmon(totales, 15, format_importe, atof((char *)retencion->importe));
+      memset(buffer, 0, 1024);
+      snprintf(buffer, 1024, "(Retencion) %s: %s", retencion->impuesto, totales);
+      HPDF_Page_TextRect(page, page_width - margin -secc5_width,
+			       y,
+			       page_width - margin,
+			       y - line_width,
+			       buffer,
+			       HPDF_TALIGN_RIGHT,
+			       NULL);
+      y -= line_width;
+      retencion = retencion->next;
+    }
+  }
+
+  if ( cfdi->Impuestos->Traslados != NULL ) {
+    traslado = cfdi->Impuestos->Traslados;
+    while ( traslado != NULL ) {
+      memset(totales, 0, 15);
+      strfmon(totales, 15, format_importe, atof((char *)traslado->importe));
+      memset(buffer, 0, 1024);
+      snprintf(buffer, 1024, "(Traslado) %s (%s%%): %s", traslado->impuesto, traslado->tasa, totales);
+      HPDF_Page_TextRect(page, page_width - margin -secc5_width,
+			       y,
+			       page_width - margin,
+			       y - line_width,
+			       buffer,
+			       HPDF_TALIGN_RIGHT,
+			       NULL);
+      y -= line_width;
+      traslado = traslado->next;
+    }
+  }
+
+  /* El TOTAL */
+  memset(totales, 0, 15);
+  strfmon(totales, 15, format_importe, atof((char *)cfdi->total));
+  memset(buffer, 0, 1024);
+  snprintf(buffer, 1024, "Total: %s", totales);
+  HPDF_Page_TextRect(page, page_width - margin -secc5_width,
+			   y,
+			   page_width - margin,
+			   y - line_width,
+			   buffer,
+			   HPDF_TALIGN_RIGHT,
+			   NULL);
+  secc5_height = y;
+
+
+  /* Ahora deberemos de escribir el total con letra y los demas parametros
+   * acerca del pago.
+   */
+  x = margin;
+  y = point.y - line_width;
+
+
+  /**
+   * el total con letra y la forma de pago
+   */
+  HPDF_Page_SetFontAndSize(page, font_bold, 8);
+  HPDF_Page_TextOut(page, x, y, "Total con letra:");
+  y -= line_width;
+  cantidadcl = cantidadcl_alloc((char *)cfdi->total, verbose);
+  HPDF_Page_SetFontAndSize(page, font, font_size);
+  lines = write_in_a_box(page, x, y, page_width - x - secc5_width, cantidadcl);
+  free(cantidadcl);
+
+  /* Forma de pago, requerido  */
+  y -= line_width * lines;
+  HPDF_Page_SetFontAndSize(page, font_bold, 8);
+  HPDF_Page_TextOut(page, x, y, "Forma de pago:");
+  y -= line_width;
+  HPDF_Page_SetFontAndSize(page, font, font_size);
+  lines = write_in_a_box(page, x, y, page_width - x - secc5_width, (char *)cfdi->formaDePago);
+
+  /* Numero de cuenta de Pago, atributo opcional pero util para la represent */
+  if ( cfdi->NumCtaPago != NULL ) {
+    y -= line_width * lines;
+    HPDF_Page_SetFontAndSize(page, font_bold, 8);
+    HPDF_Page_TextOut(page, x, y, "Número de cuenta de pago:");
+    y -= line_width;
+    HPDF_Page_SetFontAndSize(page, font, font_size);
+    lines = write_in_a_box(page, x, y, page_width - x - secc5_width, (char *)cfdi->NumCtaPago);
+  }
+
+  /* Motivo del Descuento */
+  if ( cfdi->motivoDescuento != NULL ) {
+    y -= line_width * lines;
+    HPDF_Page_SetFontAndSize(page, font_bold, 8);
+    HPDF_Page_TextOut(page, x, y, "Motivo del Descuento:");
+    y -= line_width;
+    HPDF_Page_SetFontAndSize(page, font, font_size);
+    lines = write_in_a_box(page, x, y, page_width - x - secc5_width, (char *)cfdi->motivoDescuento);
+  }
+
+  /* Moneda */
+  if ( cfdi->Moneda != NULL ) {
+    y -= line_width * lines;
+    HPDF_Page_SetFontAndSize(page, font_bold, 8);
+    HPDF_Page_TextOut(page, x, y, "Moneda:");
+    y -= line_width;
+    HPDF_Page_SetFontAndSize(page, font, font_size);
+    lines = write_in_a_box(page, x, y, page_width - x - secc5_width, (char *)cfdi->Moneda);
+  }
+
+  /* Tipo de cambio */
+  if ( cfdi->TipoCambio != NULL ) {
+    y -= line_width * lines;
+    HPDF_Page_SetFontAndSize(page, font_bold, 8);
+    HPDF_Page_TextOut(page, x, y, "Tipo de cambio:");
+    y -= line_width;
+    HPDF_Page_SetFontAndSize(page, font, font_size);
+    lines = write_in_a_box(page, x, y, page_width - x - secc5_width, (char *)cfdi->TipoCambio);
+  }
+
+  /* Metodo de Pago */
+  y -= line_width * lines;
+  HPDF_Page_SetFontAndSize(page, font_bold, 8);
+  HPDF_Page_TextOut(page, x, y, "Metodo de pago:");
+  y -= line_width;
+  HPDF_Page_SetFontAndSize(page, font, font_size);
+  lines = write_in_a_box(page, x, y, page_width - x - secc5_width, (char *)cfdi->metodoDePago);
+
+  /* Condiciones de Pago */
+  if ( cfdi->condicionesDePago != NULL ) {
+    y -= line_width * lines;
+    HPDF_Page_SetFontAndSize(page, font_bold, 8);
+    HPDF_Page_TextOut(page, x, y, "Condiciones de Pago:");
+    y -= line_width;
+    HPDF_Page_SetFontAndSize(page, font, font_size);
+    lines = write_in_a_box(page, x, y, page_width - x - secc5_width, (char *)cfdi->condicionesDePago);
+  }
+  y -= line_width * lines;
 
 
   HPDF_Page_EndText(page);
 
+
+  /* Ahora debemos de escribir el qr code, y la informacion del timbrado
+   * y para esto debemos de calcular la altura a la que comenzaran a escribirse
+   * esta informacion
+   */
+  y = (y < secc5_height ? y : secc5_height);
+
+  if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
+    qrcode = crea_cfdi_qrcode_alloc((char *)cfdi->Emisor->rfc,
+				    (char *)cfdi->Receptor->rfc,
+				    (char *)cfdi->total,
+				    (char *)cfdi->Complemento->TimbreFiscalDigital->UUID);
+
+    qrcode_image = HPDF_LoadPngImageFromMem(pdf,
+					(const HPDF_BYTE *)qrcode->buffer,
+					(HPDF_UINT)qrcode->size);
+
+    HPDF_Page_DrawImage(page, qrcode_image, x, y - qrcode_image_size,
+			qrcode_image_size, qrcode_image_size);
+
+    if ( qrcode != NULL ) {
+      free(qrcode);
+    }
+
+
+    /* Ahora escribe los parametros del timbrado */
+    x = qrcode_image_size + margin;
+    /*y -= line_width;*/
+    HPDF_Page_BeginText(page);
+
+    /* Sello digital del CFDI */
+    HPDF_Page_SetFontAndSize(page, font_bold, 8);
+    HPDF_Page_TextOut(page, x, y, "Sello digital del CFDI:");
+    y -= line_width;
+    HPDF_Page_SetFontAndSize(page, font, font_size);
+    lines = write_in_a_box(page, x, y, page_width - x - margin, (char *)cfdi->Complemento->TimbreFiscalDigital->selloCFD);
+
+    /* Sello del SAT */
+    y -= line_width * lines;
+    HPDF_Page_SetFontAndSize(page, font_bold, 8);
+    HPDF_Page_TextOut(page, x, y, "Sello del SAT:");
+    y -= line_width;
+    HPDF_Page_SetFontAndSize(page, font, font_size);
+    lines = write_in_a_box(page, x, y, page_width - x - margin, (char *)cfdi->Complemento->TimbreFiscalDigital->selloSAT);
+
+    /* Cadena Original del complemento de certificacion digital del SAT */
+    y -= line_width * lines;
+    HPDF_Page_SetFontAndSize(page, font_bold, 8);
+    HPDF_Page_TextOut(page, x, y, "Cadena Original del complemento de certificación digital del SAT:");
+    y -= line_width;
+    HPDF_Page_SetFontAndSize(page, font, font_size);
+    cadena_certificacion = cadena_original_de_certificacion_alloc(cfdi->Complemento->TimbreFiscalDigital);
+    lines = write_in_a_box(page, x, y, page_width - x - margin, cadena_certificacion);
+    free(cadena_certificacion);
+
+    /* No. de Serie del Certificado del SAT */
+    y -= line_width * lines;
+    HPDF_Page_SetFontAndSize(page, font_bold, 8);
+    HPDF_Page_TextOut(page, x, y, "No. de Serie del Certificado del SAT:");
+    y -= line_width;
+    HPDF_Page_SetFontAndSize(page, font, font_size);
+    lines = write_in_a_box(page, x, y, page_width - x - margin, (char *)cfdi->Complemento->TimbreFiscalDigital->noCertificadoSAT);
+
+    /* Fecha y hora de certificacion */
+    y -= line_width * lines;
+    HPDF_Page_SetFontAndSize(page, font_bold, 8);
+    HPDF_Page_TextOut(page, x, y, "Fecha y hora de certificación:");
+    y -= line_width;
+    HPDF_Page_SetFontAndSize(page, font, font_size);
+    lines = write_in_a_box(page, x, y, page_width - x - margin, (char *)cfdi->Complemento->TimbreFiscalDigital->FechaTimbrado);
+
+  }
+
+  /* Ahora imprime la leyenda
+   * Este documento es una representación impresa de un CFDI
+   */
+  y -= line_width * lines;
+  HPDF_Page_SetFontAndSize(page, font_bold, 8);
+  HPDF_Page_TextRect(page, margin, y + line_width, page_width - margin, y,
+	"Este documento es una representación impresa de un CFDI",
+	HPDF_TALIGN_CENTER, NULL);
+
+  HPDF_Page_EndText(page);
 
   /* Libera la memoria consumida */
   termina_cfdi(cfdi);

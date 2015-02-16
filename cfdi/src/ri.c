@@ -26,7 +26,9 @@ main(int argc, char *argv[])
     return 1;
   }
 
-  res = r12nimpresa(argv[1], argv[2], NULL, NULL, verbose);
+  res = r12nimpresa(argv[1], argv[2], "Nombre del establecimiento",
+		    "Teléfonos: (xxx) xxx xxxx. email: ventas@example.org",
+		    NULL, NULL, verbose);
 
   return res;
 }
