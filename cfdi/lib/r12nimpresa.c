@@ -318,7 +318,6 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   HPDF_REAL top = 0;
   HPDF_REAL bottom = 0;
   const HPDF_REAL page_width = HPDF_Page_GetWidth(page);
-  const HPDF_REAL page_height = HPDF_Page_GetHeight(page);
 
   Concepto_list_t *conceptos = NULL;
 
@@ -342,7 +341,6 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   }
 
   *point = HPDF_Page_GetCurrentPos(page);
-  printf("1. Current position: y = %f, x = %f\n", point->y, point->x);
 
   /* Print the current path */
   HPDF_Page_Stroke(page);
@@ -507,16 +505,11 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   HPDF_Page_EndText(page);
 
   /* Draw another line */
-  *point = HPDF_Page_GetCurrentPos(page);
-  printf("2. Current position: y = %f, x = %f\n", point->y, point->x);
-  printf("La linea inferior sera dibujada en: y = %f, x = %f\n", page_height - 150 - 15, page_width - margin);
-
   HPDF_Page_SetLineWidth(page, 1);
   HPDF_Page_MoveTo(page, margin, top_y - line_width);
   HPDF_Page_LineTo(page, page_width - margin, top_y - line_width);
 
   *point = HPDF_Page_GetCurrentPos(page);
-  printf("3. Current position: y = %f, x = %f\n", point->y, point->x);
 
   /* Print the current path */
   HPDF_Page_Stroke(page);
@@ -997,7 +990,6 @@ r12nimpresa(const char *input, const char *output, const char *banner,
    * receptor y emisor
    */
   point = HPDF_Page_GetCurrentTextPos(page);
-  printf("0. Despues de escribir los datos del cliente, x = %f, y = %f\n", point.x, point.y);
 
   /* Cambia de modo */
   HPDF_Page_EndText(page);

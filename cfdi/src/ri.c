@@ -12,7 +12,7 @@ int
 main(int argc, char *argv[])
 {
   int res = 0;
-  int verbose = 1;
+  int verbose = 0;
 
   if ( argc == 2 ) {
     /* En este caso, solo fue dado el CFDI y el archivo para la
