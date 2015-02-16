@@ -10,8 +10,12 @@ sello_LDFLAGS = $(top_srcdir)/lib/libinerecfdi.la \
 
 
 ri_SOURCES = ri.c
-ri_LDFLAGS = $(top_srcdir)/lib/libinerecfdi.la \
-		-lz -ldl -lm -lrt
+ri_LDFLAGS = $(top_srcdir)/lib/libinerecfdi.la
+if RI_ENABLED
+  ri_LDFLAGS += $(top_srcdir)/../lib/libinere.la
+endif
+ri_LDFLAGS += -lz -ldl -lm -lrt
+
 
 
 INCLUDES = -I$(top_srcdir)/include
