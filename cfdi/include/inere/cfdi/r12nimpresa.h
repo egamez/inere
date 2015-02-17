@@ -35,6 +35,8 @@ extern int r12nimpresa(const char *input, const char *output,
 		       const char *banner, const char *extra_info,
 		       const char *ttf_font_path,
 		       const char *ttf_bold_font_path,
+		       const unsigned int font_size,
+		       const unsigned int font_label_size,
 		       const int sucursal,
 		       const int verbose);
 

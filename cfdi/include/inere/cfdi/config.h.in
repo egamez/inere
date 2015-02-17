@@ -70,6 +70,12 @@
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 
+/* Tamaño de la fuente en negritas (en dpi) en la fuente */
+#undef INERE_FONT_LABEL_SIZE
+
+/* Tamaño de la fuente (en dpi) en la fuente */
+#undef INERE_FONT_SIZE
+
 /* Ruta de las TTF, en negritas, para la representacion impresa */
 #undef INERE_TTF_FONT_BOLD_PATH
 

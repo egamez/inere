@@ -53,8 +53,6 @@
 
 
 jmp_buf env;
-const unsigned int font_size_label = 8;
-const unsigned int font_size       = 8;
 
 const char *info_author          = "INERE - Soporte para CFDI";
 const char *info_creator         = PACKAGE_STRING;
@@ -86,10 +84,11 @@ const HPDF_REAL line_width	 = 10;
 const unsigned int decimales_importe      = 2;
 const unsigned int digitos_importe        = 7; /* 9,999,999 max */
 const char *format_importe		  = "%13n";
+const char *importe_signature		  = "$8,888,888.88";
 const unsigned int decimales_precio       = 4;
 const unsigned int digitos_precio         = 7; /* 9 999 999 max */
 const char *format_precio		  = "%!14.4n";
-const char *importe_signature		  = "$8,888,888.88";
+const char *precio_signature		  = "8,888,888.8888";
 
 const unsigned int decimales_cantidad     = 0;
 const unsigned int digitos_cantidad       = 7; /* 9999999 max */
@@ -100,8 +99,10 @@ void error_handler(HPDF_STATUS error_no, HPDF_STATUS detail_no,void *user_data);
 HPDF_STATUS fija_opciones_del_documento(HPDF_Doc pdf, Comprobante_t* cfdi);
 HPDF_Point imprime_conceptos(HPDF_Page page, const HPDF_REAL margin,
 			     HPDF_Point *point, HPDF_Font font,
-			      HPDF_Font font_bold, Comprobante_t* cfdi,
-			      const int verbose);
+			     HPDF_Font font_bold, Comprobante_t* cfdi,
+			     const unsigned int font_size,
+			     const unsigned int font_label_size,
+			     const int verbose);
 HPDF_UINT write_in_a_box(HPDF_Page page, HPDF_REAL x, HPDF_REAL y,
 			 HPDF_REAL width, const char *data);
 char *cadena_original_de_certificacion_alloc(const TimbreFiscalDigital_t *timbre);
@@ -318,7 +319,8 @@ write_in_a_box(HPDF_Page page, HPDF_REAL x, HPDF_REAL y, HPDF_REAL width,
 HPDF_Point
 imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
 		  HPDF_Font font, HPDF_Font font_bold, Comprobante_t* cfdi,
-		  const int verbose)
+		  const unsigned int font_size,
+		  const unsigned int font_label_size, const int verbose)
 {
   int tiene_noIdent = 0;
   char buffer[15];
@@ -343,7 +345,6 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
 
   Concepto_list_t *conceptos = NULL;
 
-
   if ( verbose ) {
     printf("%s:%d Dibujando la linea superior de los conceptos.\n", __FILE__, __LINE__); 
   }
@@ -367,7 +368,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   /* Print the current path */
   HPDF_Page_Stroke(page);
 
-  HPDF_Page_SetFontAndSize(page, font_bold, 8);
+  HPDF_Page_SetFontAndSize(page, font_bold, font_label_size);
   HPDF_Page_BeginText(page);
 
   /*
@@ -381,9 +382,12 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
   /* Para determinar al ancho del campo 'Cantidad' seleccionaremos el
    * mayor entre la etiqueta 'Cantidad' y la cantidad de digitos
    */
-  width_cant = (HPDF_Page_TextWidth(page, "8") * digitos_cantidad >
+  HPDF_Page_SetFontAndSize(page, font, font_size);
+  width_cant = HPDF_Page_TextWidth(page, "8") * digitos_cantidad;
+  HPDF_Page_SetFontAndSize(page, font_bold, font_label_size);
+  width_cant = (width_cant >
 		 HPDF_Page_TextWidth(page, "Cantidad") ?
-			HPDF_Page_TextWidth(page, "8") * digitos_cantidad :
+			width_cant :
 			HPDF_Page_TextWidth(page, "Cantidad"));
   rect_cant.right  = margin + width_cant + 2; /* 2 = espacio entre campos */
   HPDF_Page_TextRect(page,
@@ -414,7 +418,9 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
     rect_ident.top    = point->y;
     rect_ident.bottom = point->y - line_width;
     rect_ident.left   = rect_cant.right + 2;
+    HPDF_Page_SetFontAndSize(page, font, font_size);
     width_ident       = HPDF_Page_TextWidth(page, "A") * noIdentificacion_width;
+    HPDF_Page_SetFontAndSize(page, font_bold, font_label_size);
     rect_ident.right  = rect_ident.left + width_ident;
     HPDF_Page_TextRect(page,
 			rect_ident.left,
@@ -467,13 +473,15 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
    * Para calcular el ancho del campo que corresponde al precio unitario y al
    * importe deberemos de...
    */
-  width_precio = HPDF_Page_TextWidth(page, "8,888,888.8888");
+  HPDF_Page_SetFontAndSize(page, font, font_size);
+  width_precio = HPDF_Page_TextWidth(page, precio_signature);
   width_importe = HPDF_Page_TextWidth(page, importe_signature);
   rect_desc.top    = point->y;
   rect_desc.bottom = point->y - line_width;
   rect_desc.left   = rect_unidad.right;
   width_desc       = page_width - margin - width_importe - width_precio - rect_unidad.right - 4; /* 4 espacio acumulado entre descripcion + precio */
   rect_desc.right  = rect_desc.left + width_desc + 2;
+  HPDF_Page_SetFontAndSize(page, font_bold, font_label_size);
   HPDF_Page_TextRect(page,
 			rect_desc.left,
 			rect_desc.top,
@@ -640,6 +648,8 @@ r12nimpresa(const char *input, const char *output,
 	    const char *extra_info,
 	    const char *ttf_font_path,
 	    const char *ttf_bold_font_path,
+	    const unsigned int user_font_size,
+	    const unsigned int user_font_label_size,
 	    const int sucursal,
 	    const int verbose)
 {
@@ -649,7 +659,8 @@ r12nimpresa(const char *input, const char *output,
   char totales[15];
   char *cantidadcl = NULL;
   char *cadena_certificacion = NULL;
-  cfdi_qrcode_t *qrcode = NULL;
+  unsigned int font_size = 0;
+  unsigned int font_size_label = 0;
 
   HPDF_Doc pdf;
   HPDF_Page page;
@@ -677,6 +688,7 @@ r12nimpresa(const char *input, const char *output,
   RegimenFiscal_list_t *regimen = NULL;
   Retencion_list_t *retencion = NULL;
   Traslado_list_t *traslado = NULL;
+  cfdi_qrcode_t *qrcode = NULL;
 
   setlocale(LC_ALL, "");
 
@@ -705,6 +717,32 @@ r12nimpresa(const char *input, const char *output,
     }
     return 2;
   }
+
+  /* Verifica algunas opciones */
+  if ( user_font_size == 0 ) {
+    if ( verbose ) {
+      printf("%s:%d Info. No se definio el tamaño de la fuente para generar la representación impresa, se utilizará el valor default (%d dpi)\n", __FILE__, __LINE__, INERE_FONT_SIZE);
+    }
+    font_size = INERE_FONT_SIZE;
+  } else {
+    if ( verbose ) {
+      printf("%s:%d Info. Se ha definido un tamaño para la fuente, para generar la representación impresa (%d dpi)\n", __FILE__, __LINE__, user_font_size);
+    }
+    font_size = user_font_size;
+  }
+
+  if ( user_font_label_size == 0 ) {
+    if ( verbose ) {
+      printf("%s:%d Info. No se definio el tamaño de la fuente, en negritas, para generar la representación impresa, se utilizará el valor default (%d dpi)\n", __FILE__, __LINE__, INERE_FONT_LABEL_SIZE);
+    }
+    font_size_label = INERE_FONT_LABEL_SIZE;
+  } else {
+    if ( verbose ) {
+      printf("%s:%d Info. Se ha definido un tamaño para la fuente, en negritas, para generar la representación impresa (%d dpi)\n", __FILE__, __LINE__, user_font_label_size);
+    }
+    font_size_label = user_font_label_size;
+  }
+
 
   if ( verbose ) {
     printf("%s:%d Info. Fijando opciones generales del documento.\n", __FILE__, __LINE__);
@@ -1098,7 +1136,7 @@ r12nimpresa(const char *input, const char *output,
   /* 
    * CONCEPTOS
    */
-  point = imprime_conceptos(page, margin, &point, font, font_bold, cfdi, verbose);
+  point = imprime_conceptos(page, margin, &point, font, font_bold, cfdi, font_size, font_size_label, verbose);
   if ( verbose ) {
     printf("%s:%d Info. Conceptos terminados.\n", __FILE__, __LINE__);
   }

@@ -272,6 +272,32 @@ AC_ARG_WITH([ttf-bold-font-file],
 	])
 
 
+# Ahora, agrega las opciones para definir el tamaño de las fonts
+AC_ARG_WITH([font-size],
+	[AS_HELP_STRING([--with-font-size@<:@=SIZE@:>@],
+		[Define el tamaño de la font (en dpi) que se utilizara para generar la representación impresa @<:@default=8@:>@])
+	],
+	[
+		AC_DEFINE([INERE_FONT_SIZE], [$withval], [Tamaño de la fuente (en dpi) en la fuente])
+	],
+	[
+		AC_DEFINE([INERE_FONT_SIZE], [8], [Tamaño de la fuente (en dpi) en la fuente])
+	])
+
+
+AC_ARG_WITH([font-label-size],
+	[AS_HELP_STRING([--with-font-label-size@<:@=SIZE@:>@],
+		[Define el tamaño de la font, en negritas (en dpi), que se utilizara para generar la representación impresa @<:@default=8@:>@])
+	],
+	[
+		AC_DEFINE([INERE_FONT_LABEL_SIZE], [$withval], [Tamaño de la fuente en negritas (en dpi) en la fuente])
+	],
+	[
+		AC_DEFINE([INERE_FONT_LABEL_SIZE], [8], [Tamaño de la fuente en negritas (en dpi) en la fuente])
+	])
+
+
+
 AM_CONDITIONAL([RI_ENABLED], [ test x$RI_ENABLED = xtrue ])
 
 AC_CONFIG_FILES([Makefile

@@ -92,19 +92,18 @@ Principales opciones:\n\
 				enunciadas al momento de compilación\n\
 				(default: %s)\n\
   -s SIZE, --font-size=SIZE	Tamaño de la font, en dpi, con la que se\n\
-				generará la representación impresa. El\n\
-				tamaño por default es 8 (dpi).\n", INERE_TTF_FONT_BOLD_PATH);
+				generará la representación impresa\n\
+				(default: %d)\n", INERE_TTF_FONT_BOLD_PATH, INERE_FONT_SIZE);
   printf("\
   -l SIZE, --font-label-size=SIZE Tamaño de la font, en dpi, con la que se\n\
 				generarán las etiqueta de la información de\n\
-				la representación impresa. El tamaño por\n\
-				default es 8 (dpi).\n\
+				la representación impresa (default: %d)\n\
   -S,  --sucursal		Imprime los datos acerca del domicilio de\n\
 				expedición, en caso de que estos se encuentren\n\
 				en el CFDI.\n\
   -v,  --verbose		Imprime mensajes extra acerca de la ejecución\n\
 				en la generación.\n\
-  -h,  --help			Imprime este mensaje.\n");
+  -h,  --help			Imprime este mensaje.\n", INERE_FONT_LABEL_SIZE);
   printf("\
 \n\n\
 Bugs a <egamezf@gmail.com>\n");
@@ -125,8 +124,8 @@ main(int argc, char *argv[])
   const char *font_bold_path = NULL;
   const char *cfdi = NULL;
   char *cfdi_pdf = NULL;
-  int font_size = 8;
-  int font_label_size = 8;
+  int font_size = 0;
+  int font_label_size = 0;
   int want_sucursal = 0;
   int want_verbose = 0;
   int want_help = 0;
@@ -245,7 +244,7 @@ main(int argc, char *argv[])
   }
 
   res = r12nimpresa(cfdi, cfdi_pdf, banner, info, font_path, font_bold_path,
-		    want_sucursal, want_verbose);
+		    font_size, font_label_size, want_sucursal, want_verbose);
 
   if ( argv[optind] == NULL ) {
     free(cfdi_pdf);
