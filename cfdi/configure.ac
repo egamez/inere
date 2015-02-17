@@ -247,7 +247,7 @@ AC_ARG_WITH([ttf-font-file],
 	],
 	[
 		if test "${RI_ENABLED}" = "true" ; then
-			AC_MSG_ERROR([Es necesario definir la ruta de las TTF que se utilizaran para la representacion impresa.])
+			AC_DEFINE_UNQUOTED([INERE_TTF_FONT_PATH], ["Sin definir"], [Ruta de las TTF para la representacion impresa])
 		fi
 	])
 
@@ -267,7 +267,7 @@ AC_ARG_WITH([ttf-bold-font-file],
 	],
 	[
 		if test "${RI_ENABLED}" = "true" ; then
-			AC_MSG_ERROR([Es necesario definir la ruta de las TTF, en negritas, que se utilizaran para la representacion impresa.])
+			AC_DEFINE_UNQUOTED([INERE_TTF_FONT_BOLD_PATH], ["Sin definir"], [Ruta de las TTF, en negritas, para la representacion impresa])
 		fi
 	])
 
