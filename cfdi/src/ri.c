@@ -28,6 +28,9 @@
 #include "inere/cfdi/r12nimpresa.h"
 #endif
 
+/* Para cargar las opciones, por default, al momento de compilar */
+#include "inere/cfdi/config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -80,20 +83,25 @@ Principales opciones:\n\
   -f PATH,   --font=PATH	Ruta en donde se encuentran las TTF fonts\n\
 				con las que se generará la representación\n\
 				impresa, diferente a las TTF enunciadas al\n\
-				momento de compilación.\n");
+				momento de compilación.\n\
+				(default: %s)\n", INERE_TTF_FONT_PATH);
   printf("\
   -F PATH, --font-bold=PATH	Ruta en donde se encuentran las TTF fonts\n\
 				en negritas con las que se generará la\n\
 				representación impresa, diferente a las TTF\n\
-				enunciadas al momento de compilación.\n\
+				enunciadas al momento de compilación\n\
+				(default: %s)\n\
   -s SIZE, --font-size=SIZE	Tamaño de la font, en dpi, con la que se\n\
 				generará la representación impresa. El\n\
-				tamaño por default es 8 (dpi).\n");
+				tamaño por default es 8 (dpi).\n", INERE_TTF_FONT_BOLD_PATH);
   printf("\
   -l SIZE, --font-label-size=SIZE Tamaño de la font, en dpi, con la que se\n\
 				generarán las etiqueta de la información de\n\
 				la representación impresa. El tamaño por\n\
 				default es 8 (dpi).\n\
+  -S,  --sucursal		Imprime los datos acerca del domicilio de\n\
+				expedición, en caso de que estos se encuentren\n\
+				en el CFDI.\n\
   -v,  --verbose		Imprime mensajes extra acerca de la ejecución\n\
 				en la generación.\n\
   -h,  --help			Imprime este mensaje.\n");
@@ -119,8 +127,9 @@ main(int argc, char *argv[])
   char *cfdi_pdf = NULL;
   int font_size = 8;
   int font_label_size = 8;
-  int want_help = 0;
+  int want_sucursal = 0;
   int want_verbose = 0;
+  int want_help = 0;
 
   /* options descriptor */
   static struct option longopts[] = {
@@ -130,12 +139,13 @@ main(int argc, char *argv[])
 	{"font-bold",		required_argument,	NULL,	'F'},
 	{"font-size",		required_argument,	NULL,	's'},
 	{"font-label-size",	required_argument,	NULL,	'l'},
+	{"sucursal",		required_argument,	NULL,	'S'},
 	{"verbose",		no_argument,		NULL,	'v'},
 	{"help",		no_argument,		NULL,	'h'},
 	{NULL,			0,			NULL,	 0 }
   };
 
-  while ((ch=getopt_long(argc,argv,"b:i:f:F:s:l:vh", longopts, NULL)) != -1 ) {
+  while ((ch=getopt_long(argc,argv,"b:i:f:F:s:l:Svh", longopts, NULL)) != -1 ) {
 
     switch(ch) {
 
@@ -167,6 +177,11 @@ main(int argc, char *argv[])
       case 'l':
 	/* El tamaño de la font en dpi, para las etiquetas de la informacion */
 	font_label_size = atoi(optarg);
+	break;
+
+      case 'S':
+	/* Imprime la informacion acerca del domicilio de expedicion */
+	want_sucursal = 1;
 	break;
 
       case 'v':
@@ -230,7 +245,7 @@ main(int argc, char *argv[])
   }
 
   res = r12nimpresa(cfdi, cfdi_pdf, banner, info, font_path, font_bold_path,
-		    want_verbose);
+		    want_sucursal, want_verbose);
 
   if ( argv[optind] == NULL ) {
     free(cfdi_pdf);

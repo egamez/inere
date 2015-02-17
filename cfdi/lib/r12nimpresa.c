@@ -635,10 +635,13 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
  *
  */
 int
-r12nimpresa(const char *input, const char *output, const char *banner,
+r12nimpresa(const char *input, const char *output,
+	    const char *banner,
 	    const char *extra_info,
 	    const char *ttf_font_path,
-	    const char *ttf_bold_font_path, int verbose)
+	    const char *ttf_bold_font_path,
+	    const int sucursal,
+	    const int verbose)
 {
   const char *font_name;
   const char *font_bold_name;
@@ -940,7 +943,63 @@ r12nimpresa(const char *input, const char *output, const char *banner,
   /*
    * DOMICILIO DE EMISION del CFDI
    */
-  if ( cfdi->Emisor->ExpedidoEn != NULL ) {
+  if ( cfdi->Emisor->ExpedidoEn != NULL && sucursal ) {
+
+    if ( verbose ) {
+      printf("%s:%d Info. Se imprimira la información acerca del domicilio de emisión.\n", __FILE__, __LINE__);
+    }
+
+    HPDF_Page_SetFontAndSize(page, font_bold, 8);
+    y -= line_width;
+    HPDF_Page_TextOut(page, x, y, "Expedido en:");
+
+    y -= line_width;
+    HPDF_Page_SetFontAndSize(page, font, 10);
+
+    /* Para el domicilio fiscal, escribiremos primero:
+     *
+     *		- La calle, numero exterior, numero interior y colonia
+     */
+    memset(buffer, 0, 1024);
+    if ( cfdi->Emisor->ExpedidoEn->calle  != NULL ) {
+      strcat(buffer, (char *)cfdi->Emisor->ExpedidoEn->calle);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->noExterior != NULL ) {
+      strcat(buffer, " ");
+      strcat(buffer, (char *)cfdi->Emisor->ExpedidoEn->noExterior);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->noInterior != NULL ) {
+      strcat(buffer, " ");
+      strcat(buffer, (char *)cfdi->Emisor->ExpedidoEn->noInterior);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->colonia != NULL ) {
+      strcat(buffer, ", COL. ");
+      strcat(buffer, (char *)cfdi->Emisor->ExpedidoEn->colonia);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->codigoPostal != NULL ) {
+      strcat(buffer, ", C.P. ");
+      strcat(buffer, (char *)cfdi->Emisor->ExpedidoEn->codigoPostal);
+    }
+
+    lines = write_in_a_box(page, x, y, page_width - x - secc1_width, buffer);
+
+    memset(buffer, 0, 1024);
+    if ( cfdi->Emisor->ExpedidoEn->municipio  != NULL ) {
+      strcat(buffer, (char *)cfdi->Emisor->ExpedidoEn->municipio);
+    }
+
+    if ( cfdi->Emisor->ExpedidoEn->estado != NULL ) {
+      strcat(buffer, ", ");
+      strcat(buffer, (char *)cfdi->Emisor->ExpedidoEn->estado);
+    }
+
+    y -= line_width * lines;
+    lines = write_in_a_box(page, x, y, page_width - x - secc1_width, buffer);
+
   }
 
   /* Extra info del emisor */
