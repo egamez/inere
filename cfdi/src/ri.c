@@ -225,13 +225,30 @@ main(int argc, char *argv[])
      * modo que no es posible general la representacion impresa
      */
     fprintf(stderr, "Error. No fue propocionado la ruta del CFDI, de modo que no hay representación impresa a generar.\n");
-    usage();
     return 1;
   }
 
   /* Lee al argumento */
   if ( argv[optind] != NULL ) {
     cfdi = argv[optind++];
+  }
+
+  /* Verifica que se hallan definido las fonts */
+  if ( font_path == NULL ) {
+    if ( strcmp(INERE_TTF_FONT_PATH, "Sin definir") == 0 ) {
+      /* No se ha definido la ruta de las fonts. Error */
+      fprintf(stderr, "No se ha definido la ruta para las fonts, de modo que no es posible generar la representación.\nUtilice -f,--font para proporcionar la ruta del archivo que contiene las fonts.\n");
+      return 2;
+    }
+  }
+
+  /* Verifica que se hallan definido las fonts */
+  if ( font_bold_path == NULL ) {
+    if ( strcmp(INERE_TTF_FONT_BOLD_PATH, "Sin definir") == 0 ) {
+      /* No se ha definido la ruta de las fonts. Error */
+      fprintf(stderr, "No se ha definido la ruta para las fonts, en negritas, de modo que no es posible generar la representación.\nUtilice -F,--font-bold para proporcionar la ruta del archivo que contiene las fonts en negritas.\n");
+      return 3;
+    }
   }
 
   /* Verifica si fue proporcionado el archivo de salida */
