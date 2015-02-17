@@ -30,6 +30,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <getopt.h>
 
@@ -39,6 +40,27 @@
 
 /* Forward declaration */
 void usage(void);
+char *substitute_filename_alloc(const char *filename);
+
+
+/**
+ *
+ */
+char *
+substitute_filename_alloc(const char *filename)
+{
+  char *buffer = NULL;
+  const size_t len = strlen(filename);
+  char *extension = strrchr(filename, '.');
+  const size_t len_extension = strlen(extension);
+
+  buffer = (char *)calloc(len + len_extension, sizeof(char));
+  memcpy(buffer, filename, len - len_extension);
+  strncat(buffer, ".pdf", 4);
+
+  return buffer;
+}
+
 
 void
 usage(void)
@@ -94,7 +116,7 @@ main(int argc, char *argv[])
   const char *font_path = NULL;
   const char *font_bold_path = NULL;
   const char *cfdi = NULL;
-  const char *cfdi_pdf = NULL;
+  char *cfdi_pdf = NULL;
   int font_size = 8;
   int font_label_size = 8;
   int want_help = 0;
@@ -204,11 +226,15 @@ main(int argc, char *argv[])
 
   } else {
     /* Genera el nombre del archivo de salida */
-
+    cfdi_pdf = substitute_filename_alloc(cfdi);
   }
 
   res = r12nimpresa(cfdi, cfdi_pdf, banner, info, font_path, font_bold_path,
 		    want_verbose);
+
+  if ( argv[optind] == NULL ) {
+    free(cfdi_pdf);
+  }
 
   return res;
 }
