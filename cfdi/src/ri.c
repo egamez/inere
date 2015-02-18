@@ -77,13 +77,16 @@ CFDI.\n\n");
 Principales opciones:\n\
 \n\
   -b BANNER, --banner=BANNER	Leyenda a aparecer como encabezado de la\n\
-				representación impresa.\n\
+				representación impresa, o ruta del archivo\n\
+				que contiene la imagen a ser utilizada como\n\
+				banner (formatos soportados: jpeg o png)\n\
   -n LINES,  --lines=LINES	Cantidad de lineas que se utilizaran para\n\
 				escribir el banner de texto (default: 2)\n");
   printf("\
   -i INFO,   --info=INFO	Mensaje a aparecer como información, por\n\
 				ejemplo: Teléfono, email, etc.\n\
-  -t FOOTER, --footer=FOOTER	Mensaje a aparecer como footer.\n\
+  -t FOOTER, --footer=FOOTER	Mensaje a aparecer como footer, o ruta del\n\
+				archivo de texto que contiene el footer.\n\
   -f PATH,   --font=PATH	Ruta en donde se encuentran las TTF fonts\n\
 				con las que se generará la representación\n\
 				impresa, diferente a las TTF enunciadas al\n\

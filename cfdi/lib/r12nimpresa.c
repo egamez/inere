@@ -900,17 +900,54 @@ r12nimpresa(const char *input, const char *output,
    *
    */
   if ( banner != NULL ) {
+
     int banner_height = 0;
     if ( banner_lines < 2 ) {
       banner_height = 2 * line_width;
     } else {
       banner_height = banner_lines * line_width;
     }
-    HPDF_Page_SetFontAndSize(page, font_bold, banner_height);
-    HPDF_Page_TextRect(page, x, y, page_width - secc1_width, y - banner_height,
-		       banner, HPDF_TALIGN_CENTER, NULL);
+
+    /* Ahora verifica si el string banner apunta a algun archivo */
+    if ( access(banner, R_OK) == 0 ) {
+
+      /* Lee el archivo, que debe de contener la imagen que se utilizara */
+      int with_image = 1;
+      HPDF_Image image_banner;
+
+      /* Trata de determinar la extension del archivo */
+      if ( strcasecmp(strrchr(banner, '.'), ".jpg") == 0 ) {
+	image_banner = HPDF_LoadJpegImageFromFile(pdf, banner);
+      } else if ( strcasecmp(strrchr(banner, '.'), ".jpeg") == 0 ) {
+	image_banner = HPDF_LoadJpegImageFromFile(pdf, banner);
+      } else if ( strcasecmp(strrchr(banner, '.'), ".png") == 0 ) {
+	image_banner = HPDF_LoadPngImageFromFile2(pdf, banner);
+      } else {
+	fprintf(stderr, "El formato de la imagen no pudo reconocerse.\n");
+	with_image = 0;
+      }
+
+      if ( with_image ) {
+	HPDF_REAL scale = (page_width - secc1_width)/HPDF_Image_GetWidth(image_banner);
+
+	HPDF_Page_EndText(page);
+	HPDF_Page_DrawImage(page, image_banner, x, y - banner_height,
+		HPDF_Image_GetWidth(image_banner)*scale*.9,
+		banner_height);
+	HPDF_Page_BeginText(page);
+      }
+
+    } else {
+      /* El string es el banner mismo */
+      HPDF_Page_SetFontAndSize(page, font_bold, banner_height);
+      HPDF_Page_TextRect(page,x, y, page_width - secc1_width, y - banner_height,
+		         banner, HPDF_TALIGN_CENTER, NULL);
+    }
+
+    /* Actualiza la altura */
     y -= banner_height;
     y -= line_width;
+
   }
 
   /* Los datos del emisor */
