@@ -48,6 +48,7 @@
 #include <locale.h>
 #include <monetary.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <hpdf.h>
 
@@ -1496,10 +1497,57 @@ r12nimpresa(const char *input, const char *output,
   }
 
   if ( footer != NULL ) {
-    HPDF_Page_BeginText(page);
-    HPDF_Page_SetFontAndSize(page, font, font_size_label);
-    HPDF_Page_TextOut(page, margin, y, footer);
-    HPDF_Page_EndText(page);
+    /* Debería de ser posible identificar si footer es un string o el
+     * el nombre de un archivo
+     *
+     * http://stackoverflow.com/questions/230062/whats-the-best-way-to-check-if-a-file-exists-in-c-cross-platform
+     */
+    if ( access(footer, R_OK) == 0 ) {
+      /* El string dado corresponde a la ruta de un archivo */
+      size_t size = 0;
+      char *result = NULL;
+      FILE *file = fopen(footer, "r");
+
+      if ( file != NULL ) {
+
+	fseek(file, 0, SEEK_END);
+	size = ftell(file);
+	rewind(file);
+
+	result = (char *)malloc(size);
+	if ( result != NULL ) {
+
+	  if ( fread(result, sizeof(char), size, file) != size ) {
+	    fprintf(stderr, "Error al leer el contenido del footer.\n");
+	  } else {
+	    /* Escribe el contenido del archivo como el footer */
+	    HPDF_Page_BeginText(page);
+	    HPDF_Page_SetFontAndSize(page, font, font_size_label);
+	    /* Utiliza la funcion write_in_a_box para imprimir el footer */
+	    lines = write_in_a_box(page, margin, y, page_width, result);
+	    HPDF_Page_EndText(page);
+
+	  }
+
+	} else {
+	  fprintf(stderr, "No pudo reversarse memoría para leer el contenido del footer.\n");
+	}
+
+	fclose(file);
+
+      } else {
+        fprintf(stderr, "No pudo leerse el archivo que contiene el footer para la representación impresa de este CFDI.\n");
+      }
+
+    } else {
+      /* El string dado es el footer mismo */
+      HPDF_Page_BeginText(page);
+      HPDF_Page_SetFontAndSize(page, font, font_size_label);
+      /* Utiliza la funcion write_in_a_box para imprimir el footer completo */
+      lines = write_in_a_box(page, margin, y, page_width, footer);
+      HPDF_Page_EndText(page);
+    }
+
   }
 
   /* Libera la memoria consumida */
