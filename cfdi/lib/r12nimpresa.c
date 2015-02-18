@@ -645,6 +645,7 @@ imprime_conceptos(HPDF_Page page, const HPDF_REAL margin, HPDF_Point *point,
 int
 r12nimpresa(const char *input, const char *output,
 	    const char *banner,
+	    const unsigned int banner_lines,
 	    const char *extra_info,
 	    const char *ttf_font_path,
 	    const char *ttf_bold_font_path,
@@ -887,14 +888,26 @@ r12nimpresa(const char *input, const char *output,
 
   y = page_height - 20;
   x = margin;
-  /* Banner */
-  /* El espacio para el banner va a ser de dos veces el valor de line_width
+  /** Banner
+   * Para el banner de texto, si el valor en el argumento de esta funcion
+   * es cero, se utilizaran dos lineas.
+   *
+   * Debería de ser posible implementar una chequeo acercar de cuantos
+   * caracteres fueron escritos, y si se requerira de escribir mas caracteres
+   * en una caja justo abajo de la inicial.
    *
    */
   if ( banner != NULL ) {
-    y -= 2*line_width;
-    HPDF_Page_SetFontAndSize(page, font_bold, 20);
-    HPDF_Page_TextOut(page, x, y, banner);
+    int banner_height = 0;
+    if ( banner_lines < 2 ) {
+      banner_height = 2 * line_width;
+    } else {
+      banner_height = banner_lines * line_width;
+    }
+    HPDF_Page_SetFontAndSize(page, font_bold, banner_height);
+    HPDF_Page_TextRect(page, x, y, page_width - secc1_width, y - banner_height,
+		       banner, HPDF_TALIGN_CENTER, NULL);
+    y -= banner_height;
   }
 
   /* Los datos del emisor */

@@ -78,6 +78,9 @@ Principales opciones:\n\
 \n\
   -b BANNER, --banner=BANNER	Leyenda a aparecer como encabezado de la\n\
 				representación impresa.\n\
+  -n LINES,  --lines=LINES	Cantidad de lineas que se utilizaran para\n\
+				escribir el banner de texto (default: 2)\n");
+  printf("\
   -i INFO,   --info=INFO	Mensaje a aparecer como información, por\n\
 				ejemplo: Teléfono, email, etc.\n\
   -f PATH,   --font=PATH	Ruta en donde se encuentran las TTF fonts\n\
@@ -119,6 +122,7 @@ main(int argc, char *argv[])
   int res = 0;
   int ch = 0;
   const char *banner = NULL;
+  unsigned int banner_lines = 0;
   const char *info = NULL;
   const char *font_path = NULL;
   const char *font_bold_path = NULL;
@@ -133,6 +137,7 @@ main(int argc, char *argv[])
   /* options descriptor */
   static struct option longopts[] = {
 	{"banner",		required_argument,	NULL,	'b'},
+	{"banner-lines",	required_argument,	NULL,	'n'},
 	{"info",		required_argument,	NULL,	'i'},
 	{"font",		required_argument,	NULL,	'f'},
 	{"font-bold",		required_argument,	NULL,	'F'},
@@ -144,13 +149,18 @@ main(int argc, char *argv[])
 	{NULL,			0,			NULL,	 0 }
   };
 
-  while ((ch=getopt_long(argc,argv,"b:i:f:F:s:l:Svh", longopts, NULL)) != -1 ) {
+  while ((ch=getopt_long(argc,argv,"b:n:i:f:F:s:l:Svh", longopts, NULL)) != -1 ) {
 
     switch(ch) {
 
       case 'b':
 	/* La leyenda de banner del comprobante */
 	banner = optarg;
+	break;
+
+      case 'n':
+	/* El numero de lineas que se utilizaran para el banner */
+	banner_lines = atoi(optarg);
 	break;
 
       case 'i':
@@ -260,8 +270,9 @@ main(int argc, char *argv[])
     cfdi_pdf = substitute_filename_alloc(cfdi);
   }
 
-  res = r12nimpresa(cfdi, cfdi_pdf, banner, info, font_path, font_bold_path,
-		    font_size, font_label_size, want_sucursal, want_verbose);
+  res = r12nimpresa(cfdi, cfdi_pdf, banner, banner_lines, info, font_path,
+		    font_bold_path, font_size, font_label_size, want_sucursal,
+		    want_verbose);
 
   if ( argv[optind] == NULL ) {
     free(cfdi_pdf);
