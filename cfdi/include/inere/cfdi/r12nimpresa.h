@@ -34,6 +34,7 @@ extern "C" {
 extern int r12nimpresa(const char *input, const char *output,
 		       const char *banner, const unsigned int banner_lines,
 		       const char *extra_info,
+		       const char *footer,
 		       const char *ttf_font_path,
 		       const char *ttf_bold_font_path,
 		       const unsigned int font_size,

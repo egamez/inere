@@ -647,6 +647,7 @@ r12nimpresa(const char *input, const char *output,
 	    const char *banner,
 	    const unsigned int banner_lines,
 	    const char *extra_info,
+	    const char *footer,
 	    const char *ttf_font_path,
 	    const char *ttf_bold_font_path,
 	    const unsigned int user_font_size,
@@ -1474,6 +1475,8 @@ r12nimpresa(const char *input, const char *output,
       lines = write_in_a_box(page, x, y, page_width - x - margin, (char *)cfdi->Complemento->TimbreFiscalDigital->FechaTimbrado);
 
       HPDF_Page_EndText(page);
+
+      y -= line_width * lines;
     }
   }
 
@@ -1482,14 +1485,21 @@ r12nimpresa(const char *input, const char *output,
    */
   if ( cfdi->Complemento != NULL ) {
     if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
-      y -= line_width * lines;
       HPDF_Page_BeginText(page);
-      HPDF_Page_SetFontAndSize(page, font_bold, 8);
+      HPDF_Page_SetFontAndSize(page, font_bold, font_size_label);
       HPDF_Page_TextRect(page, margin, y + line_width, page_width - margin, y,
 	"Este documento es una representación impresa de un CFDI",
 	HPDF_TALIGN_CENTER, NULL);
       HPDF_Page_EndText(page);
+      y -= line_width;
     }
+  }
+
+  if ( footer != NULL ) {
+    HPDF_Page_BeginText(page);
+    HPDF_Page_SetFontAndSize(page, font, font_size_label);
+    HPDF_Page_TextOut(page, margin, y, footer);
+    HPDF_Page_EndText(page);
   }
 
   /* Libera la memoria consumida */

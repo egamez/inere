@@ -83,6 +83,7 @@ Principales opciones:\n\
   printf("\
   -i INFO,   --info=INFO	Mensaje a aparecer como información, por\n\
 				ejemplo: Teléfono, email, etc.\n\
+  -t FOOTER, --footer=FOOTER	Mensaje a aparecer como footer.\n\
   -f PATH,   --font=PATH	Ruta en donde se encuentran las TTF fonts\n\
 				con las que se generará la representación\n\
 				impresa, diferente a las TTF enunciadas al\n\
@@ -124,6 +125,7 @@ main(int argc, char *argv[])
   const char *banner = NULL;
   unsigned int banner_lines = 0;
   const char *info = NULL;
+  const char *footer = NULL;
   const char *font_path = NULL;
   const char *font_bold_path = NULL;
   const char *cfdi = NULL;
@@ -139,6 +141,7 @@ main(int argc, char *argv[])
 	{"banner",		required_argument,	NULL,	'b'},
 	{"banner-lines",	required_argument,	NULL,	'n'},
 	{"info",		required_argument,	NULL,	'i'},
+	{"footer",		required_argument,	NULL,	't'},
 	{"font",		required_argument,	NULL,	'f'},
 	{"font-bold",		required_argument,	NULL,	'F'},
 	{"font-size",		required_argument,	NULL,	's'},
@@ -149,7 +152,7 @@ main(int argc, char *argv[])
 	{NULL,			0,			NULL,	 0 }
   };
 
-  while ((ch=getopt_long(argc,argv,"b:n:i:f:F:s:l:Svh", longopts, NULL)) != -1 ) {
+  while ((ch=getopt_long(argc,argv,"b:n:i:t:f:F:s:l:Svh", longopts, NULL)) != -1 ) {
 
     switch(ch) {
 
@@ -166,6 +169,11 @@ main(int argc, char *argv[])
       case 'i':
 	/* Info a mostrar en la factura, telefonos, email, etc */
 	info = optarg;
+	break;
+
+      case 't':
+	/* Info a mostrar como footer */
+	footer = optarg;
 	break;
 
       case 'f':
@@ -270,9 +278,9 @@ main(int argc, char *argv[])
     cfdi_pdf = substitute_filename_alloc(cfdi);
   }
 
-  res = r12nimpresa(cfdi, cfdi_pdf, banner, banner_lines, info, font_path,
-		    font_bold_path, font_size, font_label_size, want_sucursal,
-		    want_verbose);
+  res = r12nimpresa(cfdi, cfdi_pdf, banner, banner_lines, info, footer,
+		    font_path, font_bold_path, font_size, font_label_size,
+		    want_sucursal, want_verbose);
 
   if ( argv[optind] == NULL ) {
     free(cfdi_pdf);
