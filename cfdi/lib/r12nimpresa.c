@@ -909,11 +909,11 @@ r12nimpresa(const char *input, const char *output,
     HPDF_Page_TextRect(page, x, y, page_width - secc1_width, y - banner_height,
 		       banner, HPDF_TALIGN_CENTER, NULL);
     y -= banner_height;
+    y -= line_width;
   }
 
   /* Los datos del emisor */
   HPDF_Page_SetFontAndSize(page, font_bold, 8);
-  y -= line_width;
   HPDF_Page_TextOut(page, x, y, "Datos del emisor:");
 
   y -= line_width;
