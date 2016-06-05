@@ -25,7 +25,8 @@ main(int argc, char *argv[])
     if ( argc > 3 ) {
       printf("%s: ", argv[i]);
     }
-    cfdi = xmlReadFile(argv[i], "UTF-8", XML_PARSE_NOENT);
+    /*cfdi = xmlReadFile(argv[i], "UTF-8", XML_PARSE_NOENT);*/
+    cfdi = xmlParseFile(argv[i]);
     if ( cfdi == NULL ) {
       printf("El CFDi (%s) no pudo ser leido.\n", argv[i]);
       continue;
