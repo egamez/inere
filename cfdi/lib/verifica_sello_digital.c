@@ -262,7 +262,7 @@ verifica_sello_digital(const char *filename, const char *stylesheet, const int v
   if ( access(filename, R_OK) == 0 ) {
     /* El argumento dado corresponde a la ruta del archivo que contiene el
      * CFDI*/
-    doc = xmlReadFile(filename, "UTF-8", XML_PARSE_NOENT);
+    doc = xmlParseFile(filename);
   } else {
     /* El string dado contiene el CFDi mismo */
     doc = xmlReadMemory(filename, strlen(filename), "http://www.sat.gob.mx/cfd/3", "UTF-8", XML_PARSE_RECOVER);
