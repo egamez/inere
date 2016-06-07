@@ -144,6 +144,8 @@ crea_comprobante(unsigned char *version)
 int
 termina_comprobante(Comprobante_t *cfdi)
 {
+  MetodoDePago_list_t *met1 = NULL;
+  MetodoDePago_list_t *met2 = NULL;
   Concepto_list_t *prods1 = NULL;
   Concepto_list_t *prods2 = NULL;
   RegimenFiscal_list_t *reg1 = NULL;
@@ -216,6 +218,14 @@ termina_comprobante(Comprobante_t *cfdi)
     free(cfdi->Emisor->DomicilioFiscal);
   }
   free(cfdi->Emisor);
+
+  met1 = cfdi->metodoDePago;
+  while ( met1 != NULL ) {
+    met2 = met1;
+    met1 = met1->next;
+    free(met2);
+  }
+  cfdi->metodoDePago = NULL;
 
   free(cfdi);
   cfdi = NULL;
@@ -552,23 +562,53 @@ asigna_tipoDeComprobante(Comprobante_t *cfdi, unsigned char *tipoDeComprobante)
 
 
 /**
- *
+ * Agrega un metodo de pago de este CFDI
  */
 int
-asigna_metodoDePago(Comprobante_t *cfdi, unsigned char *metodoDePago)
+agrega_metodoDePago(Comprobante_t *cfdi, unsigned char *metodoDePago)
 {
-  int ret = 0;
+  MetodoDePago_list_t *current = NULL;
+  MetodoDePago_list_t *tmp = NULL;
+
   if ( cfdi == NULL ) {
-    ret = 1;
     fprintf(stderr, "%s:%d Error. Comprobante nulo.\n", __FILE__, __LINE__);
+    return 1;
+
   } else if ( metodoDePago == NULL ) {
-    ret = 2;
     fprintf(stderr, "%s:%d Error. Argumento nulo.\n", __FILE__, __LINE__);
-  } else {
-    /* Copia el puntero al argumento */
-    cfdi->metodoDePago = metodoDePago;
+    return 2;
+
   }
-  return ret;
+
+  tmp = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
+  if ( tmp == NULL ) {
+    fprintf(stderr, "%s:%d Error al momento de reservar memoria para este metodo de pago:%s\n", __FILE__, __LINE__, metodoDePago);
+    return 3;
+  }
+
+  tmp->metodoDePago = metodoDePago;
+  tmp->next = NULL;
+
+  /* Verifica si debemos de agregar este metodo de pago, o si es el primero */
+  if ( cfdi->metodoDePago == NULL ) {
+
+    /* Esta es la primera entrada */
+    cfdi->metodoDePago = tmp;
+    cfdi->metodoDePago->size = 1;
+
+  } else {
+
+    /* Agrega una entrada */
+    current = cfdi->metodoDePago;
+    while ( current->next != NULL ) {
+      current = current->next;
+    }
+    current->next = tmp;
+    current->size++;
+
+  }
+
+  return 0;
 }
 
 
@@ -1336,31 +1376,33 @@ agrega_Impuesto_Traslado(Comprobante_t *cfdi,
 xmlChar *
 genera_comprobante_alloc(Comprobante_t *cfdi)
 {
-  xmlDocPtr doc                 = NULL;
-  xmlNsPtr cfdi_ns              = NULL;
-  xmlNsPtr tfd_ns               = NULL;
-  xmlNodePtr Comprobante        = NULL;
-  xmlNodePtr Emisor             = NULL;
-  xmlNodePtr RegimenFiscal      = NULL;
-  xmlNodePtr DomicilioFiscal    = NULL;
-  xmlNodePtr ExpedidoEn         = NULL;
-  xmlNodePtr Receptor           = NULL;
-  xmlNodePtr Domicilio          = NULL;
-  xmlNodePtr Conceptos          = NULL;
-  xmlNodePtr Concepto           = NULL;
-  xmlNodePtr Impuestos          = NULL;
-  xmlNodePtr Retenciones        = NULL;
-  xmlNodePtr Retencion          = NULL;
-  xmlNodePtr Traslados          = NULL;
-  xmlNodePtr Traslado           = NULL;
-  xmlNodePtr Complemento        = NULL;
-  xmlNodePtr TimbreFiscalDigital= NULL;
-  Concepto_list_t *conceptos    = NULL;
-  Retencion_list_t *retenciones = NULL;
-  Traslado_list_t *traslados    = NULL;
-  RegimenFiscal_list_t *regimen = NULL;
-  xmlChar *comprobante          = NULL;
-  int len                       = 0;
+  xmlDocPtr doc                     = NULL;
+  xmlNsPtr cfdi_ns                  = NULL;
+  xmlNsPtr tfd_ns                   = NULL;
+  xmlNodePtr Comprobante            = NULL;
+  xmlNodePtr Emisor                 = NULL;
+  xmlNodePtr RegimenFiscal          = NULL;
+  xmlNodePtr DomicilioFiscal        = NULL;
+  xmlNodePtr ExpedidoEn             = NULL;
+  xmlNodePtr Receptor               = NULL;
+  xmlNodePtr Domicilio              = NULL;
+  xmlNodePtr Conceptos              = NULL;
+  xmlNodePtr Concepto               = NULL;
+  xmlNodePtr Impuestos              = NULL;
+  xmlNodePtr Retenciones            = NULL;
+  xmlNodePtr Retencion              = NULL;
+  xmlNodePtr Traslados              = NULL;
+  xmlNodePtr Traslado               = NULL;
+  xmlNodePtr Complemento            = NULL;
+  xmlNodePtr TimbreFiscalDigital    = NULL;
+  MetodoDePago_list_t *metodos      = NULL;
+  xmlChar *metodoDePago             = NULL;
+  Concepto_list_t *conceptos        = NULL;
+  Retencion_list_t *retenciones     = NULL;
+  Traslado_list_t *traslados        = NULL;
+  RegimenFiscal_list_t *regimen     = NULL;
+  xmlChar *comprobante              = NULL;
+  int len                           = 0;
 
   doc = xmlNewDoc((const xmlChar *)"1.0");
   if ( doc == NULL ) {
@@ -1410,8 +1452,21 @@ n", __FILE__, __LINE__);
   xmlNewProp(Comprobante, (const xmlChar *)"subTotal", cfdi->subTotal);
   xmlNewProp(Comprobante, (const xmlChar *)"total", cfdi->total);
   xmlNewProp(Comprobante, (const xmlChar *)"tipoDeComprobante", cfdi->tipoDeComprobante);
-  xmlNewProp(Comprobante, (const xmlChar *)"metodoDePago", cfdi->metodoDePago);
   xmlNewProp(Comprobante, (const xmlChar *)"LugarExpedicion", cfdi->LugarExpedicion);
+
+  /*
+   * Ahora haz un loop sobre los posibles diferentes metodos de pago,
+   * y crea un unico string para todos los metodos de pago separados por
+   * una coma.
+   */
+  metodos = cfdi->metodoDePago;
+  while ( metodos != NULL ) {
+
+    metodoDePago = xmlStrncatNew(cfdi->metodoDePago->metodoDePago,
+				 (const xmlChar *)"", -1);
+    metodos = metodos->next;
+  }
+  xmlNewProp(Comprobante, (const xmlChar *)"metodoDePago", metodoDePago);
 
   /* Ahora los atributos opcionales */
   if ( cfdi->serie != NULL ) {

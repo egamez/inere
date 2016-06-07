@@ -70,7 +70,7 @@ extern int asigna_total(Comprobante_t *cfdi,
 			unsigned char *total);
 extern int asigna_tipoDeComprobante(Comprobante_t *cfdi,
 				    unsigned char *tipoDeComprobante);
-extern int asigna_metodoDePago(Comprobante_t *cfdi,
+extern int agrega_metodoDePago(Comprobante_t *cfdi,
 			       unsigned char *metodoDePago);
 extern int asigna_LugarExpedicion(Comprobante_t *cfdi,
 				  unsigned char *LugarExpedicion);

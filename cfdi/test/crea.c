@@ -24,8 +24,8 @@ main(void)
   asigna_subTotal(factura, (unsigned char *)"100.00");
   asigna_total(factura, (unsigned char *)"116.00");
   asigna_tipoDeComprobante(factura, (unsigned char *)"ingreso");
-  asigna_metodoDePago(factura, (unsigned char *)"efectivo");
   asigna_LugarExpedicion(factura, (unsigned char *)"Mi casa");
+  agrega_metodoDePago(factura, (unsigned char *)"efectivo");
 
   /* Agrega los datos del emisor */
   agrega_Emisor(factura, (unsigned char *)"GAFA7701266V2", (unsigned char *)"Alma Delia Gámez Flores");

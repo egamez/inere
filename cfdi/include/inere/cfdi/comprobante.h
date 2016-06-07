@@ -139,36 +139,42 @@ typedef struct _Addenda {
   unsigned char *addenda;
 } Addenda_t;
 
+typedef struct _MetodoDePago_list {
+  unsigned char *metodoDePago;
+  unsigned int  size;
+  struct _MetodoDePago_list *next;
+} MetodoDePago_list_t;
+
 typedef struct _Comprobante {
-  unsigned char   *version;
-  unsigned char   *serie;
-  unsigned char   *folio;
-  unsigned char   *fecha;
-  unsigned char   *sello;
-  unsigned char   *formaDePago;
-  unsigned char   *noCertificado;
-  unsigned char   *certificado;
-  unsigned char   *condicionesDePago;
-  unsigned char   *subTotal;
-  unsigned char   *descuento;
-  unsigned char   *motivoDescuento;
-  unsigned char   *TipoCambio;
-  unsigned char   *Moneda;
-  unsigned char   *total;
-  unsigned char   *tipoDeComprobante;
-  unsigned char   *metodoDePago;
-  unsigned char   *LugarExpedicion;
-  unsigned char   *NumCtaPago;
-  unsigned char   *FolioFiscalOrig;
-  unsigned char   *SerieFolioFiscalOrig;
-  unsigned char   *FechaFolioFiscalOrig;
-  unsigned char   *MontoFolioFiscalOrig;
-  Emisor_t        *Emisor;
-  Receptor_t      *Receptor;
-  Concepto_list_t *Conceptos;
-  Impuestos_t     *Impuestos;
-  Complemento_t   *Complemento;
-  Addenda_t       *Addenda;
+  unsigned char       *version;
+  unsigned char       *serie;
+  unsigned char       *folio;
+  unsigned char       *fecha;
+  unsigned char       *sello;
+  unsigned char       *formaDePago;
+  unsigned char       *noCertificado;
+  unsigned char       *certificado;
+  unsigned char       *condicionesDePago;
+  unsigned char       *subTotal;
+  unsigned char       *descuento;
+  unsigned char       *motivoDescuento;
+  unsigned char       *TipoCambio;
+  unsigned char       *Moneda;
+  unsigned char       *total;
+  unsigned char       *tipoDeComprobante;
+  unsigned char       *LugarExpedicion;
+  unsigned char       *NumCtaPago;
+  unsigned char       *FolioFiscalOrig;
+  unsigned char       *SerieFolioFiscalOrig;
+  unsigned char       *FechaFolioFiscalOrig;
+  unsigned char       *MontoFolioFiscalOrig;
+  MetodoDePago_list_t *metodoDePago;
+  Emisor_t            *Emisor;
+  Receptor_t          *Receptor;
+  Concepto_list_t     *Conceptos;
+  Impuestos_t         *Impuestos;
+  Complemento_t       *Complemento;
+  Addenda_t           *Addenda;
 } Comprobante_t;
 
 #ifdef __cplusplus

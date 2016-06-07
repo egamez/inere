@@ -109,8 +109,9 @@ lee_cfdi(const char *filename, const int verbose)
   cfdi->subTotal          = xmlGetProp(node, (const xmlChar *)"subTotal");
   cfdi->total             = xmlGetProp(node, (const xmlChar *)"total");
   cfdi->tipoDeComprobante = xmlGetProp(node, (const xmlChar *)"tipoDeComprobante");
-  cfdi->metodoDePago      = xmlGetProp(node, (const xmlChar *)"metodoDePago");
   cfdi->LugarExpedicion   = xmlGetProp(node, (const xmlChar *)"LugarExpedicion");
+  /* Ahora crea la lista con los diferentes metodos de pago */
+  /**** cfdi->metodoDePago      = xmlGetProp(node, (const xmlChar *)"metodoDePago"); *****/
 
   /* Ahora algunos atributos opcionales */
   cfdi->serie             = xmlGetProp(node, (const xmlChar *)"serie");
