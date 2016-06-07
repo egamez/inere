@@ -10,6 +10,6 @@ nobase_dist_include_HEADERS = $(top_srcdir)/include/inere/envia/non_ascii.h \
 			$(top_srcdir)/include/inere/envia/base64.h \
 			$(top_srcdir)/include/inere/envia/genera_cadena.h
 
-INCLUDES = -I$(top_srcdir)/include $(CURL_INCLUDES) $(UUID_INCLUDES)
+AM_CPPFLAGS = -I$(top_srcdir)/include $(CURL_INCLUDES) $(UUID_INCLUDES)
 
 AM_CFLAGS = -Wall -Wextra -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -Wuninitialized -Wmissing-declarations -Winit-self -ansi -pedantic -pthread -pedantic-errors -D_GNU_SOURCE -funsigned-char
