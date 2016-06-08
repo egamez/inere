@@ -1462,11 +1462,25 @@ n", __FILE__, __LINE__);
   metodos = cfdi->metodoDePago;
   while ( metodos != NULL ) {
 
-    metodoDePago = xmlStrncatNew(cfdi->metodoDePago->metodoDePago,
-				 (const xmlChar *)"", -1);
+    /* Verifica si esta es la primera entrada */
+    if ( metodoDePago == NULL ) {
+      /* Solo copia el metodo de pago asignado */
+      metodoDePago = xmlStrdup(metodos->metodoDePago);
+
+    } else {
+      /* Aqui debemos de agregar, al ya existente, este nuevo metodo de pago */
+      xmlChar *tmp_metodo = xmlStrdup(metodoDePago);
+      xmlFree(metodoDePago);
+      metodoDePago = xmlStrncat(xmlStrncatNew((const xmlChar *)", ",
+					       tmp_metodo, -1),
+				metodos->metodoDePago, -1);
+      xmlFree(tmp_metodo);
+    }
     metodos = metodos->next;
   }
   xmlNewProp(Comprobante, (const xmlChar *)"metodoDePago", metodoDePago);
+  /* Ahora libera la memeoria consumida */
+  xmlFree(metodoDePago);
 
   /* Ahora los atributos opcionales */
   if ( cfdi->serie != NULL ) {
