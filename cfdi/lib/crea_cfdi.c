@@ -1471,9 +1471,9 @@ n", __FILE__, __LINE__);
       /* Aqui debemos de agregar, al ya existente, este nuevo metodo de pago */
       xmlChar *tmp_metodo = xmlStrdup(metodoDePago);
       xmlFree(metodoDePago);
-      metodoDePago = xmlStrncat(xmlStrncatNew((const xmlChar *)", ",
-					       tmp_metodo, -1),
-				metodos->metodoDePago, -1);
+      metodoDePago = xmlStrncatNew(xmlStrncatNew(tmp_metodo,
+						 (const xmlChar *)", ", -1),
+				   metodos->metodoDePago, -1);
       xmlFree(tmp_metodo);
     }
     metodos = metodos->next;
