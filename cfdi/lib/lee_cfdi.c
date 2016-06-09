@@ -52,6 +52,7 @@ int lee_datos_receptor(const xmlNodePtr node,
 int lee_datos_emisor(const xmlNodePtr node,
 		     Comprobante_t *cfdi,
 		     const int verbose);
+MetodoDePago_list_t *identifica_metodos_de_pago(xmlChar *metodoDePago);
 
 
 Comprobante_t *
@@ -111,7 +112,7 @@ lee_cfdi(const char *filename, const int verbose)
   cfdi->tipoDeComprobante = xmlGetProp(node, (const xmlChar *)"tipoDeComprobante");
   cfdi->LugarExpedicion   = xmlGetProp(node, (const xmlChar *)"LugarExpedicion");
   /* Ahora crea la lista con los diferentes metodos de pago */
-  /**** cfdi->metodoDePago      = xmlGetProp(node, (const xmlChar *)"metodoDePago"); *****/
+  cfdi->metodoDePago = identifica_metodos_de_pago(xmlGetProp(node, (const xmlChar *)"metodoDePago"));
 
   /* Ahora algunos atributos opcionales */
   cfdi->serie             = xmlGetProp(node, (const xmlChar *)"serie");
@@ -988,4 +989,19 @@ lee_datos_receptor(const xmlNodePtr node,
   cfdi->Receptor = receptor;
 
   return 0;
+}
+
+
+/**
+ * Funcion auxiliar para generar una lista con cada metodo de pago
+ * independiente.
+ *
+ * Se espera que el elemento 'metodoDePago' contenga las claves separadas
+ * por comas.
+ */
+MetodoDePago_list_t *
+identifica_metodos_de_pago(xmlChar *metodoDePago)
+{
+  MetodoDePago_list_t *metodos = NULL;
+  return metodos;
 }
