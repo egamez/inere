@@ -13,19 +13,31 @@ main(int argc, char* argv[])
 {
   int res = 0;
   int verbose = 0;
+  int i = 0;
 
   if ( argc < 3 ) {
-    fprintf(stderr, "Uso: %s STYLESHEET CFDIn", argv[0]);
+    fprintf(stderr, "Uso: %s STYLESHEET CFDI [ CFDIs ]\n", argv[0]);
     return 1;
   }
 
-  res = verifica_sello_digital(argv[2], argv[1], verbose);
+  for (i = 2; i < argc; i++) {
+    res = verifica_sello_digital(argv[i], argv[1], verbose);
 
-  if ( res ) {
-    /* Un error ocurrio */
-    fprintf(stderr, "El sello digital del CFDI no coincide.\n");
-  } else {
-    printf("Ok.\n");
+    if ( res ) {
+      /* Un error ocurrio */
+      if ( argc == 3 ) {
+	fprintf(stderr, "El sello digital del CFDI no coincide.\n");
+      } else {
+	fprintf(stderr, "%s: El sello digital del CFDI no coincide.\n",argv[i]);
+      }
+
+    } else {
+      if ( argc == 3 ) {
+	printf("Ok.\n");
+      } else {
+	printf("%s: Ok.\n", argv[i]);
+      }
+    }
   }
 
   return 0;
