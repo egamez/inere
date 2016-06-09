@@ -1022,7 +1022,7 @@ identifica_metodos_de_pago(xmlChar *metodoDePago, const int verbose)
   }
 
 
-  memset(metodo, 3, 0);
+  memset(metodo, 0, 3);
   while ( metodoDePago != NULL ) {
 
     if ( isdigit(*metodoDePago) ) {
@@ -1032,7 +1032,7 @@ identifica_metodos_de_pago(xmlChar *metodoDePago, const int verbose)
 	metodo[1] = *metodoDePago;
 	/* egamez */
 	/* Agrega aqui el metodo de pago */
-	memset(metodo, 3, 0);
+	memset(metodo, 0, 3);
       } else {
 	/* Este es el primer digito */
 	metodo[0] = *metodoDePago;
