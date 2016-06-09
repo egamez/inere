@@ -30,6 +30,7 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include <libxml/tree.h>
 
@@ -52,7 +53,8 @@ int lee_datos_receptor(const xmlNodePtr node,
 int lee_datos_emisor(const xmlNodePtr node,
 		     Comprobante_t *cfdi,
 		     const int verbose);
-MetodoDePago_list_t *identifica_metodos_de_pago(xmlChar *metodoDePago);
+MetodoDePago_list_t *identifica_metodos_de_pago(xmlChar *metodoDePago,
+						const int verbose);
 
 
 Comprobante_t *
@@ -112,7 +114,7 @@ lee_cfdi(const char *filename, const int verbose)
   cfdi->tipoDeComprobante = xmlGetProp(node, (const xmlChar *)"tipoDeComprobante");
   cfdi->LugarExpedicion   = xmlGetProp(node, (const xmlChar *)"LugarExpedicion");
   /* Ahora crea la lista con los diferentes metodos de pago */
-  cfdi->metodoDePago = identifica_metodos_de_pago(xmlGetProp(node, (const xmlChar *)"metodoDePago"));
+  cfdi->metodoDePago = identifica_metodos_de_pago(xmlGetProp(node, (const xmlChar *)"metodoDePago"), verbose);
 
   /* Ahora algunos atributos opcionales */
   cfdi->serie             = xmlGetProp(node, (const xmlChar *)"serie");
@@ -997,11 +999,47 @@ lee_datos_receptor(const xmlNodePtr node,
  * independiente.
  *
  * Se espera que el elemento 'metodoDePago' contenga las claves separadas
- * por comas.
+ * por comas o espacios.
  */
 MetodoDePago_list_t *
-identifica_metodos_de_pago(xmlChar *metodoDePago)
+identifica_metodos_de_pago(xmlChar *metodoDePago, const int verbose)
 {
   MetodoDePago_list_t *metodos = NULL;
+  char metodo[3];
+
+  if ( metodoDePago == NULL ) {
+    if ( verbose ) {
+      fprintf(stderr, "%s:%d Error. Metodo de pago NUL\n", __FILE__, __LINE__);
+    }
+    return metodos;
+  }
+
+  /* Crea la lista */
+  metodos = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
+  if ( metodos == NULL ) {
+    fprintf(stderr, "%s:%d Error al momento de reservar memoria para este metodo de pago:%s\n", __FILE__, __LINE__, metodoDePago);
+    return metodos;
+  }
+
+
+  memset(metodo, 3, 0);
+  while ( metodoDePago != NULL ) {
+
+    if ( isdigit(*metodoDePago) ) {
+      /* Este es uno de los caracteres que estamos buscando */
+      if ( strlen(metodo) == 1 ) {
+	/* Este esl el ultimo digito de la clave */
+	metodo[1] = *metodoDePago;
+	/* egamez */
+	/* Agrega aqui el metodo de pago */
+	memset(metodo, 3, 0);
+      } else {
+	/* Este es el primer digito */
+	metodo[0] = *metodoDePago;
+      }
+    }
+    metodoDePago++;
+  }
+
   return metodos;
 }
