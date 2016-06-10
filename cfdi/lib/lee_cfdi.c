@@ -184,6 +184,8 @@ termina_cfdi(Comprobante_t *cfdi)
   InformacionAduanera_list_t *info_a_tmp = NULL;
   RegimenFiscal_list_t *regimen1 = NULL;
   RegimenFiscal_list_t *regimen2 = NULL;
+  MetodoDePago_list_t *met1 = NULL;
+  MetodoDePago_list_t *met2 = NULL;
 
   /* El complemento */
   if ( cfdi->Complemento != NULL ) {
@@ -424,7 +426,6 @@ termina_cfdi(Comprobante_t *cfdi)
     xmlFree(cfdi->serie);
   }
   xmlFree(cfdi->LugarExpedicion);
-  xmlFree(cfdi->metodoDePago);
   xmlFree(cfdi->tipoDeComprobante);
   xmlFree(cfdi->total);
   xmlFree(cfdi->subTotal);
@@ -434,6 +435,16 @@ termina_cfdi(Comprobante_t *cfdi)
   xmlFree(cfdi->sello);
   xmlFree(cfdi->fecha);
   xmlFree(cfdi->version);
+
+  /* Ahora los posibles diversos metodos de pago */
+  met1 = cfdi->metodoDePago;
+  while ( met1 != NULL ) {
+    met2 = met1;
+    met1 = met1->next;
+    xmlFree(met2->metodoDePago);
+    free(met2);
+  }
+  cfdi->metodoDePago = NULL;
 
   /* Y finalmente */
   free(cfdi);
@@ -1005,6 +1016,8 @@ MetodoDePago_list_t *
 identifica_metodos_de_pago(xmlChar *metodoDePago, const int verbose)
 {
   MetodoDePago_list_t *metodos = NULL;
+  MetodoDePago_list_t *current = NULL;
+  MetodoDePago_list_t *tmp = NULL;
   char metodo[3];
 
   if ( metodoDePago == NULL ) {
@@ -1030,9 +1043,18 @@ identifica_metodos_de_pago(xmlChar *metodoDePago, const int verbose)
       if ( strlen(metodo) == 1 ) {
 	/* Este esl el ultimo digito de la clave */
 	metodo[1] = *metodoDePago;
-	/* egamez */
-	/* Agrega aqui el metodo de pago */
+	tmp = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
+	tmp->metodoDePago = xmlCharStrdup(metodo);
+
 	memset(metodo, 0, 3);
+
+	current = metodos;
+	while ( current->next != NULL ) {
+	  current = current->next;
+	}
+	current->next = tmp;
+	current->size++;
+
       } else {
 	/* Este es el primer digito */
 	metodo[0] = *metodoDePago;
