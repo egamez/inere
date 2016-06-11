@@ -53,8 +53,7 @@ int lee_datos_receptor(const xmlNodePtr node,
 int lee_datos_emisor(const xmlNodePtr node,
 		     Comprobante_t *cfdi,
 		     const int verbose);
-MetodoDePago_list_t *identifica_metodos_de_pago(xmlChar *metodoDePago,
-						const int verbose);
+int identifica_metodos_de_pago(Comprobante_t *cfdi, const int verbose);
 
 
 Comprobante_t *
@@ -64,6 +63,7 @@ lee_cfdi(const char *filename, const int verbose)
   xmlNodePtr node = NULL;
   xmlNodePtr cur = NULL;
   Comprobante_t *cfdi = NULL;
+  int res = 0;
 
   /* Hay dos posibilidades:
    *
@@ -113,8 +113,15 @@ lee_cfdi(const char *filename, const int verbose)
   cfdi->total             = xmlGetProp(node, (const xmlChar *)"total");
   cfdi->tipoDeComprobante = xmlGetProp(node, (const xmlChar *)"tipoDeComprobante");
   cfdi->LugarExpedicion   = xmlGetProp(node, (const xmlChar *)"LugarExpedicion");
+  cfdi->metodoDePago      = xmlGetProp(node, (const xmlChar *)"metodoDePago");
+
   /* Ahora crea la lista con los diferentes metodos de pago */
-  cfdi->metodoDePago = identifica_metodos_de_pago(xmlGetProp(node, (const xmlChar *)"metodoDePago"), verbose);
+  res = identifica_metodos_de_pago(cfdi, verbose);
+  if ( !res ) {
+    /* Un error ocurrio. Ya que es un parametro obligatorio, no deberia de
+     * ser correcto continuar */
+    fprintf(stderr, "%s:%d Error. No fue posible identificar metodo de pago alguno, error: %d\n", __FILE__, __LINE__, res);
+  }
 
   /* Ahora algunos atributos opcionales */
   cfdi->serie             = xmlGetProp(node, (const xmlChar *)"serie");
@@ -437,14 +444,15 @@ termina_cfdi(Comprobante_t *cfdi)
   xmlFree(cfdi->version);
 
   /* Ahora los posibles diversos metodos de pago */
-  met1 = cfdi->metodoDePago;
+  met1 = cfdi->MetodosDePago;
   while ( met1 != NULL ) {
     met2 = met1;
     met1 = met1->next;
     xmlFree(met2->metodoDePago);
     free(met2);
   }
-  cfdi->metodoDePago = NULL;
+  cfdi->MetodosDePago = NULL;
+  xmlFree(cfdi->metodoDePago);
 
   /* Y finalmente */
   free(cfdi);
@@ -1011,38 +1019,40 @@ lee_datos_receptor(const xmlNodePtr node,
  *
  * Se espera que el elemento 'metodoDePago' contenga las claves separadas
  * por comas o espacios.
+ *
+ *	1	cfdi NUL
+ *	2	Not enough memory
  */
-MetodoDePago_list_t *
-identifica_metodos_de_pago(xmlChar *metodoDePago, const int verbose)
+int
+identifica_metodos_de_pago(Comprobante_t *cfdi, const int verbose)
 {
   MetodoDePago_list_t *metodos = NULL;
   MetodoDePago_list_t *current = NULL;
   MetodoDePago_list_t *tmp = NULL;
   char metodo[3];
 
-  if ( metodoDePago == NULL ) {
+  if ( cfdi == NULL ) {
     if ( verbose ) {
-      fprintf(stderr, "%s:%d Error. Metodo de pago NUL\n", __FILE__, __LINE__);
+      fprintf(stderr, "%s:%d Error. CFDI de pago NUL\n", __FILE__, __LINE__);
     }
-    return metodos;
+    return 1;
   }
 
-  /* Crea la lista */
   metodos = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
   if ( metodos == NULL ) {
-    fprintf(stderr, "%s:%d Error al momento de reservar memoria para este metodo de pago:%s\n", __FILE__, __LINE__, metodoDePago);
-    return metodos;
+    fprintf(stderr, "%s:%d Error al momento de reservar memoria para este metodo de pago:%s\n", __FILE__, __LINE__, cfdi->metodoDePago);
+    return 2;
   }
 
-
+  /*** ***/
   memset(metodo, 0, 3);
-  while ( metodoDePago != NULL ) {
+  while ( cfdi->metodoDePago != NULL ) {
 
-    if ( isdigit(*metodoDePago) ) {
+    if ( isdigit(*(cfdi->metodoDePago)) ) {
       /* Este es uno de los caracteres que estamos buscando */
       if ( strlen(metodo) == 1 ) {
 	/* Este esl el ultimo digito de la clave */
-	metodo[1] = *metodoDePago;
+	metodo[1] = *(cfdi->metodoDePago);
 	tmp = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
 	tmp->metodoDePago = xmlCharStrdup(metodo);
 
@@ -1057,11 +1067,11 @@ identifica_metodos_de_pago(xmlChar *metodoDePago, const int verbose)
 
       } else {
 	/* Este es el primer digito */
-	metodo[0] = *metodoDePago;
+	metodo[0] = *(cfdi->metodoDePago);
       }
     }
-    metodoDePago++;
+    cfdi->metodoDePago++;
   }
 
-  return metodos;
+  return 0;
 }

@@ -115,6 +115,7 @@ crea_comprobante(unsigned char *version)
       cfdi->total                = NULL;
       cfdi->tipoDeComprobante    = NULL;
       cfdi->metodoDePago         = NULL;
+      cfdi->MetodosDePago        = NULL;
       cfdi->LugarExpedicion      = NULL;
       cfdi->NumCtaPago           = NULL;
       cfdi->FolioFiscalOrig      = NULL;
@@ -219,13 +220,16 @@ termina_comprobante(Comprobante_t *cfdi)
   }
   free(cfdi->Emisor);
 
-  met1 = cfdi->metodoDePago;
+  met1 = cfdi->MetodosDePago;
   while ( met1 != NULL ) {
     met2 = met1;
     met1 = met1->next;
     free(met2);
   }
-  cfdi->metodoDePago = NULL;
+  cfdi->MetodosDePago = NULL;
+  if ( cfdi->metodoDePago != NULL ) {
+    xmlFree(cfdi->metodoDePago);
+  }
 
   free(cfdi);
   cfdi = NULL;
@@ -590,16 +594,16 @@ agrega_metodoDePago(Comprobante_t *cfdi, unsigned char *metodoDePago)
   tmp->next = NULL;
 
   /* Verifica si debemos de agregar este metodo de pago, o si es el primero */
-  if ( cfdi->metodoDePago == NULL ) {
+  if ( cfdi->MetodosDePago == NULL ) {
 
     /* Esta es la primera entrada */
-    cfdi->metodoDePago = tmp;
-    cfdi->metodoDePago->size = 1;
+    cfdi->MetodosDePago = tmp;
+    cfdi->MetodosDePago->size = 1;
 
   } else {
 
     /* Agrega una entrada */
-    current = cfdi->metodoDePago;
+    current = cfdi->MetodosDePago;
     while ( current->next != NULL ) {
       current = current->next;
     }
@@ -1459,7 +1463,7 @@ n", __FILE__, __LINE__);
    * y crea un unico string para todos los metodos de pago separados por
    * una coma.
    */
-  metodos = cfdi->metodoDePago;
+  metodos = cfdi->MetodosDePago;
   while ( metodos != NULL ) {
 
     /* Verifica si esta es la primera entrada */
@@ -1478,6 +1482,7 @@ n", __FILE__, __LINE__);
     }
     metodos = metodos->next;
   }
+  cfdi->metodoDePago = xmlStrdup(metodoDePago);
   xmlNewProp(Comprobante, (const xmlChar *)"metodoDePago", metodoDePago);
   /* Ahora libera la memeoria consumida */
   xmlFree(metodoDePago);

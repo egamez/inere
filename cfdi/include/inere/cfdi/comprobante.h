@@ -168,7 +168,8 @@ typedef struct _Comprobante {
   unsigned char       *SerieFolioFiscalOrig;
   unsigned char       *FechaFolioFiscalOrig;
   unsigned char       *MontoFolioFiscalOrig;
-  MetodoDePago_list_t *metodoDePago;
+  unsigned char	      *metodoDePago;
+  MetodoDePago_list_t *MetodosDePago;
   Emisor_t            *Emisor;
   Receptor_t          *Receptor;
   Concepto_list_t     *Conceptos;
