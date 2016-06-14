@@ -117,7 +117,7 @@ lee_cfdi(const char *filename, const int verbose)
 
   /* Ahora crea la lista con los diferentes metodos de pago */
   res = identifica_metodos_de_pago(cfdi, verbose);
-  if ( !res ) {
+  if ( res ) {
     /* Un error ocurrio. Ya que es un parametro obligatorio, no deberia de
      * ser correcto continuar */
     fprintf(stderr, "%s:%d Error. No fue posible identificar metodo de pago alguno, error: %d\n", __FILE__, __LINE__, res);
@@ -1029,6 +1029,7 @@ identifica_metodos_de_pago(Comprobante_t *cfdi, const int verbose)
   MetodoDePago_list_t *metodos = NULL;
   MetodoDePago_list_t *current = NULL;
   MetodoDePago_list_t *tmp = NULL;
+  xmlChar *metodoDePago = NULL;
   char metodo[3];
 
   if ( cfdi == NULL ) {
@@ -1038,39 +1039,54 @@ identifica_metodos_de_pago(Comprobante_t *cfdi, const int verbose)
     return 1;
   }
 
-  metodos = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
-  if ( metodos == NULL ) {
+  current = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
+  if ( current == NULL ) {
     fprintf(stderr, "%s:%d Error al momento de reservar memoria para este metodo de pago:%s\n", __FILE__, __LINE__, cfdi->metodoDePago);
     return 2;
   }
 
-  /*** ***/
-  memset(metodo, 0, 3);
-  while ( cfdi->metodoDePago != NULL ) {
+  cfdi->MetodosDePago = current;
 
-    if ( isdigit(*(cfdi->metodoDePago)) ) {
+  memset(metodo, 0, 3);
+  metodoDePago = cfdi->metodoDePago;
+  while ( *metodoDePago ) {
+
+    if ( isdigit(*metodoDePago) ) {
+
       /* Este es uno de los caracteres que estamos buscando */
       if ( strlen(metodo) == 1 ) {
-	/* Este esl el ultimo digito de la clave */
-	metodo[1] = *(cfdi->metodoDePago);
+
+	/* Este es el ultimo digito de la clave */
+	metodo[1] = *metodoDePago;
 	tmp = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
 	tmp->metodoDePago = xmlCharStrdup(metodo);
+	printf("address: %x\n", tmp->metodoDePago);
 
-	memset(metodo, 0, 3);
+	if ( metodos == NULL ) {
+	  /* Esta es la primera entrada */
+	  metodos = tmp;
+	  metodos->next = NULL;
+	  metodos->size = 1;
+	  current = metodos;
 
-	current = metodos;
-	while ( current->next != NULL ) {
-	  current = current->next;
+	} else {
+
+	  while ( current->next != NULL ) {
+	    current = current->next;
+	  }
+	  tmp->next = NULL;
+	  current = tmp;
+	  current->size++;
+
 	}
-	current->next = tmp;
-	current->size++;
+	memset(metodo, 0, 3);
 
       } else {
 	/* Este es el primer digito */
-	metodo[0] = *(cfdi->metodoDePago);
+	metodo[0] = *metodoDePago;
       }
     }
-    cfdi->metodoDePago++;
+    metodoDePago++;
   }
 
   return 0;

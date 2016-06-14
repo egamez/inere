@@ -251,8 +251,10 @@ main(int argc, const char *argv[])
   printf("\n\n\nTotal: %s\n", cfdi->total);
   printf("\n\n\n");
   printf("Fecha: %s\n", cfdi->fecha);
-  if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
-    printf("Folio fiscal: %s\n", cfdi->Complemento->TimbreFiscalDigital->UUID);
+  if ( cfdi->Complemento != NULL ) {
+    if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
+      printf("Folio fiscal: %s\n", cfdi->Complemento->TimbreFiscalDigital->UUID);
+    }
   }
 
   termina_cfdi(cfdi);
