@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, L3a,
+ * Copyright (c) 2014-2016, L3a,
  *                          Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
@@ -1045,40 +1045,51 @@ identifica_metodos_de_pago(Comprobante_t *cfdi, const int verbose)
     return 2;
   }
 
+  /* Asigna la lista a la representacion del CFDI */
   cfdi->MetodosDePago = current;
 
-  memset(metodo, 0, 3);
+  /* Copia el string a utilizar para el analisis */
   metodoDePago = cfdi->metodoDePago;
+
+  /* Limpia el metodo actual */
+  memset(metodo, 0, 3);
+
+  /* Inicia el loop para identificar las claves de los metodos de pago */
   while ( *metodoDePago ) {
 
     if ( isdigit(*metodoDePago) ) {
-
       /* Este es uno de los caracteres que estamos buscando */
+
       if ( strlen(metodo) == 1 ) {
 
 	/* Este es el ultimo digito de la clave */
 	metodo[1] = *metodoDePago;
-	tmp = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
-	tmp->metodoDePago = xmlCharStrdup(metodo);
-	printf("address: %x\n", tmp->metodoDePago);
 
+	/* Ahora debemos de agregar este metodo a la lista de metodos */
 	if ( metodos == NULL ) {
-	  /* Esta es la primera entrada */
-	  metodos = tmp;
+
+	  /* Este es el primer metodo para agregar a la lista */
+	  metodos = current;
+	  metodos->metodoDePago = xmlCharStrdup(metodo);
 	  metodos->next = NULL;
 	  metodos->size = 1;
-	  current = metodos;
 
 	} else {
 
+	  /* Ya existe al menos un metodo de pago en la lista, agrega otro */
 	  while ( current->next != NULL ) {
 	    current = current->next;
 	  }
+	  tmp = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
+	  tmp->metodoDePago = xmlCharStrdup(metodo);
 	  tmp->next = NULL;
-	  current = tmp;
-	  current->size++;
 
+	  /* Asigna este metodo al final de la lista */
+	  current->next = tmp;
+	  current->size++;
 	}
+
+	/* Limpia este metodo para el siguiente */
 	memset(metodo, 0, 3);
 
       } else {

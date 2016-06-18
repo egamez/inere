@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, L3a,
+ * Copyright (c) 2014-2016, L3a,
  *                          Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
@@ -39,6 +39,7 @@ main(int argc, const char *argv[])
   Traslado_list_t *traslado = NULL;
   Retencion_list_t *retencion = NULL;
   InformacionAduanera_list_t *info = NULL;
+  MetodoDePago_list_t *metodos = NULL;
 
   if ( argc < 2 ) {
     fprintf(stderr, "Uso: %s  CFDI\n", argv[0]);
@@ -254,7 +255,16 @@ main(int argc, const char *argv[])
   if ( cfdi->Complemento != NULL ) {
     if ( cfdi->Complemento->TimbreFiscalDigital != NULL ) {
       printf("Folio fiscal: %s\n", cfdi->Complemento->TimbreFiscalDigital->UUID);
+    } else {
+      printf("No hay folio fiscal!\n");
     }
+  }
+
+  /* Imprime ahora los metodos de pago */
+  metodos = cfdi->MetodosDePago;
+  while ( metodos != NULL ) {
+    printf("Metodo de pago: %s\n", metodos->metodoDePago);
+    metodos = metodos->next;
   }
 
   termina_cfdi(cfdi);
