@@ -141,7 +141,7 @@ typedef struct _Addenda {
 
 typedef struct _MetodoDePago_list {
   unsigned char *metodoDePago;
-  unsigned int  size;
+  unsigned int  tipo;
   struct _MetodoDePago_list *next;
 } MetodoDePago_list_t;
 
