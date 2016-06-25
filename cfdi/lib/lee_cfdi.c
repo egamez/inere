@@ -1030,7 +1030,8 @@ identifica_metodos_de_pago(Comprobante_t *cfdi, const int verbose)
   MetodoDePago_list_t *current = NULL;
   MetodoDePago_list_t *tmp = NULL;
   xmlChar *metodoDePago = NULL;
-  char metodo[3];
+  char metodo[80];
+  int i = 0;
 
   if ( cfdi == NULL ) {
     if ( verbose ) {
@@ -1052,9 +1053,11 @@ identifica_metodos_de_pago(Comprobante_t *cfdi, const int verbose)
   metodoDePago = cfdi->metodoDePago;
 
   /* Limpia el metodo actual */
-  memset(metodo, 0, 3);
+  memset(metodo, 0, 80);
 
-  /* Inicia el loop para identificar las claves de los metodos de pago */
+  /* Inicia el loop para identificar las claves de los metodos de pago.
+     Metodo de Pago tipo 1.
+   */
   while ( *metodoDePago ) {
 
     if ( isdigit(*metodoDePago) ) {
@@ -1064,6 +1067,7 @@ identifica_metodos_de_pago(Comprobante_t *cfdi, const int verbose)
 
 	/* Este es el ultimo digito de la clave */
 	metodo[1] = *metodoDePago;
+	metodo[2] = 0; /* Asegurate de terminar el string */
 
 	/* Ahora debemos de agregar este metodo a la lista de metodos */
 	if ( metodos == NULL ) {
@@ -1071,8 +1075,8 @@ identifica_metodos_de_pago(Comprobante_t *cfdi, const int verbose)
 	  /* Este es el primer metodo para agregar a la lista */
 	  metodos = current;
 	  metodos->metodoDePago = xmlCharStrdup(metodo);
+	  metodos->tipo = 1;
 	  metodos->next = NULL;
-	  metodos->size = 1;
 
 	} else {
 
@@ -1082,15 +1086,15 @@ identifica_metodos_de_pago(Comprobante_t *cfdi, const int verbose)
 	  }
 	  tmp = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
 	  tmp->metodoDePago = xmlCharStrdup(metodo);
+	  tmp->tipo = 1;
 	  tmp->next = NULL;
 
 	  /* Asigna este metodo al final de la lista */
 	  current->next = tmp;
-	  current->size++;
 	}
 
 	/* Limpia este metodo para el siguiente */
-	memset(metodo, 0, 3);
+	memset(metodo, 0, 80);
 
       } else {
 	/* Este es el primer digito */
@@ -1098,6 +1102,99 @@ identifica_metodos_de_pago(Comprobante_t *cfdi, const int verbose)
       }
     }
     metodoDePago++;
+  }
+
+  if ( metodos == NULL ) {
+    /* Aun no ha sido leido metodo alguno, muy posiblemente se trate
+     * de alguna leyenda y no una clave. En este caso se espera que los
+     * metodos de pago vengan separados por comas.
+     */
+
+    /* Lee nuevamente el metodo de pago */
+    metodoDePago = cfdi->metodoDePago;
+
+    /* Inicia el loop para identificar las diferentes leyendas del
+     * metodo de pago.
+     * Metodo de pago tipo 0
+     */
+    while ( *metodoDePago ) {
+
+      if ( *metodoDePago == ',' ) {
+	/* Este es el separado para algun otro metodo de pago.
+	 * Entonces agrega este metodo de pago a la lista.
+	 */
+
+	metodo[i++] = 0; /* Termina el string */
+
+	/* Ahora agrega este metodo a la lista */
+	if ( metodos == NULL ) {
+
+	  /* Este es el primer metodo para agregar a la lista */
+	  metodos = current;
+	  metodos->metodoDePago = xmlCharStrdup(metodo);
+	  metodos->tipo = 0;
+	  metodos->next = NULL;
+
+	} else {
+
+	  /* Ya existe al menos un metodo de pago en la lista, agrega otro */
+	  while ( current->next != NULL ) {
+	    current = current->next;
+	  }
+	  tmp = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
+	  tmp->metodoDePago = xmlCharStrdup(metodo);
+	  tmp->tipo = 0;
+	  tmp->next = NULL;
+
+	  /* Asigna este metodo al final de la lista */
+	  current->next = tmp;
+	}
+
+	memset(metodo, 0, 80);
+	i = 0;
+
+      } else {
+
+	/* Continua agregando caracteres */
+	metodo[i++] = *metodoDePago;
+
+      }
+
+      metodoDePago++;
+    }
+
+    /* Es posible que aun tengamos algun metodo de pago todavia */
+    if ( i > 1 ) {
+      /* Si, todavia tenemos un metodo por agregar */
+
+      /* termina el string */
+      metodo[i] = 0;
+
+      if ( metodos == NULL ) {
+
+	/* Este es el primer metodo para agregar a la lista */
+	metodos = current;
+	metodos->metodoDePago = xmlCharStrdup(metodo);
+	metodos->tipo = 0;
+	metodos->next = NULL;
+
+      } else {
+
+	/* Ya existe al menos un metodo de pago en la lista, agrega otro */
+	while ( current->next != NULL ) {
+	  current = current->next;
+	}
+	tmp = (MetodoDePago_list_t *)malloc(sizeof(MetodoDePago_list_t));
+	tmp->metodoDePago = xmlCharStrdup(metodo);
+	tmp->tipo = 0;
+	tmp->next = NULL;
+
+	/* Asigna este metodo al final de la lista */
+	current->next = tmp;
+      }
+
+    }
+
   }
 
   return 0;

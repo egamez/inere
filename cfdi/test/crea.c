@@ -25,9 +25,11 @@ main(void)
   asigna_total(factura, (unsigned char *)"116.00");
   asigna_tipoDeComprobante(factura, (unsigned char *)"ingreso");
   asigna_LugarExpedicion(factura, (unsigned char *)"Mi casa");
-  agrega_metodoDePago(factura, (unsigned char *)"01"); /* Efectivo */
-  agrega_metodoDePago(factura, (unsigned char *)"03"); /* transferencia */
-  agrega_metodoDePago(factura, (unsigned char *)"04"); /* T. de credito */
+  /*agrega_metodoDePago(factura, (unsigned char *)"01");  Efectivo */
+  /*agrega_metodoDePago(factura, (unsigned char *)"03");  transferencia */
+  /*agrega_metodoDePago(factura, (unsigned char *)"04");  T. de credito */
+  agrega_metodoDePago(factura, (unsigned char *)"NA");
+  agrega_metodoDePago(factura, (unsigned char *)"Efectivo");
 
   /* Agrega los datos del emisor */
   agrega_Emisor(factura, (unsigned char *)"GAFA7701266V2", (unsigned char *)"Alma Delia Gámez Flores");

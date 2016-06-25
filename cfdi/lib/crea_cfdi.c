@@ -598,7 +598,6 @@ agrega_metodoDePago(Comprobante_t *cfdi, unsigned char *metodoDePago)
 
     /* Esta es la primera entrada */
     cfdi->MetodosDePago = tmp;
-    cfdi->MetodosDePago->size = 1;
 
   } else {
 
@@ -608,7 +607,6 @@ agrega_metodoDePago(Comprobante_t *cfdi, unsigned char *metodoDePago)
       current = current->next;
     }
     current->next = tmp;
-    current->size++;
 
   }
 
