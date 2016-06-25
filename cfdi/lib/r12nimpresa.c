@@ -687,11 +687,13 @@ r12nimpresa(const char *input, const char *output,
   HPDF_REAL y = 0; /* Para la coordenada y en que se estará escribiendo */
   HPDF_REAL x = 0; /* Para la coordenada x en que se estará escribiendo */
 
-  Comprobante_t *cfdi = NULL;
+  Comprobante_t *cfdi           = NULL;
   RegimenFiscal_list_t *regimen = NULL;
-  Retencion_list_t *retencion = NULL;
-  Traslado_list_t *traslado = NULL;
-  cfdi_qrcode_t *qrcode = NULL;
+  Retencion_list_t *retencion   = NULL;
+  Traslado_list_t *traslado     = NULL;
+  cfdi_qrcode_t *qrcode         = NULL;
+  MetodoDePago_list_t *metodos  = NULL;
+  char *metodo                  = NULL;
 
   setlocale(LC_ALL, "");
 
@@ -1416,7 +1418,70 @@ r12nimpresa(const char *input, const char *output,
   HPDF_Page_TextOut(page, x, y, "Metodo de pago:");
   y -= line_width;
   HPDF_Page_SetFontAndSize(page, font, font_size);
-  lines = write_in_a_box(page, x, y, page_width - x - secc5_width, (char *)cfdi->metodoDePago);
+  metodos = cfdi->MetodosDePago;
+  metodo = (char *)calloc(120, sizeof(char));
+  while ( metodos != NULL ) {
+
+    /* Verifica si el metodo de pago es una clave o una leyenda
+     *
+     *	metodos->tipo = 0	Leyenda
+     *	metodos->tipo = 1	Clave
+     *
+     * En caso de ser una leyenda escribe el metodo de pago tal cual
+     * y en caso de tratarse de una clave, agrega la traduccion de la
+     * clave y pon entre parentesis la clave misma.
+     */
+    if ( metodos->tipo == 0 ) {
+      metodo = strcat(metodo, (char *)metodos->metodoDePago);
+
+    } else {
+      if (        strncmp((char *)metodos->metodoDePago, "01", 2) == 0 ) {
+	metodo = strncat(metodo, "Efectivo (01)", 13);
+
+      } else if ( strncmp((char *)metodos->metodoDePago, "02", 2) == 0 ) {
+	metodo = strncat(metodo, "Cheque nominativo (02)", 22);
+
+      } else if ( strncmp((char *)metodos->metodoDePago, "03", 2) == 0 ) {
+	metodo = strncat(metodo, "Transferencia electrónica de fondos (03)",41);
+
+      } else if ( strncmp((char *)metodos->metodoDePago, "04", 2) == 0 ) {
+	metodo = strncat(metodo, "Tarjeta de Crédito (04)", 24);
+
+      } else if ( strncmp((char *)metodos->metodoDePago, "05", 2) == 0 ) {
+	metodo = strncat(metodo, "Monedero Electrónico (05)", 26);
+
+      } else if ( strncmp((char *)metodos->metodoDePago, "06", 2) == 0 ) {
+	metodo = strncat(metodo, "Dinero Electrónico (06)", 24);
+
+      } else if ( strncmp((char *)metodos->metodoDePago, "08", 2) == 0 ) {
+	metodo = strncat(metodo, "Vales de Despensa (08)", 22);
+
+      } else if ( strncmp((char *)metodos->metodoDePago, "28", 2) == 0 ) {
+	metodo = strncat(metodo, "Tarjeta de Débito (28)", 23);
+
+      } else if ( strncmp((char *)metodos->metodoDePago, "29", 2) == 0 ) {
+	metodo = strncat(metodo, "Tarjeta de servicio (29)", 24);
+
+      } else if ( strncmp((char *)metodos->metodoDePago, "99", 2) == 0 ) {
+	metodo = strncat(metodo, "Otros (99)", 10);
+
+      } else {
+	metodo = strncat(metodo, "Otros", 5);
+	metodo = strncat(metodo, (char *)metodos->metodoDePago, 2);
+      }
+
+    }
+    metodos = metodos->next;
+
+    if ( metodos != NULL ) {
+      /* Agrega un separador */
+      metodo = strncat(metodo, ",", 1);
+    }
+
+  }
+  lines = write_in_a_box(page, x, y, page_width - x - secc5_width, metodo);
+  free(metodo);
+
 
   /* Condiciones de Pago */
   if ( cfdi->condicionesDePago != NULL ) {
