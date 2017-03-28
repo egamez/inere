@@ -37,6 +37,7 @@
 
 void local_png_write_data(png_structp png_ptr, png_bytep data, png_size_t length);
 int writePNG(QRcode *qrcode, cfdi_qrcode_t *code);
+int termina_cfdi_qrcode(cfdi_qrcode_t *code);
 
 void
 local_png_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
