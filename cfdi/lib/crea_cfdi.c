@@ -1771,6 +1771,9 @@ n", __FILE__, __LINE__);
 
   xmlFreeDoc(doc);
   xmlFreeNs(cfdi_ns);
+  if ( tfd_ns != NULL ) {
+    xmlFreeNs(tfd_ns);
+  }
 
   return comprobante;
 }
