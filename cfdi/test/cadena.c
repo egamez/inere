@@ -32,7 +32,7 @@ main(int argc, char *argv[])
       continue;
     }
 
-    res = genera_cadena_original(argv[1], cfdi, &cadena, verbose);
+    res = genera_cadena_original(argv[1], cfdi, NULL, &cadena, verbose);
     if ( res == 0 ) {
       /* Si fue posible extraer la cadena, imprime el resultado */
       printf("%s\n", cadena);
