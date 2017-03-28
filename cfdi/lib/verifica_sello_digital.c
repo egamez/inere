@@ -356,7 +356,7 @@ verifica_sello_digital(const char *filename, const char *stylesheet, const int v
   }
 
   /* Build the cadena oridigal */
-  genera_cadena_original(stylesheet, doc, cadena, verbose);
+  genera_cadena_original(stylesheet, doc, NULL, cadena, verbose);
   if ( *cadena == NULL ) {
     if ( verbose ) {
       fprintf(stderr, "No fue posible formar la cadena original del comprobante fiscal. No es posible realizar la verificación.\n");
