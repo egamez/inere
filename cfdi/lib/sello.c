@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, L3a,
+ * Copyright (c) 2014-2017, L3a,
  *                          Enrique Gámez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
@@ -25,10 +25,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * Instrucciones para remover la contraseña del certificado de llave privada:
+ * IMPORTANTE. Esta funcion solo podra firmar el hash la cadena con una
+ * llave privada sin password y en formato PEM
  *
- *	$ openssl x509 -in certificado-de-llave-publica.cer -inform DER -out certificado-de-llave-publica.cer.pem
-$ openssl pkcs8 -inform DER -in certificado-de-llave-privada.key -passin pass:AQUI-VA-EL-PASSWORD -out certificado-de-llave-privada.key.pem
+ * Instrucciones para remover la contraseña de la llave privada:
+ *	openssl pkcs8 -inform DER -in certificado-de-llave-privada.key -passin pass:AQUI-VA-EL-PASSWORD -out certificado-de-llave-privada.key.pem
  *
  */
 #ifndef INERE_CFDI_SELLO_H_
@@ -43,6 +44,7 @@ $ openssl pkcs8 -inform DER -in certificado-de-llave-privada.key -passin pass:AQ
 #include <stdlib.h>
 
 #include <openssl/evp.h>
+#include <openssl/pem.h>
 #include <openssl/err.h>
 
 /**
@@ -59,16 +61,16 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
   int read = 0;
   int len = 0;
   unsigned char *buffer = NULL;
-  const unsigned char *tmp;
   unsigned char signbuffer[1024];
   unsigned int signlen = 0;
   char *data = NULL;
   FILE *file = NULL;
+  BIO *key_bio = NULL;
   BIO* err = NULL;
   EVP_MD_CTX mdctx;
   EVP_PKEY *privateKey = NULL;
 
-  file = fopen(keyfile, "rb");
+  file = fopen(keyfile, "r");
   if ( file == NULL ) {
     /* An error ocurred */
     if ( verbose ) {
@@ -87,7 +89,6 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
   }
   len = ftell(file);
   rewind(file);
-
 
   buffer = (unsigned char *)calloc(len + 1, sizeof(unsigned char));
   read = fread(buffer, sizeof(unsigned char), len, file);
@@ -108,8 +109,9 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
   }
 
   /* Now convert the bytes to a EVP_PKEY structure */
-  tmp = buffer;
-  privateKey = d2i_AutoPrivateKey(NULL, &tmp, len);
+  /*privateKey = d2i_AutoPrivateKey(NULL, &tmp, len);*/
+  key_bio = BIO_new_mem_buf(buffer, -1);
+  privateKey = PEM_read_bio_PrivateKey(key_bio, NULL, NULL, NULL);
   if ( privateKey == NULL ) {
     if ( verbose ) {
       BIO_printf(err, "Error at reading the private key on %s.\n", keyfile);
@@ -118,7 +120,6 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
     free(buffer);
     return NULL;
   }
-  free(buffer);
 
   /* Add all digest algorithms to the table */
   OpenSSL_add_all_digests();
@@ -133,6 +134,7 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
     EVP_PKEY_free(privateKey);
     EVP_cleanup();
     BIO_free(err);
+    BIO_free(key_bio);
     return NULL;
   }
 
@@ -145,6 +147,7 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
     EVP_PKEY_free(privateKey);
     EVP_cleanup();
     BIO_free(err);
+    BIO_free(key_bio);
     return NULL;
   }
   if ( EVP_SignUpdate(&mdctx, cadena, strlen((char *)cadena)) == 0 ) {
@@ -155,6 +158,7 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
     EVP_PKEY_free(privateKey);
     EVP_cleanup();
     BIO_free(err);
+    BIO_free(key_bio);
     return NULL;
   }
 
@@ -168,6 +172,7 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
     EVP_PKEY_free(privateKey);
     EVP_cleanup();
     BIO_free(err);
+    BIO_free(key_bio);
     return NULL;
   }
 
@@ -175,6 +180,7 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
   EVP_PKEY_free(privateKey);
   EVP_cleanup();
   BIO_free(err);
+  BIO_free(key_bio);
 
   /* Now prepare the data to be base64 encoded */
   base64_encode_alloc((const char *)signbuffer, signlen, &data);
