@@ -58,13 +58,9 @@
 unsigned char *
 sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena, const int verbose)
 {
-  int read = 0;
-  int len = 0;
-  unsigned char *buffer = NULL;
   unsigned char signbuffer[1024];
   unsigned int signlen = 0;
   char *data = NULL;
-  FILE *file = NULL;
   BIO *key_bio = NULL;
   BIO* err = NULL;
   EVP_MD_CTX mdctx;
