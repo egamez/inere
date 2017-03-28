@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2015, L3a,
- *                     Enrique Gamez Flores <egamez@edisson.com.mx>
+ * Copyright (c) 2015-2017, L3a,
+ *                          Enrique Gamez Flores <egamez@edisson.com.mx>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,17 +37,13 @@
 
 #include <getopt.h>
 
-/**
- * http://stackoverflow.com/questions/5309471/getting-file-extension-in-c
- */
-
-/* Forward declaration */
+/* Forward declarations */
 void usage(void);
 char *substitute_filename_alloc(const char *filename);
 
 
 /**
- *
+ * http://stackoverflow.com/questions/5309471/getting-file-extension-in-c
  */
 char *
 substitute_filename_alloc(const char *filename)
@@ -137,7 +133,6 @@ main(int argc, char *argv[])
   int font_label_size = 0;
   int want_sucursal = 0;
   int want_verbose = 0;
-  int want_help = 0;
 
   /* options descriptor */
   static struct option longopts[] = {
@@ -211,24 +206,16 @@ main(int argc, char *argv[])
 
       case 'h':
 	/* help */
-	want_help = 1;
-	break;
-
-      case '?':
-	/* getopt_long already printed an error message. */
-	break;
+	usage();
+	return 0;
 
       default:
-	break;
+	usage();
+	return -1;
 
     }
   }
 
-  /* Check if help was selected */
-  if ( want_help ) {
-    usage();
-    return 0;
-  }
 
   /* Ahora, preparate para leer algunos argumento posicionales
    * los argumentos seran:
@@ -241,7 +228,10 @@ main(int argc, char *argv[])
    * la representacion impresa, no sea suministrado, el nombre se tomará
    * del nombre del CFDI, pero ahora con la extensión pdf
    */
-  if ( optind >= argc ) {
+  if ( optind < argc ) {
+    /* Lee la ruta del cfdi para el cual generaremos la representacion impresa*/
+    cfdi = argv[optind++];
+  } else {
     /* Esta es una situacion inusual, no fue proporcionado el CFDI, de
      * modo que no es posible general la representacion impresa
      */
@@ -249,10 +239,6 @@ main(int argc, char *argv[])
     return 1;
   }
 
-  /* Lee al argumento */
-  if ( argv[optind] != NULL ) {
-    cfdi = argv[optind++];
-  }
 
   /* Verifica que se hallan definido las fonts */
   if ( font_path == NULL ) {
@@ -286,6 +272,7 @@ main(int argc, char *argv[])
 		    want_sucursal, want_verbose);
 
   if ( argv[optind] == NULL ) {
+    /* En caso de que se halla generado el nombre del archivo de salida */
     free(cfdi_pdf);
   }
 
