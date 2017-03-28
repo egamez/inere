@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-extern int genera_cadena_original(const char *stylesheet, xmlDocPtr doc, xmlChar** cadena, int verbose);
+extern int genera_cadena_original(const char *stylesheet, xmlDocPtr doc, xmlChar *cfdi, xmlChar** cadena, int verbose);
 
 #ifdef __cplusplus
 }
