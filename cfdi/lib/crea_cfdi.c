@@ -51,8 +51,6 @@ static const xmlChar *cfdi_schemaLocation = (const xmlChar *)"http://www.sat.gob
 static const xmlChar *tfd_url = (const xmlChar *)"http://www.sat.gob.mx/TimbreFiscalDigital";
 static const xmlChar *tfd_schemaLocation = (const xmlChar *)"http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/TimbreFiscalDigital/TimbreFiscalDigital.xsd";
 
-static const char *cadena_original_stylesheet = "cadenaoriginal_3_2.xslt";
-
 /**
  * 2014-05-05T21:35:56
  */
