@@ -1,5 +1,5 @@
 #
-bin_PROGRAMS = sello certificado cadena lee crea verifica_firma
+bin_PROGRAMS = sello certificado cadena lee crea genera
 
 sello_SOURCES = sello.c
 sello_LDFLAGS = $(top_srcdir)/lib/libinerecfdi.la \
@@ -26,8 +26,8 @@ crea_LDFLAGS = $(top_srcdir)/lib/libinerecfdi.la \
 		$(top_srcdir)/../lib/libinere.la \
 		-lz -ldl -lm -lrt
 
-verifica_firma_SOURCES = verifica_firma.c
-verifica_firma_LDFLAGS = $(top_srcdir)/lib/libinerecfdi.la \
+genera_SOURCES = genera.c
+genera_LDFLAGS = $(top_srcdir)/lib/libinerecfdi.la \
 		$(top_srcdir)/../lib/libinere.la \
 		-lz -ldl -lm -lrt
 
