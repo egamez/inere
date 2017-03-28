@@ -75,12 +75,13 @@ local_error_function(void *ctx, const char* mess, ...)
  *
  */
 int
-genera_cadena_original(const char *stylesheet, xmlDocPtr doc, xmlChar** cadena, int verbose)
+genera_cadena_original(const char *stylesheet, xmlDocPtr doc, xmlChar *cfdi, xmlChar** cadena, int verbose)
 {
   xsltStylesheetPtr style = NULL;
   xmlDocPtr result = NULL;
   int cadena_len = 0;
   int out = 0;
+
 
   xmlSubstituteEntitiesDefault(1);
   xmlLoadExtDtdDefaultValue = 1;
@@ -96,7 +97,21 @@ genera_cadena_original(const char *stylesheet, xmlDocPtr doc, xmlChar** cadena, 
     return 1;
   }
 
-  result = xsltApplyStylesheet(style, doc, NULL);
+  /* verifica primero si fue suministrado el cfdi */
+  if ( doc != NULL ) {
+    result = xsltApplyStylesheet(style, doc, NULL);
+  } else if ( cfdi != NULL ) {
+    /* Debemos de crear un DocNodePtr */
+    result = xsltApplyStylesheet(style, xmlReadMemory((char *)cfdi, strlen((char *)cfdi), "http://www.sat.gob.mx/cfd/3", "UTF-8", XML_PARSE_RECOVER), NULL);
+
+  } else {
+    /* Error */
+    fprintf(stderr, "%s:%d Ocurrio un Error. Es necesario especificar el nodo o el string.\n", __FILE__, __LINE__);
+    xsltFreeStylesheet(style);
+    xsltCleanupGlobals();
+    return 4;
+  }
+
   if ( result == NULL ) {
     if ( verbose ) {
       fprintf(stderr, "%s:%d Ocurrio un Error. Transformaciones de stylesheet (%s) no aplicadas.\n", __FILE__, __LINE__, stylesheet);
