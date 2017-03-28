@@ -70,37 +70,6 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
   EVP_MD_CTX mdctx;
   EVP_PKEY *privateKey = NULL;
 
-  file = fopen(keyfile, "r");
-  if ( file == NULL ) {
-    /* An error ocurred */
-    if ( verbose ) {
-      fprintf(stderr, "No fue posible leer correctamente el archivo %s.\n", keyfile);
-    }
-    return NULL;
-  }
-  len = fseek(file, 0, SEEK_END);
-  if ( len ) {
-    /* An error did occur */
-    if ( verbose ) {
-      fprintf(stderr, "No fue posible obtener el final del archivo %s.\n", keyfile);
-    }
-    fclose(file);
-    return NULL;
-  }
-  len = ftell(file);
-  rewind(file);
-
-  buffer = (unsigned char *)calloc(len + 1, sizeof(unsigned char));
-  read = fread(buffer, sizeof(unsigned char), len, file);
-  fclose(file);
-  if ( read != len ) {
-    if ( verbose ) {
-      fprintf(stderr, "An error has ocurred. The number of items read was %d, but it should be %d instead.\n", read, len);
-      free(buffer);
-    }
-    return NULL;
-  }
-
   /* Set the BIO method for the error messages */
   if ( err == NULL ) {
     if ( (err = BIO_new(BIO_s_file())) ) {
@@ -108,16 +77,23 @@ sello_alloc(const char *keyfile, const char *digest, const unsigned char *cadena
     }
   }
 
-  /* Now convert the bytes to a EVP_PKEY structure */
-  /*privateKey = d2i_AutoPrivateKey(NULL, &tmp, len);*/
-  key_bio = BIO_new_mem_buf(buffer, -1);
+  /* Load the file where private key is, to sign the data */
+  key_bio = BIO_new(BIO_s_file());
+  if ( BIO_read_filename(key_bio, keyfile) <= 0 ) {
+    BIO_printf(err, "Error opening %s\n", keyfile);
+    ERR_print_errors(err);
+    BIO_free(err);
+    return NULL;
+  }
+
   privateKey = PEM_read_bio_PrivateKey(key_bio, NULL, NULL, NULL);
   if ( privateKey == NULL ) {
     if ( verbose ) {
       BIO_printf(err, "Error at reading the private key on %s.\n", keyfile);
       ERR_print_errors(err);
     }
-    free(buffer);
+    BIO_free(err);
+    BIO_free(key_bio);
     return NULL;
   }
 
